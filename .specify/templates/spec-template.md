@@ -100,6 +100,19 @@
 - **[Entity 1]**: [What it represents, key attributes without implementation]
 - **[Entity 2]**: [What it represents, relationships to other entities]
 
+## Privacy & Safety Considerations *(mandatory if user data or user-to-user features are involved)*
+
+<!--
+  ACTION REQUIRED: Document data minimization, visibility defaults, and sharing controls.
+  Include any consent requirements, retention decisions, and user safety measures.
+-->
+
+- **Data Minimization**: [What data is collected and why]
+- **Default Visibility**: [Who can see the data by default]
+- **Sharing/Consent**: [How explicit user consent is captured]
+- **Retention**: [How long data is kept and why]
+- **Safety Controls**: [Blocking/reporting or other protections, if applicable]
+
 ## Success Criteria *(mandatory)*
 
 <!--
