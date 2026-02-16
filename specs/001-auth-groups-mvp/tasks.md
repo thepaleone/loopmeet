@@ -14,12 +14,12 @@ description: "Task list for Auth & Groups MVP implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create solution and project structure in src/LoopMeet.App, src/LoopMeet.Api, src/LoopMeet.Core, src/LoopMeet.Infrastructure, tests/LoopMeet.Api.Tests, tests/LoopMeet.Core.Tests, tests/LoopMeet.Infrastructure.Tests
-- [ ] T002 Configure shared build settings in Directory.Build.props at repository root
-- [ ] T003 [P] Add NuGet package references in src/LoopMeet.Api/LoopMeet.Api.csproj and src/LoopMeet.Infrastructure/LoopMeet.Infrastructure.csproj
-- [ ] T004 [P] Add NuGet package references in src/LoopMeet.App/LoopMeet.App.csproj and src/LoopMeet.Core/LoopMeet.Core.csproj
-- [ ] T005 [P] Add API configuration files at src/LoopMeet.Api/appsettings.json and src/LoopMeet.Api/appsettings.Development.json
-- [ ] T006 [P] Add app configuration holder in src/LoopMeet.App/Services/AppConfig.cs
+- [x] T001 Create solution and project structure in src/LoopMeet.App, src/LoopMeet.Api, src/LoopMeet.Core, src/LoopMeet.Infrastructure, tests/LoopMeet.Api.Tests, tests/LoopMeet.Core.Tests, tests/LoopMeet.Infrastructure.Tests
+- [x] T002 Configure shared build settings in Directory.Build.props at repository root
+- [x] T003 [P] Add NuGet package references in src/LoopMeet.Api/LoopMeet.Api.csproj and src/LoopMeet.Infrastructure/LoopMeet.Infrastructure.csproj
+- [x] T004 [P] Add NuGet package references in src/LoopMeet.App/LoopMeet.App.csproj and src/LoopMeet.Core/LoopMeet.Core.csproj
+- [x] T005 [P] Add API configuration files at src/LoopMeet.Api/appsettings.json and src/LoopMeet.Api/appsettings.Development.json
+- [x] T006 [P] Add app configuration holder in src/LoopMeet.App/Services/AppConfig.cs
 
 ---
 
@@ -27,21 +27,21 @@ description: "Task list for Auth & Groups MVP implementation"
 
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
-- [ ] T007 Create core domain models in src/LoopMeet.Core/Models/User.cs, Group.cs, Membership.cs, Invitation.cs, AuthIdentity.cs
-- [ ] T008 Create validation rules in src/LoopMeet.Core/Validators/UserValidator.cs, GroupValidator.cs, InvitationValidator.cs
-- [ ] T009 Implement EF Core DbContext and entity configs in src/LoopMeet.Infrastructure/Data/LoopMeetDbContext.cs and src/LoopMeet.Infrastructure/Data/Configurations/*.cs
-- [ ] T010 Configure EF Core migrations and connection registration in src/LoopMeet.Api/Program.cs
-- [ ] T011 Implement repository interfaces in src/LoopMeet.Core/Interfaces/*.cs and repositories in src/LoopMeet.Infrastructure/Repositories/*.cs
-- [ ] T012 Add error response contract in src/LoopMeet.Api/Contracts/ErrorResponse.cs and exception middleware in src/LoopMeet.Api/Services/ErrorHandlingMiddleware.cs
-- [ ] T013 Configure Serilog logging and request correlation in src/LoopMeet.Api/Program.cs
-- [ ] T014 Implement Supabase JWT validation in src/LoopMeet.Api/Services/Auth/JwtValidationHandler.cs and wire auth in src/LoopMeet.Api/Program.cs
-- [ ] T015 Add current-user context service in src/LoopMeet.Api/Services/Auth/CurrentUserService.cs
-- [ ] T016 Add API client setup with Refit + Polly in src/LoopMeet.App/Services/ApiClient.cs
-- [ ] T017 Configure MAUI Shell routes in src/LoopMeet.App/AppShell.xaml and src/LoopMeet.App/AppShell.xaml.cs
-- [ ] T018 Configure text-only splash screen asset in src/LoopMeet.App/Resources/Splash/loopmeet_splash.svg and update src/LoopMeet.App/LoopMeet.App.csproj
-- [ ] T019 [P] Add API test host in tests/LoopMeet.Api.Tests/Infrastructure/TestWebApplicationFactory.cs
-- [ ] T020 [P] Add Postgres Testcontainers fixture in tests/LoopMeet.Api.Tests/Infrastructure/PostgresFixture.cs
-- [ ] T021 [P] Add validator tests in tests/LoopMeet.Core.Tests/Validators/UserValidatorTests.cs and GroupValidatorTests.cs
+- [x] T007 Create core domain models in src/LoopMeet.Core/Models/User.cs, Group.cs, Membership.cs, Invitation.cs, AuthIdentity.cs
+- [x] T008 Create validation rules in src/LoopMeet.Core/Validators/UserValidator.cs, GroupValidator.cs, InvitationValidator.cs
+- [x] T009 Implement EF Core DbContext and entity configs in src/LoopMeet.Infrastructure/Data/LoopMeetDbContext.cs and src/LoopMeet.Infrastructure/Data/Configurations/*.cs
+- [x] T010 Configure EF Core migrations and connection registration in src/LoopMeet.Api/Program.cs
+- [x] T011 Implement repository interfaces in src/LoopMeet.Core/Interfaces/*.cs and repositories in src/LoopMeet.Infrastructure/Repositories/*.cs
+- [x] T012 Add error response contract in src/LoopMeet.Api/Contracts/ErrorResponse.cs and exception middleware in src/LoopMeet.Api/Services/ErrorHandlingMiddleware.cs
+- [x] T013 Configure Serilog logging and request correlation in src/LoopMeet.Api/Program.cs
+- [x] T014 Implement Supabase JWT validation in src/LoopMeet.Api/Services/Auth/JwtValidationHandler.cs and wire auth in src/LoopMeet.Api/Program.cs
+- [x] T015 Add current-user context service in src/LoopMeet.Api/Services/Auth/CurrentUserService.cs
+- [x] T016 Add API client setup with Refit + Polly in src/LoopMeet.App/Services/ApiClient.cs
+- [x] T017 Configure MAUI Shell routes in src/LoopMeet.App/AppShell.xaml and src/LoopMeet.App/AppShell.xaml.cs
+- [x] T018 Configure text-only splash screen asset in src/LoopMeet.App/Resources/Splash/loopmeet_splash.svg and update src/LoopMeet.App/LoopMeet.App.csproj
+- [x] T019 [P] Add API test host in tests/LoopMeet.Api.Tests/Infrastructure/TestWebApplicationFactory.cs
+- [x] T020 [P] Add Postgres Testcontainers fixture in tests/LoopMeet.Api.Tests/Infrastructure/PostgresFixture.cs
+- [x] T021 [P] Add validator tests in tests/LoopMeet.Core.Tests/Validators/UserValidatorTests.cs and GroupValidatorTests.cs
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -55,18 +55,18 @@ description: "Task list for Auth & Groups MVP implementation"
 
 ### Tests for User Story 1
 
-- [ ] T022 [P] [US1] Add API integration tests for profile upsert and required fields in tests/LoopMeet.Api.Tests/Endpoints/UserEndpointsTests.cs
+- [x] T022 [P] [US1] Add API integration tests for profile upsert and required fields in tests/LoopMeet.Api.Tests/Endpoints/UserEndpointsTests.cs
 
 ### Implementation for User Story 1
 
-- [ ] T023 [P] [US1] Define auth DTOs in src/LoopMeet.App/Features/Auth/Models/AuthModels.cs
-- [ ] T024 [P] [US1] Implement Supabase auth service in src/LoopMeet.App/Features/Auth/AuthService.cs
-- [ ] T025 [P] [US1] Build login UI in src/LoopMeet.App/Features/Auth/Views/LoginPage.xaml and src/LoopMeet.App/Features/Auth/ViewModels/LoginViewModel.cs
-- [ ] T026 [US1] Build create account UI in src/LoopMeet.App/Features/Auth/Views/CreateAccountPage.xaml and src/LoopMeet.App/Features/Auth/ViewModels/CreateAccountViewModel.cs
-- [ ] T027 [US1] Implement social profile pre-fill and required-field validation in src/LoopMeet.App/Features/Auth/ViewModels/CreateAccountViewModel.cs
-- [ ] T028 [US1] Implement auth flow coordinator in src/LoopMeet.App/Features/Auth/AuthCoordinator.cs
-- [ ] T029 [US1] Provision user profile on first API access in src/LoopMeet.Api/Services/Auth/UserProvisioningService.cs
-- [ ] T030 [US1] Add API endpoint for user profile upsert in src/LoopMeet.Api/Endpoints/UserEndpoints.cs
+- [x] T023 [P] [US1] Define auth DTOs in src/LoopMeet.App/Features/Auth/Models/AuthModels.cs
+- [x] T024 [P] [US1] Implement Supabase auth service in src/LoopMeet.App/Features/Auth/AuthService.cs
+- [x] T025 [P] [US1] Build login UI in src/LoopMeet.App/Features/Auth/Views/LoginPage.xaml and src/LoopMeet.App/Features/Auth/ViewModels/LoginViewModel.cs
+- [x] T026 [US1] Build create account UI in src/LoopMeet.App/Features/Auth/Views/CreateAccountPage.xaml and src/LoopMeet.App/Features/Auth/ViewModels/CreateAccountViewModel.cs
+- [x] T027 [US1] Implement social profile pre-fill and required-field validation in src/LoopMeet.App/Features/Auth/ViewModels/CreateAccountViewModel.cs
+- [x] T028 [US1] Implement auth flow coordinator in src/LoopMeet.App/Features/Auth/AuthCoordinator.cs
+- [x] T029 [US1] Provision user profile on first API access in src/LoopMeet.Api/Services/Auth/UserProvisioningService.cs
+- [x] T030 [US1] Add API endpoint for user profile upsert in src/LoopMeet.Api/Endpoints/UserEndpoints.cs
 
 **Checkpoint**: User Story 1 is functional and independently testable
 
@@ -80,21 +80,21 @@ description: "Task list for Auth & Groups MVP implementation"
 
 ### Tests for User Story 2
 
-- [ ] T031 [P] [US2] Add API integration tests for groups list sorting in tests/LoopMeet.Api.Tests/Endpoints/GroupsEndpointsTests.cs
-- [ ] T032 [P] [US2] Add API integration tests for invitations list in tests/LoopMeet.Api.Tests/Endpoints/InvitationsEndpointsTests.cs
+- [x] T031 [P] [US2] Add API integration tests for groups list sorting in tests/LoopMeet.Api.Tests/Endpoints/GroupsEndpointsTests.cs
+- [x] T032 [P] [US2] Add API integration tests for invitations list in tests/LoopMeet.Api.Tests/Endpoints/InvitationsEndpointsTests.cs
 
 ### Implementation for User Story 2
 
-- [ ] T033 [P] [US2] Implement group query service in src/LoopMeet.Api/Services/Groups/GroupQueryService.cs
-- [ ] T034 [P] [US2] Implement invitation query service in src/LoopMeet.Api/Services/Invitations/InvitationQueryService.cs
-- [ ] T035 [US2] Add GET /groups endpoint in src/LoopMeet.Api/Endpoints/GroupsEndpoints.cs
-- [ ] T036 [US2] Add GET /groups/{groupId} endpoint in src/LoopMeet.Api/Endpoints/GroupsEndpoints.cs
-- [ ] T037 [US2] Add GET /invitations endpoint in src/LoopMeet.Api/Endpoints/InvitationsEndpoints.cs
-- [ ] T038 [P] [US2] Add groups API client in src/LoopMeet.App/Services/GroupsApi.cs
-- [ ] T039 [P] [US2] Add invitations API client in src/LoopMeet.App/Services/InvitationsApi.cs
-- [ ] T040 [P] [US2] Build groups list UI in src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml and src/LoopMeet.App/Features/Groups/ViewModels/GroupsListViewModel.cs
-- [ ] T041 [P] [US2] Build group detail UI in src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml and src/LoopMeet.App/Features/Groups/ViewModels/GroupDetailViewModel.cs
-- [ ] T042 [US2] Add invitations section and empty-state prompt in src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml
+- [x] T033 [P] [US2] Implement group query service in src/LoopMeet.Api/Services/Groups/GroupQueryService.cs
+- [x] T034 [P] [US2] Implement invitation query service in src/LoopMeet.Api/Services/Invitations/InvitationQueryService.cs
+- [x] T035 [US2] Add GET /groups endpoint in src/LoopMeet.Api/Endpoints/GroupsEndpoints.cs
+- [x] T036 [US2] Add GET /groups/{groupId} endpoint in src/LoopMeet.Api/Endpoints/GroupsEndpoints.cs
+- [x] T037 [US2] Add GET /invitations endpoint in src/LoopMeet.Api/Endpoints/InvitationsEndpoints.cs
+- [x] T038 [P] [US2] Add groups API client in src/LoopMeet.App/Services/GroupsApi.cs
+- [x] T039 [P] [US2] Add invitations API client in src/LoopMeet.App/Services/InvitationsApi.cs
+- [x] T040 [P] [US2] Build groups list UI in src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml and src/LoopMeet.App/Features/Groups/ViewModels/GroupsListViewModel.cs
+- [x] T041 [P] [US2] Build group detail UI in src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml and src/LoopMeet.App/Features/Groups/ViewModels/GroupDetailViewModel.cs
+- [x] T042 [US2] Add invitations section and empty-state prompt in src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml
 
 **Checkpoint**: User Story 2 is functional and independently testable
 

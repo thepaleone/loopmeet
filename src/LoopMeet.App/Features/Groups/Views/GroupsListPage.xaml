@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Groups.Views.GroupsListPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Groups">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12">
+            <Label Text="Groups" FontSize="24" />
+
+            <Label Text="Pending Invitations" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding PendingInvitations}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding InvitedEmail}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Owned Groups" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding OwnedGroups}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding Name}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Member Groups" FontAttributes="Bold" />
+            <CollectionView ItemsSource="{Binding MemberGroups}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding Name}" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="You have no groups yet. Create one or join with an invitation." IsVisible="{Binding ShowEmptyState}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
