@@ -10,6 +10,12 @@ public interface IGroupsApi
 
     [Get("/groups/{groupId}")]
     Task<GroupDetail> GetGroupAsync(Guid groupId);
+
+    [Post("/groups")]
+    Task<GroupSummary> CreateGroupAsync([Body] CreateGroupRequest request);
+
+    [Patch("/groups/{groupId}")]
+    Task<GroupSummary> UpdateGroupAsync(Guid groupId, [Body] UpdateGroupRequest request);
 }
 
 public sealed class GroupsApi
@@ -24,4 +30,9 @@ public sealed class GroupsApi
     public Task<GroupsResponse> GetGroupsAsync() => _api.GetGroupsAsync();
 
     public Task<GroupDetail> GetGroupAsync(Guid groupId) => _api.GetGroupAsync(groupId);
+
+    public Task<GroupSummary> CreateGroupAsync(CreateGroupRequest request) => _api.CreateGroupAsync(request);
+
+    public Task<GroupSummary> UpdateGroupAsync(Guid groupId, UpdateGroupRequest request) =>
+        _api.UpdateGroupAsync(groupId, request);
 }

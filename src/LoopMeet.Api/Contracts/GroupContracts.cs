@@ -7,6 +7,16 @@ public class GroupSummaryResponse
     public Guid OwnerUserId { get; init; }
 }
 
+public sealed class CreateGroupRequest
+{
+    public string Name { get; init; } = string.Empty;
+}
+
+public sealed class UpdateGroupRequest
+{
+    public string Name { get; init; } = string.Empty;
+}
+
 public sealed class GroupMemberResponse
 {
     public Guid UserId { get; init; }

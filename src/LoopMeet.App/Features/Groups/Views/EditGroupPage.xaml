@@ -7,5 +7,8 @@
 
     <VerticalStackLayout Padding="24" Spacing="12">
         <Label Text="Edit Group" FontSize="24" />
+        <Entry Placeholder="Group name" Text="{Binding Name}" />
+        <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+        <Button Text="Save Changes" Command="{Binding SaveCommand}" />
     </VerticalStackLayout>
 </ContentPage>

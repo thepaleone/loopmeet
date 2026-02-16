@@ -3,11 +3,13 @@
     x:Class="LoopMeet.App.Features.Groups.Views.GroupsListPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="GroupsPage"
     Title="Groups">
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="12">
             <Label Text="Groups" FontSize="24" />
+            <Button Text="Create Group" Command="{Binding CreateGroupCommand}" />
 
             <Label Text="Pending Invitations" FontAttributes="Bold" />
             <CollectionView ItemsSource="{Binding PendingInvitations}">
@@ -22,7 +24,13 @@
             <CollectionView ItemsSource="{Binding OwnedGroups}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Label Text="{Binding Name}" />
+                        <Label Text="{Binding Name}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding BindingContext.OpenGroupCommand, Source={x:Reference GroupsPage}}"
+                                    CommandParameter="{Binding .}" />
+                            </Label.GestureRecognizers>
+                        </Label>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
@@ -31,7 +39,13 @@
             <CollectionView ItemsSource="{Binding MemberGroups}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Label Text="{Binding Name}" />
+                        <Label Text="{Binding Name}">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding BindingContext.OpenGroupCommand, Source={x:Reference GroupsPage}}"
+                                    CommandParameter="{Binding .}" />
+                            </Label.GestureRecognizers>
+                        </Label>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

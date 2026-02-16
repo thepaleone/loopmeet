@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -24,6 +25,26 @@ public sealed partial class GroupsListViewModel : ObservableObject
     public GroupsListViewModel(GroupsApi groupsApi)
     {
         _groupsApi = groupsApi;
+    }
+
+    [RelayCommand]
+    private Task CreateGroupAsync()
+    {
+        return Shell.Current.GoToAsync("create-group");
+    }
+
+    [RelayCommand]
+    private Task OpenGroupAsync(GroupSummary? group)
+    {
+        if (group is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Shell.Current.GoToAsync("group-detail", new Dictionary<string, object>
+        {
+            ["groupId"] = group.Id
+        });
     }
 
     [RelayCommand]

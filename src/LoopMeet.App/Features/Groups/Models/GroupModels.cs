@@ -9,6 +9,16 @@ public sealed class GroupSummary
     public Guid OwnerUserId { get; set; }
 }
 
+public sealed class CreateGroupRequest
+{
+    public string Name { get; set; } = string.Empty;
+}
+
+public sealed class UpdateGroupRequest
+{
+    public string Name { get; set; } = string.Empty;
+}
+
 public sealed class GroupMember
 {
     public Guid UserId { get; set; }

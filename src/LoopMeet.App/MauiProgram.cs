@@ -48,10 +48,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<CreateAccountViewModel>();
 		builder.Services.AddTransient<GroupsListViewModel>();
 		builder.Services.AddTransient<GroupDetailViewModel>();
+		builder.Services.AddTransient<CreateGroupViewModel>();
+		builder.Services.AddTransient<EditGroupViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<GroupsListPage>();
 		builder.Services.AddTransient<GroupDetailPage>();
+		builder.Services.AddTransient<CreateGroupPage>();
+		builder.Services.AddTransient<EditGroupPage>();
 
 		return builder.Build();
 	}

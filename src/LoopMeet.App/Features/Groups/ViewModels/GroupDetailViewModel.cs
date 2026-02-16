@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,9 +19,27 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     [ObservableProperty]
     private Guid _groupId;
 
+    [ObservableProperty]
+    private Guid _ownerUserId;
+
     public GroupDetailViewModel(GroupsApi groupsApi)
     {
         _groupsApi = groupsApi;
+    }
+
+    [RelayCommand]
+    private Task EditGroupAsync()
+    {
+        if (GroupId == Guid.Empty)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Shell.Current.GoToAsync("edit-group", new Dictionary<string, object>
+        {
+            ["groupId"] = GroupId,
+            ["groupName"] = GroupName
+        });
     }
 
     [RelayCommand]
@@ -33,6 +52,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
 
         var group = await _groupsApi.GetGroupAsync(GroupId);
         GroupName = group.Name;
+        OwnerUserId = group.OwnerUserId;
         Members.Clear();
         foreach (var member in group.Members)
         {

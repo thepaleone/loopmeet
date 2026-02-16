@@ -30,6 +30,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<UserProvisioningService>();
 builder.Services.AddScoped<GroupQueryService>();
+builder.Services.AddScoped<GroupCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
