@@ -100,6 +100,11 @@ Outputs:
 - [specs/001-auth-groups-mvp/contracts/loopmeet-api.yaml](specs/001-auth-groups-mvp/contracts/loopmeet-api.yaml)
 - [specs/001-auth-groups-mvp/quickstart.md](specs/001-auth-groups-mvp/quickstart.md)
 
+## UX Review Checkpoint
+
+- Review login, create account, groups list, group detail, and invitation flows for clarity and visual consistency.
+- Record UX review outcomes and action items in this plan before implementation starts.
+
 ## Testing Strategy
 
 - Unit tests for domain rules: group name uniqueness per owner, invitation acceptance, and role checks.
