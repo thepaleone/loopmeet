@@ -1,6 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Polly;
-using Polly.Extensions.Http;
 using Refit;
 
 namespace LoopMeet.App.Services;
@@ -15,9 +13,6 @@ public static class ApiClient
             .ConfigureHttpClient(client =>
             {
                 client.BaseAddress = new Uri(config.ApiBaseUrl);
-            })
-            .AddPolicyHandler(HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .WaitAndRetryAsync(3, retry => TimeSpan.FromMilliseconds(200 * retry)));
+            });
     }
 }

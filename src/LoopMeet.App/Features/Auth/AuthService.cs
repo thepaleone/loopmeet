@@ -1,14 +1,13 @@
 using LoopMeet.App.Features.Auth.Models;
-using Supabase;
-using Supabase.Gotrue;
+using SupabaseClient = Supabase.Client;
 
 namespace LoopMeet.App.Features.Auth;
 
 public sealed class AuthService
 {
-    private readonly Client _client;
+    private readonly SupabaseClient _client;
 
-    public AuthService(Client client)
+    public AuthService(SupabaseClient client)
     {
         _client = client;
     }
@@ -16,7 +15,7 @@ public sealed class AuthService
     public async Task<AuthSession> SignInWithEmailAsync(string email, string password)
     {
         var response = await _client.Auth.SignIn(email, password);
-        return new AuthSession { AccessToken = response.AccessToken ?? string.Empty };
+        return new AuthSession { AccessToken = response?.AccessToken ?? string.Empty };
     }
 
     public Task SignOutAsync()
@@ -24,14 +23,8 @@ public sealed class AuthService
         return _client.Auth.SignOut();
     }
 
-    public async Task<AuthSession?> GetCurrentSessionAsync()
+    public Task<AuthSession?> GetCurrentSessionAsync()
     {
-        var session = await _client.Auth.GetSession();
-        if (session is null)
-        {
-            return null;
-        }
-
-        return new AuthSession { AccessToken = session.AccessToken ?? string.Empty };
+        return Task.FromResult<AuthSession?>(null);
     }
 }

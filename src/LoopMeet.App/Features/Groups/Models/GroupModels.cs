@@ -2,7 +2,7 @@ using LoopMeet.App.Features.Invitations.Models;
 
 namespace LoopMeet.App.Features.Groups.Models;
 
-public sealed class GroupSummary
+public class GroupSummary
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;

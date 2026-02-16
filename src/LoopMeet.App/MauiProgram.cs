@@ -4,6 +4,7 @@ using LoopMeet.App.Features.Auth.Views;
 using LoopMeet.App.Features.Groups.ViewModels;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Services;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Supabase;
 
@@ -16,6 +17,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
