@@ -8,6 +8,7 @@ using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Services;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Devices;
 using Supabase;
 
 namespace LoopMeet.App;
@@ -30,11 +31,34 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
+		var isDebug = false;
+#if DEBUG
+		isDebug = true;
+#endif
+
+		var apiBaseUrl = "https://api.loopmeet.example.com";
+		var supabaseUrl = "https://your-supabase-url.supabase.co";
+		var supabaseAnonKey = "your-supabase-anon-key";
+		if (isDebug)
+		{
+			supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+			if (DeviceInfo.Platform == DevicePlatform.Android)
+			{
+				apiBaseUrl = "http://10.0.2.2:5001";
+				supabaseUrl = "http://10.0.2.2:54321";
+			}
+			else
+			{
+				apiBaseUrl = "http://localhost:5001";
+				supabaseUrl = "http://localhost:54321";
+			}
+		}
+
 		var config = new AppConfig
 		{
-			ApiBaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_API_BASE_URL") ?? "https://localhost:5001",
-			SupabaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_URL") ?? string.Empty,
-			SupabaseAnonKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? string.Empty
+			ApiBaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_API_BASE_URL") ?? apiBaseUrl,
+			SupabaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_URL") ?? supabaseUrl,
+			SupabaseAnonKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonKey
 		};
 
 		builder.Services.AddSingleton(config);
