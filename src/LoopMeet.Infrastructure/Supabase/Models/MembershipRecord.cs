@@ -12,7 +12,7 @@ public sealed class MembershipRecord : BaseModel
     [Column("group_id")]
     public Guid GroupId { get; set; }
 
-    [Column("user_id")]
+    [Column("member_user_id")]
     public Guid UserId { get; set; }
 
     [Column("role")]
