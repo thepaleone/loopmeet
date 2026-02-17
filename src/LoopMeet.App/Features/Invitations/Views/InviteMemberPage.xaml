@@ -7,5 +7,8 @@
 
     <VerticalStackLayout Padding="24" Spacing="12">
         <Label Text="Invite Member" FontSize="24" />
+        <Entry Placeholder="Email address" Text="{Binding Email}" Keyboard="Email" />
+        <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
+        <Button Text="Send Invite" Command="{Binding SendCommand}" />
     </VerticalStackLayout>
 </ContentPage>

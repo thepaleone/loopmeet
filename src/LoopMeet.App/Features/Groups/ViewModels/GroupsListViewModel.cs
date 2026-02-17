@@ -11,6 +11,7 @@ namespace LoopMeet.App.Features.Groups.ViewModels;
 public sealed partial class GroupsListViewModel : ObservableObject
 {
     private readonly GroupsApi _groupsApi;
+    private readonly InvitationsApi _invitationsApi;
 
     public ObservableCollection<GroupSummary> OwnedGroups { get; } = new();
     public ObservableCollection<GroupSummary> MemberGroups { get; } = new();
@@ -22,9 +23,30 @@ public sealed partial class GroupsListViewModel : ObservableObject
     [ObservableProperty]
     private bool _showEmptyState;
 
-    public GroupsListViewModel(GroupsApi groupsApi)
+    public GroupsListViewModel(GroupsApi groupsApi, InvitationsApi invitationsApi)
     {
         _groupsApi = groupsApi;
+        _invitationsApi = invitationsApi;
+    }
+
+    [RelayCommand]
+    private async Task AcceptInvitationAsync(InvitationSummary? invitation)
+    {
+        if (invitation is null || IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            await _invitationsApi.AcceptInvitationAsync(invitation.Id);
+            await LoadAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]

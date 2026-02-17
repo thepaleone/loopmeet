@@ -49,6 +49,7 @@ builder.Services.AddScoped<UserProvisioningService>();
 builder.Services.AddScoped<GroupQueryService>();
 builder.Services.AddScoped<GroupCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();
+builder.Services.AddScoped<InvitationCommandService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();

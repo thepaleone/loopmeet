@@ -28,6 +28,20 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private Task InviteMemberAsync()
+    {
+        if (GroupId == Guid.Empty)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Shell.Current.GoToAsync("invite-member", new Dictionary<string, object>
+        {
+            ["groupId"] = GroupId
+        });
+    }
+
+    [RelayCommand]
     private Task EditGroupAsync()
     {
         if (GroupId == Guid.Empty)

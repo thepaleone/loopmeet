@@ -12,3 +12,8 @@ public sealed class InvitationsResponse
 {
     public List<InvitationSummary> Invitations { get; set; } = new();
 }
+
+public sealed class CreateInvitationRequest
+{
+    public string Email { get; set; } = string.Empty;
+}

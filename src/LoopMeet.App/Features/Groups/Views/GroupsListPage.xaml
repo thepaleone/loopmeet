@@ -15,7 +15,13 @@
             <CollectionView ItemsSource="{Binding PendingInvitations}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <Label Text="{Binding InvitedEmail}" />
+                        <HorizontalStackLayout Spacing="12">
+                            <Label Text="{Binding InvitedEmail}" VerticalOptions="Center" />
+                            <Button
+                                Text="Accept"
+                                Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference GroupsPage}}"
+                                CommandParameter="{Binding .}" />
+                        </HorizontalStackLayout>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

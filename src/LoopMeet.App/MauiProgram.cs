@@ -3,6 +3,8 @@ using LoopMeet.App.Features.Auth.ViewModels;
 using LoopMeet.App.Features.Auth.Views;
 using LoopMeet.App.Features.Groups.ViewModels;
 using LoopMeet.App.Features.Groups.Views;
+using LoopMeet.App.Features.Invitations.ViewModels;
+using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Services;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
@@ -52,12 +54,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<GroupDetailViewModel>();
 		builder.Services.AddTransient<CreateGroupViewModel>();
 		builder.Services.AddTransient<EditGroupViewModel>();
+		builder.Services.AddTransient<InviteMemberViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<GroupsListPage>();
 		builder.Services.AddTransient<GroupDetailPage>();
 		builder.Services.AddTransient<CreateGroupPage>();
 		builder.Services.AddTransient<EditGroupPage>();
+		builder.Services.AddTransient<InviteMemberPage>();
 
 		return builder.Build();
 	}

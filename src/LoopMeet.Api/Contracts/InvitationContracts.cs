@@ -8,6 +8,11 @@ public sealed class InvitationResponse
     public string Status { get; init; } = string.Empty;
 }
 
+public sealed class CreateInvitationRequest
+{
+    public string Email { get; init; } = string.Empty;
+}
+
 public sealed class InvitationsResponse
 {
     public IReadOnlyList<InvitationResponse> Invitations { get; init; } = Array.Empty<InvitationResponse>();

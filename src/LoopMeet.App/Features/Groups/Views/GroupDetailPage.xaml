@@ -8,6 +8,7 @@
     <VerticalStackLayout Padding="24" Spacing="12">
         <Label Text="{Binding GroupName}" FontSize="24" />
         <Button Text="Edit Group" Command="{Binding EditGroupCommand}" />
+        <Button Text="Invite Member" Command="{Binding InviteMemberCommand}" />
         <Label Text="Members" FontAttributes="Bold" />
         <CollectionView ItemsSource="{Binding Members}">
             <CollectionView.ItemTemplate>
