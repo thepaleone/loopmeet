@@ -1,22 +1,20 @@
 using System.Net;
 using LoopMeet.Api.Tests.Infrastructure;
-using LoopMeet.Infrastructure.Data;
 using LoopMeet.Core.Models;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 using System.Net.Http.Json;
 
 namespace LoopMeet.Api.Tests.Endpoints;
 
-public sealed class GroupsEndpointsTests : IClassFixture<PostgresFixture>
+public sealed class GroupsEndpointsTests
 {
     private readonly HttpClient _client;
-    private readonly PostgresFixture _fixture;
+    private readonly InMemoryStore _store;
 
-    public GroupsEndpointsTests(PostgresFixture fixture)
+    public GroupsEndpointsTests()
     {
-        _fixture = fixture;
-        var factory = new TestWebApplicationFactory(fixture.ConnectionString);
+        _store = new InMemoryStore();
+        var factory = new TestWebApplicationFactory(_store);
         _client = factory.CreateClient();
     }
 
@@ -42,13 +40,6 @@ public sealed class GroupsEndpointsTests : IClassFixture<PostgresFixture>
 
     private async Task SeedAsync(Guid userId)
     {
-        var options = new DbContextOptionsBuilder<LoopMeetDbContext>()
-            .UseNpgsql(_fixture.ConnectionString)
-            .Options;
-
-        await using var dbContext = new LoopMeetDbContext(options);
-        await dbContext.Database.EnsureCreatedAsync();
-
         var ownedGroup = new Group
         {
             Id = Guid.NewGuid(),
@@ -67,26 +58,28 @@ public sealed class GroupsEndpointsTests : IClassFixture<PostgresFixture>
             UpdatedAt = DateTimeOffset.UtcNow
         };
 
-        dbContext.Groups.AddRange(ownedGroup, memberGroup);
-        dbContext.Memberships.Add(new Membership
+        lock (_store.SyncRoot)
         {
-            Id = Guid.NewGuid(),
-            GroupId = memberGroup.Id,
-            UserId = userId,
-            Role = "member",
-            CreatedAt = DateTimeOffset.UtcNow
-        });
+            _store.Groups.AddRange([ownedGroup, memberGroup]);
+            _store.Memberships.Add(new Membership
+            {
+                Id = Guid.NewGuid(),
+                GroupId = memberGroup.Id,
+                UserId = userId,
+                Role = "member",
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+            _store.Invitations.Add(new Invitation
+            {
+                Id = Guid.NewGuid(),
+                GroupId = ownedGroup.Id,
+                InvitedEmail = "owner@example.com",
+                Status = "pending",
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+        }
 
-        dbContext.Invitations.Add(new Invitation
-        {
-            Id = Guid.NewGuid(),
-            GroupId = ownedGroup.Id,
-            InvitedEmail = "owner@example.com",
-            Status = "pending",
-            CreatedAt = DateTimeOffset.UtcNow
-        });
-
-        await dbContext.SaveChangesAsync();
+        await Task.CompletedTask;
     }
 
     private sealed class GroupsResponse

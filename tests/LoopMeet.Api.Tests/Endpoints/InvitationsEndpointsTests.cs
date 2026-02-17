@@ -1,22 +1,20 @@
 using System.Net;
 using LoopMeet.Api.Tests.Infrastructure;
-using LoopMeet.Infrastructure.Data;
 using LoopMeet.Core.Models;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 using System.Net.Http.Json;
 
 namespace LoopMeet.Api.Tests.Endpoints;
 
-public sealed class InvitationsEndpointsTests : IClassFixture<PostgresFixture>
+public sealed class InvitationsEndpointsTests
 {
     private readonly HttpClient _client;
-    private readonly PostgresFixture _fixture;
+    private readonly InMemoryStore _store;
 
-    public InvitationsEndpointsTests(PostgresFixture fixture)
+    public InvitationsEndpointsTests()
     {
-        _fixture = fixture;
-        var factory = new TestWebApplicationFactory(fixture.ConnectionString);
+        _store = new InMemoryStore();
+        var factory = new TestWebApplicationFactory(_store);
         _client = factory.CreateClient();
     }
 
@@ -42,23 +40,19 @@ public sealed class InvitationsEndpointsTests : IClassFixture<PostgresFixture>
 
     private async Task SeedAsync(string email)
     {
-        var options = new DbContextOptionsBuilder<LoopMeetDbContext>()
-            .UseNpgsql(_fixture.ConnectionString)
-            .Options;
-
-        await using var dbContext = new LoopMeetDbContext(options);
-        await dbContext.Database.EnsureCreatedAsync();
-
-        dbContext.Invitations.Add(new Invitation
+        lock (_store.SyncRoot)
         {
-            Id = Guid.NewGuid(),
-            GroupId = Guid.NewGuid(),
-            InvitedEmail = email,
-            Status = "pending",
-            CreatedAt = DateTimeOffset.UtcNow
-        });
+            _store.Invitations.Add(new Invitation
+            {
+                Id = Guid.NewGuid(),
+                GroupId = Guid.NewGuid(),
+                InvitedEmail = email,
+                Status = "pending",
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+        }
 
-        await dbContext.SaveChangesAsync();
+        await Task.CompletedTask;
     }
 
     private sealed class InvitationsResponse

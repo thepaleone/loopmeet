@@ -5,13 +5,13 @@ using Xunit;
 
 namespace LoopMeet.Api.Tests.Endpoints;
 
-public sealed class UserEndpointsTests : IClassFixture<PostgresFixture>
+public sealed class UserEndpointsTests
 {
     private readonly HttpClient _client;
 
-    public UserEndpointsTests(PostgresFixture fixture)
+    public UserEndpointsTests()
     {
-        var factory = new TestWebApplicationFactory(fixture.ConnectionString);
+        var factory = new TestWebApplicationFactory(new InMemoryStore());
         _client = factory.CreateClient();
     }
 

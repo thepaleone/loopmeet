@@ -1,91 +1,100 @@
 using LoopMeet.Api.Contracts;
-using LoopMeet.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
+using LoopMeet.Api.Services.Cache;
+using LoopMeet.Core.Interfaces;
+using LoopMeet.Core.Models;
 
 namespace LoopMeet.Api.Services.Groups;
 
 public sealed class GroupQueryService
 {
-    private readonly LoopMeetDbContext _dbContext;
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
+    private readonly IGroupRepository _groupRepository;
+    private readonly IMembershipRepository _membershipRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly ICacheService _cacheService;
 
-    public GroupQueryService(LoopMeetDbContext dbContext)
+    public GroupQueryService(
+        IGroupRepository groupRepository,
+        IMembershipRepository membershipRepository,
+        IUserRepository userRepository,
+        ICacheService cacheService)
     {
-        _dbContext = dbContext;
+        _groupRepository = groupRepository;
+        _membershipRepository = membershipRepository;
+        _userRepository = userRepository;
+        _cacheService = cacheService;
     }
 
     public async Task<GroupsResponse> GetGroupsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var owned = await _dbContext.Groups
-            .Where(group => group.OwnerUserId == userId)
-            .OrderBy(group => group.Name)
-            .Select(group => new GroupSummaryResponse
-            {
-                Id = group.Id,
-                Name = group.Name,
-                OwnerUserId = group.OwnerUserId
-            })
-            .ToListAsync(cancellationToken);
-
-        var memberGroups = await _dbContext.Memberships
-            .Where(membership => membership.UserId == userId)
-            .Join(_dbContext.Groups,
-                membership => membership.GroupId,
-                group => group.Id,
-                (_, group) => group)
-            .Where(group => group.OwnerUserId != userId)
-            .OrderBy(group => group.Name)
-            .Select(group => new GroupSummaryResponse
-            {
-                Id = group.Id,
-                Name = group.Name,
-                OwnerUserId = group.OwnerUserId
-            })
-            .ToListAsync(cancellationToken);
-
-        return new GroupsResponse
+        var cacheKey = $"groups:{userId}";
+        return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
-            Owned = owned,
-            Member = memberGroups
-        };
+            var ownedGroups = await _groupRepository.ListOwnedAsync(userId, cancellationToken);
+            var memberGroups = await _groupRepository.ListMemberAsync(userId, cancellationToken);
+
+            var owned = ownedGroups
+                .Select(MapSummary)
+                .OrderBy(group => group.Name)
+                .ToList();
+
+            var member = memberGroups
+                .Where(group => group.OwnerUserId != userId)
+                .Select(MapSummary)
+                .OrderBy(group => group.Name)
+                .ToList();
+
+            return new GroupsResponse
+            {
+                Owned = owned,
+                Member = member
+            };
+        }) ?? new GroupsResponse();
     }
 
     public async Task<GroupDetailResponse?> GetGroupDetailAsync(Guid groupId, CancellationToken cancellationToken = default)
     {
-        var group = await _dbContext.Groups
-            .Where(candidate => candidate.Id == groupId)
-            .Select(candidate => new GroupSummaryResponse
-            {
-                Id = candidate.Id,
-                Name = candidate.Name,
-                OwnerUserId = candidate.OwnerUserId
-            })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (group is null)
+        var cacheKey = $"group-detail:{groupId}";
+        return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
-            return null;
-        }
+            var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+            if (group is null)
+            {
+                return null;
+            }
 
-        var members = await _dbContext.Memberships
-            .Where(membership => membership.GroupId == groupId)
-            .Join(_dbContext.Users,
-                membership => membership.UserId,
-                user => user.Id,
-                (membership, user) => new GroupMemberResponse
+            var memberships = await _membershipRepository.ListMembersAsync(groupId, cancellationToken);
+            var userIds = memberships.Select(member => member.UserId).Distinct().ToList();
+            var users = await _userRepository.ListByIdsAsync(userIds, cancellationToken);
+            var userLookup = users.ToDictionary(user => user.Id, user => user.DisplayName);
+
+            var members = memberships
+                .Select(member => new GroupMemberResponse
                 {
-                    UserId = user.Id,
-                    DisplayName = user.DisplayName,
-                    Role = membership.Role
+                    UserId = member.UserId,
+                    DisplayName = userLookup.TryGetValue(member.UserId, out var name) ? name : "",
+                    Role = member.Role
                 })
-            .OrderBy(member => member.DisplayName)
-            .ToListAsync(cancellationToken);
+                .OrderBy(member => member.DisplayName)
+                .ToList();
 
-        return new GroupDetailResponse
+            return new GroupDetailResponse
+            {
+                Id = group.Id,
+                Name = group.Name,
+                OwnerUserId = group.OwnerUserId,
+                Members = members
+            };
+        });
+    }
+
+    private static GroupSummaryResponse MapSummary(Group group)
+    {
+        return new GroupSummaryResponse
         {
             Id = group.Id,
             Name = group.Name,
-            OwnerUserId = group.OwnerUserId,
-            Members = members
+            OwnerUserId = group.OwnerUserId
         };
     }
 }

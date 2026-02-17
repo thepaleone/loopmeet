@@ -3,21 +3,19 @@ using System.Net.Http.Json;
 using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Tests.Infrastructure;
 using LoopMeet.Core.Models;
-using LoopMeet.Infrastructure.Data;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace LoopMeet.Api.Tests.Endpoints;
 
-public sealed class GroupsWriteEndpointsTests : IClassFixture<PostgresFixture>
+public sealed class GroupsWriteEndpointsTests
 {
     private readonly HttpClient _client;
-    private readonly PostgresFixture _fixture;
+    private readonly InMemoryStore _store;
 
-    public GroupsWriteEndpointsTests(PostgresFixture fixture)
+    public GroupsWriteEndpointsTests()
     {
-        _fixture = fixture;
-        var factory = new TestWebApplicationFactory(fixture.ConnectionString);
+        _store = new InMemoryStore();
+        var factory = new TestWebApplicationFactory(_store);
         _client = factory.CreateClient();
     }
 
@@ -39,14 +37,16 @@ public sealed class GroupsWriteEndpointsTests : IClassFixture<PostgresFixture>
         Assert.Equal("Weekenders", payload!.Name);
         Assert.Equal(ownerId, payload.OwnerUserId);
 
-        await using var dbContext = await CreateDbContextAsync();
-        var group = await dbContext.Groups.FirstOrDefaultAsync(group => group.Id == payload.Id);
-        Assert.NotNull(group);
+        lock (_store.SyncRoot)
+        {
+            var group = _store.Groups.FirstOrDefault(group => group.Id == payload.Id);
+            Assert.NotNull(group);
 
-        var membership = await dbContext.Memberships
-            .FirstOrDefaultAsync(member => member.GroupId == payload.Id && member.UserId == ownerId);
-        Assert.NotNull(membership);
-        Assert.Equal("owner", membership!.Role);
+            var membership = _store.Memberships
+                .FirstOrDefault(member => member.GroupId == payload.Id && member.UserId == ownerId);
+            Assert.NotNull(membership);
+            Assert.Equal("owner", membership!.Role);
+        }
     }
 
     [Fact]
@@ -89,10 +89,12 @@ public sealed class GroupsWriteEndpointsTests : IClassFixture<PostgresFixture>
         Assert.NotNull(payload);
         Assert.Equal("Updated", payload!.Name);
 
-        await using var dbContext = await CreateDbContextAsync();
-        var group = await dbContext.Groups.FirstOrDefaultAsync(candidate => candidate.Id == groupId);
-        Assert.NotNull(group);
-        Assert.Equal("Updated", group!.Name);
+        lock (_store.SyncRoot)
+        {
+            var group = _store.Groups.FirstOrDefault(candidate => candidate.Id == groupId);
+            Assert.NotNull(group);
+            Assert.Equal("Updated", group!.Name);
+        }
     }
 
     [Fact]
@@ -117,21 +119,8 @@ public sealed class GroupsWriteEndpointsTests : IClassFixture<PostgresFixture>
         Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
     }
 
-    private async Task<LoopMeetDbContext> CreateDbContextAsync()
-    {
-        var options = new DbContextOptionsBuilder<LoopMeetDbContext>()
-            .UseNpgsql(_fixture.ConnectionString)
-            .Options;
-
-        var dbContext = new LoopMeetDbContext(options);
-        await dbContext.Database.EnsureCreatedAsync();
-        return dbContext;
-    }
-
     private async Task<Guid> SeedGroupAsync(Guid ownerId, string name)
     {
-        await using var dbContext = await CreateDbContextAsync();
-
         var group = new Group
         {
             Id = Guid.NewGuid(),
@@ -141,8 +130,10 @@ public sealed class GroupsWriteEndpointsTests : IClassFixture<PostgresFixture>
             UpdatedAt = DateTimeOffset.UtcNow
         };
 
-        dbContext.Groups.Add(group);
-        await dbContext.SaveChangesAsync();
+        lock (_store.SyncRoot)
+        {
+            _store.Groups.Add(group);
+        }
 
         return group.Id;
     }

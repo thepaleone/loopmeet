@@ -1,14 +1,15 @@
 using LoopMeet.Api.Services;
 using LoopMeet.Api.Services.Auth;
+using LoopMeet.Api.Services.Cache;
 using LoopMeet.Api.Endpoints;
 using LoopMeet.Api.Services.Groups;
 using LoopMeet.Api.Services.Invitations;
 using LoopMeet.Core.Interfaces;
-using LoopMeet.Infrastructure.Data;
 using LoopMeet.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Serilog;
+using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,11 +21,27 @@ builder.Host.UseSerilog((context, services, configuration) =>
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<LoopMeetDbContext>(options =>
+builder.Services.AddMemoryCache();
+var redisConnection = builder.Configuration["Redis:ConnectionString"];
+if (!string.IsNullOrWhiteSpace(redisConnection))
 {
-    var connectionString = builder.Configuration.GetConnectionString("LoopMeetDb");
-    options.UseNpgsql(connectionString, npgsql => npgsql.MigrationsAssembly("LoopMeet.Infrastructure"));
-});
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+    });
+}
+builder.Services.AddSingleton<ICacheService>(provider =>
+    new CacheService(provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
+        provider.GetService<IDistributedCache>()));
+
+var supabaseUrl = builder.Configuration["Supabase:Url"] ?? string.Empty;
+var supabaseServiceKey = builder.Configuration["Supabase:ServiceKey"]
+    ?? builder.Configuration["Supabase:AnonKey"]
+    ?? string.Empty;
+builder.Services.AddSingleton(_ => new Client(supabaseUrl, supabaseServiceKey, new SupabaseOptions
+{
+    AutoConnectRealtime = false
+}));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();

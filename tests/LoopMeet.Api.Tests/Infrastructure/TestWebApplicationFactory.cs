@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using LoopMeet.Infrastructure.Data;
+using LoopMeet.Core.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,11 +11,11 @@ namespace LoopMeet.Api.Tests.Infrastructure;
 
 public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _connectionString;
+    private readonly InMemoryStore _store;
 
-    public TestWebApplicationFactory(string connectionString)
+    public TestWebApplicationFactory(InMemoryStore store)
     {
-        _connectionString = connectionString;
+        _store = store;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -25,16 +24,27 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
         {
             var settings = new Dictionary<string, string?>
             {
-                ["ConnectionStrings:LoopMeetDb"] = _connectionString
+                ["Supabase:Url"] = "http://localhost",
+                ["Supabase:ServiceKey"] = "test-key",
+                ["Supabase:JwtIssuer"] = "http://localhost"
             };
             config.AddInMemoryCollection(settings);
         });
 
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll(typeof(DbContextOptions<LoopMeetDbContext>));
-            services.AddDbContext<LoopMeetDbContext>(options =>
-                options.UseNpgsql(_connectionString));
+            services.RemoveAll<IUserRepository>();
+            services.RemoveAll<IGroupRepository>();
+            services.RemoveAll<IMembershipRepository>();
+            services.RemoveAll<IInvitationRepository>();
+            services.RemoveAll<IAuthIdentityRepository>();
+
+            services.AddSingleton(_store);
+            services.AddScoped<IUserRepository, InMemoryUserRepository>();
+            services.AddScoped<IGroupRepository, InMemoryGroupRepository>();
+            services.AddScoped<IMembershipRepository, InMemoryMembershipRepository>();
+            services.AddScoped<IInvitationRepository, InMemoryInvitationRepository>();
+            services.AddScoped<IAuthIdentityRepository, InMemoryAuthIdentityRepository>();
 
             services.AddAuthentication("Test")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });
