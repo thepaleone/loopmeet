@@ -1,10 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Services;
 
 namespace LoopMeet.App.Features.Auth.ViewModels;
 
 public sealed partial class CreateAccountViewModel : ObservableObject
 {
+    private readonly AuthService _authService;
+    private readonly UsersApi _usersApi;
+
     [ObservableProperty]
     private string _displayName = string.Empty;
 
@@ -15,7 +20,16 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     private string? _phone;
 
     [ObservableProperty]
+    private string _password = string.Empty;
+
+    [ObservableProperty]
     private bool _isBusy;
+
+    public CreateAccountViewModel(AuthService authService, UsersApi usersApi)
+    {
+        _authService = authService;
+        _usersApi = usersApi;
+    }
 
     [RelayCommand]
     private async Task SaveAsync()
@@ -25,7 +39,9 @@ public sealed partial class CreateAccountViewModel : ObservableObject
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(DisplayName) || string.IsNullOrWhiteSpace(Email))
+        if (string.IsNullOrWhiteSpace(DisplayName)
+            || string.IsNullOrWhiteSpace(Email)
+            || string.IsNullOrWhiteSpace(Password))
         {
             return;
         }
@@ -33,6 +49,20 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         IsBusy = true;
         try
         {
+            var session = await _authService.SignUpWithEmailAsync(Email, Password);
+            if (string.IsNullOrWhiteSpace(session.AccessToken))
+            {
+                return;
+            }
+
+            await _usersApi.UpsertProfileAsync(new UserProfileRequest
+            {
+                DisplayName = DisplayName,
+                Email = Email,
+                Phone = Phone,
+                Password = Password
+            });
+
             await Shell.Current.GoToAsync("groups");
         }
         finally

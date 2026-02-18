@@ -13,6 +13,7 @@ public static class ApiClient
             .ConfigureHttpClient(client =>
             {
                 client.BaseAddress = new Uri(config.ApiBaseUrl);
-            });
+            })
+            .AddHttpMessageHandler<ApiAuthHandler>();
     }
 }

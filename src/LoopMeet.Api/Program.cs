@@ -46,6 +46,8 @@ builder.Services.AddSingleton(_ => new Client(supabaseUrl, supabaseServiceKey, n
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<UserProvisioningService>();
+builder.Services.Configure<PasswordPolicyOptions>(builder.Configuration.GetSection("PasswordPolicy"));
+builder.Services.AddSingleton<PasswordPolicyValidator>();
 builder.Services.AddScoped<GroupQueryService>();
 builder.Services.AddScoped<GroupCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();

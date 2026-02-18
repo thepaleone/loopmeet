@@ -68,10 +68,13 @@ public static class MauiProgram
 		}));
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<AuthCoordinator>();
+		builder.Services.AddTransient<ApiAuthHandler>();
 		builder.Services.AddLoopMeetApi<IGroupsApi>(config);
 		builder.Services.AddLoopMeetApi<IInvitationsApi>(config);
+		builder.Services.AddLoopMeetApi<IUsersApi>(config);
 		builder.Services.AddSingleton<GroupsApi>();
 		builder.Services.AddSingleton<InvitationsApi>();
+		builder.Services.AddSingleton<UsersApi>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();
 		builder.Services.AddTransient<GroupsListViewModel>();
