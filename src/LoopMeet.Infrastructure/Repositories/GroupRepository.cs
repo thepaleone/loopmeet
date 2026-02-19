@@ -37,7 +37,7 @@ public sealed class GroupRepository : IGroupRepository
     {
         var membershipResponse = await _client
             .From<MembershipRecord>()
-            .Filter("user_id", Operator.Equals, userId.ToString())
+            .Filter("member_user_id", Operator.Equals, userId.ToString())
             .Get();
 
         var groupIds = membershipResponse.Models

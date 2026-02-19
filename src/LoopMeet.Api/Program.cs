@@ -11,13 +11,19 @@ using Microsoft.Extensions.Caching.Distributed;
 using Serilog;
 using Supabase;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((context, services, configuration) =>
     configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
-        .Enrich.FromLogContext());
+        .Enrich.FromLogContext()
+        .WriteTo.Console());
 
 builder.Services.AddOpenApi();
 
@@ -35,13 +41,30 @@ builder.Services.AddSingleton<ICacheService>(provider =>
         provider.GetService<IDistributedCache>()));
 
 var supabaseUrl = builder.Configuration["Supabase:Url"] ?? string.Empty;
-var supabaseServiceKey = builder.Configuration["Supabase:ServiceKey"]
-    ?? builder.Configuration["Supabase:AnonKey"]
-    ?? string.Empty;
-builder.Services.AddSingleton(_ => new Client(supabaseUrl, supabaseServiceKey, new SupabaseOptions
+var supabaseAnonKey = builder.Configuration["Supabase:AnonKey"] ?? string.Empty;
+builder.Services.AddScoped(provider =>
 {
-    AutoConnectRealtime = false
-}));
+    var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+    var authHeader = httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString();
+    var bearerToken = authHeader?.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) == true
+        ? authHeader["Bearer ".Length..].Trim()
+        : null;
+
+    if (string.IsNullOrWhiteSpace(bearerToken))
+    {
+        throw new InvalidOperationException("Missing bearer token for Supabase request.");
+    }
+
+    return new Client(supabaseUrl, supabaseAnonKey, new SupabaseOptions
+    {
+        AutoConnectRealtime = false,
+        Headers = new Dictionary<string, string>
+        {
+            ["Authorization"] = $"Bearer {bearerToken}",
+            ["apikey"] = supabaseAnonKey
+        }
+    });
+});
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
@@ -59,11 +82,22 @@ builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IAuthIdentityRepository, AuthIdentityRepository>();
 
+var jwtIssuer = builder.Configuration["Supabase:JwtIssuer"] ?? string.Empty;
+var jwtAudience = builder.Configuration["Supabase:JwtAudience"] ?? "loopmeet-api";
+if (string.IsNullOrWhiteSpace(jwtIssuer))
+{
+    throw new InvalidOperationException("Supabase:JwtIssuer is required for JWT validation.");
+}
+
+Log.Information("Supabase JWT validation configured. Issuer: {Issuer}, Audience: {Audience}",
+    jwtIssuer,
+    jwtAudience);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        var issuer = builder.Configuration["Supabase:JwtIssuer"] ?? string.Empty;
-        JwtValidationHandler.Configure(options, issuer);
+        options.Audience = jwtAudience;
+        JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
     });
 builder.Services.AddAuthorization();
 
