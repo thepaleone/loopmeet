@@ -69,10 +69,11 @@ public sealed class GroupRepository : IGroupRepository
         return response.Models.Count > 0;
     }
 
-    public async Task AddAsync(Group group, CancellationToken cancellationToken = default)
+    public async Task<Group> AddAsync(Group group, CancellationToken cancellationToken = default)
     {
         var record = Map(group);
-        await _client.From<GroupRecord>().Insert(record);
+        var newGroup = await _client.From<GroupRecord>().Insert(record);
+        return Map(newGroup.Models.First());
     }
 
     public async Task UpdateAsync(Group group, CancellationToken cancellationToken = default)

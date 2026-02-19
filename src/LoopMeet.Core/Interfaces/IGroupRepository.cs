@@ -8,6 +8,6 @@ public interface IGroupRepository
     Task<IReadOnlyList<Group>> ListOwnedAsync(Guid ownerUserId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Group>> ListMemberAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<bool> ExistsNameForOwnerAsync(Guid ownerUserId, string name, CancellationToken cancellationToken = default);
-    Task AddAsync(Group group, CancellationToken cancellationToken = default);
+    Task<Group> AddAsync(Group group, CancellationToken cancellationToken = default);
     Task UpdateAsync(Group group, CancellationToken cancellationToken = default);
 }

@@ -49,12 +49,12 @@ public sealed class GroupCommandService
             UpdatedAt = now
         };
 
-        await _groupRepository.AddAsync(group, cancellationToken);
+        var newGroup = await _groupRepository.AddAsync(group, cancellationToken);
 
         var membership = new Membership
         {
             Id = Guid.NewGuid(),
-            GroupId = group.Id,
+            GroupId = newGroup.Id,
             UserId = ownerUserId,
             Role = "owner",
             CreatedAt = now
@@ -64,9 +64,9 @@ public sealed class GroupCommandService
 
         return new GroupCommandResult(GroupCommandStatus.Success, new GroupSummaryResponse
         {
-            Id = group.Id,
-            Name = group.Name,
-            OwnerUserId = group.OwnerUserId
+            Id = newGroup.Id,
+            Name = newGroup.Name,
+            OwnerUserId = newGroup.OwnerUserId
         });
     }
 
