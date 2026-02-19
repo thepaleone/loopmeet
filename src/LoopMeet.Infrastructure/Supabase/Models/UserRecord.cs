@@ -3,7 +3,7 @@ using Supabase.Postgrest.Models;
 
 namespace LoopMeet.Infrastructure.Supabase.Models;
 
-[Table("users")]
+[Table("user_profiles")]
 public sealed class UserRecord : BaseModel
 {
     [PrimaryKey("id", false)]
