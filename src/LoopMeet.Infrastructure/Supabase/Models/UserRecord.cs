@@ -6,7 +6,7 @@ namespace LoopMeet.Infrastructure.Supabase.Models;
 [Table("user_profiles")]
 public sealed class UserRecord : BaseModel
 {
-    [PrimaryKey("id", false)]
+    [PrimaryKey("id", true)]
     public Guid Id { get; set; }
 
     [Column("display_name")]

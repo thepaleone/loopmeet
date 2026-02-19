@@ -8,16 +8,22 @@ public sealed class UserProvisioningService
 {
     private readonly IUserRepository _userRepository;
 
-    public UserProvisioningService(IUserRepository userRepository)
+    private readonly ILogger<UserProvisioningService> _logger;
+
+    public UserProvisioningService(IUserRepository userRepository,
+        ILogger<UserProvisioningService> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     public async Task<User> UpsertProfileAsync(Guid userId, UserProfileRequest request, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("Upserting profile for user {UserId}", userId);
         var existing = await _userRepository.GetByIdAsync(userId, cancellationToken);
         if (existing is null)
         {
+            _logger.LogInformation("Creating new profile for user {UserId}", userId);
             var user = new User
             {
                 Id = userId,
@@ -32,6 +38,7 @@ public sealed class UserProvisioningService
             return user;
         }
 
+        _logger.LogInformation("Updating existing profile for user {UserId}", userId);
         existing.DisplayName = request.DisplayName;
         existing.Email = request.Email;
         existing.Phone = request.Phone;
