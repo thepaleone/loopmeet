@@ -12,8 +12,8 @@
             <Button Text="Create Group" Command="{Binding CreateGroupCommand}" />
 
             <Label Text="Pending Invitations" FontAttributes="Bold" />
-            <CollectionView ItemsSource="{Binding PendingInvitations}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding PendingInvitations}" Spacing="8">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate>
                         <HorizontalStackLayout Spacing="12">
                             <Label Text="{Binding InvitedEmail}" VerticalOptions="Center" />
@@ -23,12 +23,12 @@
                                 CommandParameter="{Binding .}" />
                         </HorizontalStackLayout>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
             <Label Text="Owned Groups" FontAttributes="Bold" />
-            <CollectionView ItemsSource="{Binding OwnedGroups}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding OwnedGroups}" Spacing="8">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate>
                         <Label Text="{Binding Name}">
                             <Label.GestureRecognizers>
@@ -38,12 +38,12 @@
                             </Label.GestureRecognizers>
                         </Label>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
             <Label Text="Member Groups" FontAttributes="Bold" />
-            <CollectionView ItemsSource="{Binding MemberGroups}">
-                <CollectionView.ItemTemplate>
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding MemberGroups}" Spacing="8">
+                <BindableLayout.ItemTemplate>
                     <DataTemplate>
                         <Label Text="{Binding Name}">
                             <Label.GestureRecognizers>
@@ -53,8 +53,8 @@
                             </Label.GestureRecognizers>
                         </Label>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
 
             <Label Text="You have no groups yet. Create one or join with an invitation." IsVisible="{Binding ShowEmptyState}" />
         </VerticalStackLayout>

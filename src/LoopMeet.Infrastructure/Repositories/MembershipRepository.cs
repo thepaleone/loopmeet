@@ -42,7 +42,7 @@ public sealed class MembershipRepository : IMembershipRepository
     {
         var response = await _client
             .From<MembershipRecord>()
-            .Filter("user_id", Operator.Equals, userId.ToString())
+            .Filter("member_user_id", Operator.Equals, userId.ToString())
             .Filter("group_id", Operator.Equals, groupId.ToString())
             .Get();
 

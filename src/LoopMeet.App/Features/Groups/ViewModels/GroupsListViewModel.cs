@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Features.Invitations.Models;
 using LoopMeet.App.Services;
+using Microsoft.Extensions.Logging;
 
 namespace LoopMeet.App.Features.Groups.ViewModels;
 
@@ -12,6 +13,7 @@ public sealed partial class GroupsListViewModel : ObservableObject
 {
     private readonly GroupsApi _groupsApi;
     private readonly InvitationsApi _invitationsApi;
+    private readonly ILogger<GroupsListViewModel> _logger;
 
     public ObservableCollection<GroupSummary> OwnedGroups { get; } = new();
     public ObservableCollection<GroupSummary> MemberGroups { get; } = new();
@@ -23,10 +25,14 @@ public sealed partial class GroupsListViewModel : ObservableObject
     [ObservableProperty]
     private bool _showEmptyState;
 
-    public GroupsListViewModel(GroupsApi groupsApi, InvitationsApi invitationsApi)
+    public GroupsListViewModel(
+        GroupsApi groupsApi,
+        InvitationsApi invitationsApi,
+        ILogger<GroupsListViewModel> logger)
     {
         _groupsApi = groupsApi;
         _invitationsApi = invitationsApi;
+        _logger = logger;
     }
 
     [RelayCommand]
@@ -80,27 +86,48 @@ public sealed partial class GroupsListViewModel : ObservableObject
         IsBusy = true;
         try
         {
+            _logger.LogInformation("Loading groups list...");
             var response = await _groupsApi.GetGroupsAsync();
             OwnedGroups.Clear();
             MemberGroups.Clear();
             PendingInvitations.Clear();
 
-            foreach (var group in response.Owned)
+            if (response?.Owned is not null)
             {
-                OwnedGroups.Add(group);
+                foreach (var group in response.Owned)
+                {
+                    OwnedGroups.Add(group);
+                }
             }
 
-            foreach (var group in response.Member)
+            if (response?.Member is not null)
             {
-                MemberGroups.Add(group);
+                foreach (var group in response.Member)
+                {
+                    MemberGroups.Add(group);
+                }
             }
 
-            foreach (var invitation in response.PendingInvitations)
+            if (response?.PendingInvitations is not null)
             {
-                PendingInvitations.Add(invitation);
+                foreach (var invitation in response.PendingInvitations)
+                {
+                    PendingInvitations.Add(invitation);
+                }
             }
 
             ShowEmptyState = OwnedGroups.Count == 0 && MemberGroups.Count == 0;
+
+            _logger.LogInformation(
+                "Groups list loaded. Owned: {OwnedCount}, Member: {MemberCount}, Invitations: {InvitationCount}",
+                OwnedGroups.Count,
+                MemberGroups.Count,
+                PendingInvitations.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load groups list.");
+            throw;
         }
         finally
         {
