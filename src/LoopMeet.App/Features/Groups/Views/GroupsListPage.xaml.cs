@@ -80,8 +80,15 @@ public partial class GroupsListPage : ContentPage
         while (!token.IsCancellationRequested)
         {
             element.TranslationX = -120;
-            await element.TranslateTo(240, 0, 900, Easing.Linear);
-            await Task.Delay(150, token);
+            try
+            {
+                await element.TranslateToAsync(240, 0, 900, Easing.Linear);
+                await Task.Delay(150, token);
+            }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
     }
 }
