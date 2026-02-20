@@ -70,7 +70,7 @@ public sealed partial class InviteMemberViewModel : ObservableObject
             {
                 Email = trimmedEmail
             });
-            await Shell.Current.GoToAsync("..");
+            await Shell.Current.GoToAsync("//groups");
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Forbidden)
         {

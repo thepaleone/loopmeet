@@ -63,7 +63,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
                 Password = Password
             });
 
-            await Shell.Current.GoToAsync("groups");
+            await Shell.Current.GoToAsync("//groups");
         }
         finally
         {

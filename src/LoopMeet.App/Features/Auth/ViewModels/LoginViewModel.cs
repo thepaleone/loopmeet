@@ -48,7 +48,7 @@ public sealed partial class LoginViewModel : ObservableObject
             var session = await _authService.SignInWithEmailAsync(Email, Password);
             if (!string.IsNullOrWhiteSpace(session.AccessToken))
             {
-                await Shell.Current.GoToAsync("groups");
+                await Shell.Current.GoToAsync("//groups");
                 return;
             }
 

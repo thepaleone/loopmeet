@@ -53,7 +53,7 @@ public sealed partial class CreateGroupViewModel : ObservableObject
         try
         {
             await _groupsApi.CreateGroupAsync(new CreateGroupRequest { Name = trimmedName });
-            await Shell.Current.GoToAsync("groups");
+            await Shell.Current.GoToAsync("//groups");
         }
         catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Conflict)
         {

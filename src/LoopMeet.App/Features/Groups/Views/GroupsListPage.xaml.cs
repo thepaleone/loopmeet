@@ -17,6 +17,12 @@ public partial class GroupsListPage : ContentPage
     {
         base.OnAppearing();
 
+        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
+        {
+            IsEnabled = false,
+            IsVisible = false
+        });
+
         if (BindingContext is GroupsListViewModel viewModel)
         {
             viewModel.LoadCommand.Execute(null);

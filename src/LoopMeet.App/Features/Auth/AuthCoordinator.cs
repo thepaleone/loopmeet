@@ -13,7 +13,7 @@ public sealed class AuthCoordinator
 
     public Task NavigateToGroupsAsync()
     {
-        return Shell.Current.GoToAsync("groups");
+        return Shell.Current.GoToAsync("//groups");
     }
 
     public async Task NavigateToCreateAccountAsync(string? displayName, string? email, string? phone)
