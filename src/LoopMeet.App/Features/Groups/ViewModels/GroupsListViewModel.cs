@@ -25,6 +25,15 @@ public sealed partial class GroupsListViewModel : ObservableObject
     [ObservableProperty]
     private bool _showEmptyState;
 
+    [ObservableProperty]
+    private bool _isLoadingInvitations;
+
+    [ObservableProperty]
+    private bool _isLoadingOwnedGroups;
+
+    [ObservableProperty]
+    private bool _isLoadingMemberGroups;
+
     public GroupsListViewModel(
         GroupsApi groupsApi,
         InvitationsApi invitationsApi,
@@ -125,6 +134,9 @@ public sealed partial class GroupsListViewModel : ObservableObject
     private async Task LoadCoreAsync()
     {
         IsBusy = true;
+        IsLoadingInvitations = true;
+        IsLoadingOwnedGroups = true;
+        IsLoadingMemberGroups = true;
         try
         {
             _logger.LogInformation("Loading groups list...");
@@ -173,6 +185,9 @@ public sealed partial class GroupsListViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+            IsLoadingInvitations = false;
+            IsLoadingOwnedGroups = false;
+            IsLoadingMemberGroups = false;
         }
     }
 
