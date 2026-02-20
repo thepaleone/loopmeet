@@ -82,6 +82,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<CreateGroupViewModel>();
 		builder.Services.AddTransient<EditGroupViewModel>();
 		builder.Services.AddTransient<InviteMemberViewModel>();
+		builder.Services.AddTransient<InvitationDetailViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<GroupsListPage>();
@@ -89,6 +90,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<CreateGroupPage>();
 		builder.Services.AddTransient<EditGroupPage>();
 		builder.Services.AddTransient<InviteMemberPage>();
+		builder.Services.AddTransient<InvitationDetailPage>();
 
 		return builder.Build();
 	}

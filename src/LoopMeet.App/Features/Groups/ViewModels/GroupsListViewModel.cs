@@ -84,15 +84,11 @@ public sealed partial class GroupsListViewModel : ObservableObject
         {
             return Task.CompletedTask;
         }
-
-        var sentAt = invitation.CreatedAt?.ToLocalTime().ToString("g") ?? "Unknown";
-        var owner = FormatPerson(invitation.OwnerName, invitation.OwnerEmail);
-        var sender = FormatPerson(invitation.SenderName, invitation.SenderEmail);
-
-        return Shell.Current.DisplayAlert(
-            "Invitation",
-            $"Group: {invitation.GroupName}\nOwner: {owner}\nInvited by: {sender}\nSent: {sentAt}",
-            "Close");
+        
+        return Shell.Current.GoToAsync("invitation-detail", new Dictionary<string, object>
+        {
+            ["invitation"] = invitation
+        });
     }
 
     [RelayCommand]
@@ -180,18 +176,4 @@ public sealed partial class GroupsListViewModel : ObservableObject
         }
     }
 
-    private static string FormatPerson(string name, string email)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return email;
-        }
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return name;
-        }
-
-        return $"{name} ({email})";
-    }
 }

@@ -16,5 +16,6 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("create-group", typeof(CreateGroupPage));
 		Routing.RegisterRoute("edit-group", typeof(EditGroupPage));
 		Routing.RegisterRoute("invite-member", typeof(InviteMemberPage));
+		Routing.RegisterRoute("invitation-detail", typeof(InvitationDetailPage));
 	}
 }

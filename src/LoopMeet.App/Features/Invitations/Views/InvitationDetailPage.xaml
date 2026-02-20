@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Invitations.Views.InvitationDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Invitation Details"
+    Shell.PresentationMode="ModalNotAnimated"
+    BackgroundColor="#80000000">
+
+<Border
+    BackgroundColor="Transparent"
+    >
+    <Border.GestureRecognizers>
+        <TapGestureRecognizer Command="{Binding CloseCommand}" />
+    </Border.GestureRecognizers>
+
+    <VerticalStackLayout 
+        VerticalOptions="Center" 
+        Padding="30">
+        <Border
+            x:Name="Card"
+            BackgroundColor="White"
+            HorizontalOptions="Center"
+            MaximumWidthRequest="420"
+            Padding="20"
+            VerticalOptions="Center"
+            Opacity="1"
+            Scale="0.96">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16" />
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow
+                    Brush="#1F000000"
+                    Offset="0,6"
+                    Radius="16"
+                    Opacity="0.6" />
+            </Border.Shadow>
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer />
+            </Border.GestureRecognizers>
+            <VerticalStackLayout Spacing="16">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                    <Label Text="Pending Invitation" FontSize="22" FontAttributes="Bold" />
+                    <Label
+                        Grid.Column="1"
+                        Text="×"
+                        TextColor="#94A3B8"
+                        FontSize="28"
+                        VerticalOptions="Center">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CloseCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+
+                <Border BackgroundColor="#F8FAFC" Stroke="#F8FAFC" Padding="12">
+                    <Border.Shadow>
+                        <Shadow
+                            Brush="#C0C0C0"
+                            Offset="0,2"
+                            Radius="12"
+                            Opacity="0.5" />
+                    </Border.Shadow>
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="12">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Group" FontAttributes="Bold" />
+                            <Label Text="{Binding GroupName}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Owner" FontAttributes="Bold" />
+                            <Label Text="{Binding OwnerDisplay}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Invited By" FontAttributes="Bold" />
+                            <Label Text="{Binding SenderDisplay}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Sent" FontAttributes="Bold" />
+                            <Label Text="{Binding SentDisplay}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label
+                    Text="{Binding ErrorMessage}"
+                    TextColor="#DC2626"
+                    IsVisible="{Binding ShowError}" />
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Stroke="#E2E8F0" BackgroundColor="#F8FAFC" Padding="12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AcceptCommand}" />
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                            <Label Text="✓" FontSize="16" TextColor="#16A34A" />
+                            <Label Text="Accept" FontAttributes="Bold" TextColor="#16A34A" />
+                        </HorizontalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Stroke="#E2E8F0" BackgroundColor="#F8FAFC" Padding="12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="10" />
+                        </Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding DeclineCommand}" />
+                        </Border.GestureRecognizers>
+                        <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                            <Label Text="🗑" FontSize="16" TextColor="#DC2626" />
+                            <Label Text="Decline" FontAttributes="Bold" TextColor="#DC2626" />
+                        </HorizontalStackLayout>
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+        </Border>
+    </VerticalStackLayout>
+</Border>
+</ContentPage>
