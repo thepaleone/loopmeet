@@ -64,7 +64,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton(config);
 		builder.Services.AddSingleton(_ => new Client(config.SupabaseUrl, config.SupabaseAnonKey, new SupabaseOptions
 		{
-			AutoConnectRealtime = false
+			AutoConnectRealtime = false,
+			AutoRefreshToken = true,
+			SessionHandler = new MauiSessionPersistence()
 		}));
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<AuthCoordinator>();
