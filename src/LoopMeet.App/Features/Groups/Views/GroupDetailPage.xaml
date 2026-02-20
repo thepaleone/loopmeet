@@ -3,12 +3,12 @@
     x:Class="LoopMeet.App.Features.Groups.Views.GroupDetailPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Group Detail">
+    Title="{Binding GroupName}">
 
     <VerticalStackLayout Padding="24" Spacing="12">
         <Label Text="{Binding GroupName}" FontSize="24" />
-        <Button Text="Edit Group" Command="{Binding EditGroupCommand}" />
-        <Button Text="Invite Member" Command="{Binding InviteMemberCommand}" />
+        <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
+        <Button Text="Invite Member" Command="{Binding InviteMemberCommand}" IsVisible="{Binding IsOwner}" />
         <Label Text="Members" FontAttributes="Bold" />
         <CollectionView ItemsSource="{Binding Members}">
             <CollectionView.ItemTemplate>

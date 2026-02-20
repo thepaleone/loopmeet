@@ -105,6 +105,18 @@ public sealed class AuthService
         return _client.Auth.CurrentSession?.AccessToken ?? _accessToken;
     }
 
+    public Guid? GetCurrentUserId()
+    {
+        var token = GetAccessToken();
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return null;
+        }
+
+        var sub = TryGetJwtSubject(token);
+        return Guid.TryParse(sub, out var userId) ? userId : null;
+    }
+
     private static void SaveAccessToken(string? token)
     {
         if (string.IsNullOrWhiteSpace(token))
@@ -157,6 +169,45 @@ public sealed class AuthService
                 && expElement.TryGetInt64(out var exp))
             {
                 return exp;
+            }
+        }
+        catch
+        {
+            return null;
+        }
+
+        return null;
+    }
+
+    private static string? TryGetJwtSubject(string token)
+    {
+        var parts = token.Split('.');
+        if (parts.Length < 2)
+        {
+            return null;
+        }
+
+        var payload = parts[1]
+            .Replace('-', '+')
+            .Replace('_', '/');
+
+        switch (payload.Length % 4)
+        {
+            case 2:
+                payload += "==";
+                break;
+            case 3:
+                payload += "=";
+                break;
+        }
+
+        try
+        {
+            var bytes = Convert.FromBase64String(payload);
+            using var json = JsonDocument.Parse(bytes);
+            if (json.RootElement.TryGetProperty("sub", out var subElement))
+            {
+                return subElement.GetString();
             }
         }
         catch
