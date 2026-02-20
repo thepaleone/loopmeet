@@ -27,4 +27,5 @@ public partial class EditGroupPage : ContentPage, IQueryAttributable
             viewModel.ApplyGroup(groupId, nameValue?.ToString());
         }
     }
+
 }

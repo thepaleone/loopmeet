@@ -4,11 +4,11 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Name="GroupsPage"
-    Title="Groups">
+    Title="LoopMeet">
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="12">
-            <Label Text="Groups" FontSize="24" />
+            <Label Text="Groups" FontSize="18" />
             <Button Text="Create Group" Command="{Binding CreateGroupCommand}" />
 
             <Label Text="Pending Invitations" FontAttributes="Bold" />

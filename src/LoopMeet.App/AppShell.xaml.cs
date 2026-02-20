@@ -15,7 +15,6 @@ public partial class AppShell : Shell
 		InitializeComponent();
 
 		Routing.RegisterRoute("create-account", typeof(CreateAccountPage));
-		Routing.RegisterRoute("groups", typeof(GroupsListPage));
 		Routing.RegisterRoute("group-detail", typeof(GroupDetailPage));
 		Routing.RegisterRoute("create-group", typeof(CreateGroupPage));
 		Routing.RegisterRoute("edit-group", typeof(EditGroupPage));
