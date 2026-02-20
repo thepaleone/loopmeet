@@ -42,4 +42,14 @@ public sealed class CacheService : ICacheService
         _memoryCache.Set(key, created, ttl);
         return created;
     }
+
+    public async Task RemoveAsync(string key)
+    {
+        if (_distributedCache is not null)
+        {
+            await _distributedCache.RemoveAsync(key);
+        }
+
+        _memoryCache.Remove(key);
+    }
 }

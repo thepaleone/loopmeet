@@ -1,4 +1,5 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Core.Models;
 
@@ -19,11 +20,16 @@ public sealed class GroupCommandService
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IMembershipRepository _membershipRepository;
+    private readonly ICacheService _cacheService;
 
-    public GroupCommandService(IGroupRepository groupRepository, IMembershipRepository membershipRepository)
+    public GroupCommandService(
+        IGroupRepository groupRepository,
+        IMembershipRepository membershipRepository,
+        ICacheService cacheService)
     {
         _groupRepository = groupRepository;
         _membershipRepository = membershipRepository;
+        _cacheService = cacheService;
     }
 
     public async Task<GroupCommandResult> CreateAsync(Guid ownerUserId, string name, CancellationToken cancellationToken = default)
@@ -61,6 +67,8 @@ public sealed class GroupCommandService
         };
 
         await _membershipRepository.AddAsync(membership, cancellationToken);
+
+        await _cacheService.RemoveAsync($"groups:{ownerUserId}");
 
         return new GroupCommandResult(GroupCommandStatus.Success, new GroupSummaryResponse
         {
@@ -100,6 +108,9 @@ public sealed class GroupCommandService
             group.Name = trimmedName;
             group.UpdatedAt = DateTimeOffset.UtcNow;
             await _groupRepository.UpdateAsync(group, cancellationToken);
+
+            await _cacheService.RemoveAsync($"groups:{ownerUserId}");
+            await _cacheService.RemoveAsync($"group-detail:{groupId}");
         }
 
         return new GroupCommandResult(GroupCommandStatus.Success, new GroupSummaryResponse

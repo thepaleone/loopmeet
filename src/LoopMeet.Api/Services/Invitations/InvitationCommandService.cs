@@ -1,4 +1,5 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Core.Models;
 
@@ -22,17 +23,20 @@ public sealed class InvitationCommandService
     private readonly IMembershipRepository _membershipRepository;
     private readonly IInvitationRepository _invitationRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ICacheService _cacheService;
 
     public InvitationCommandService(
         IGroupRepository groupRepository,
         IMembershipRepository membershipRepository,
         IInvitationRepository invitationRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        ICacheService cacheService)
     {
         _groupRepository = groupRepository;
         _membershipRepository = membershipRepository;
         _invitationRepository = invitationRepository;
         _userRepository = userRepository;
+        _cacheService = cacheService;
     }
 
     public async Task<InvitationCommandResult> CreateAsync(Guid ownerUserId, Guid groupId, string email, CancellationToken cancellationToken = default)
@@ -82,6 +86,8 @@ public sealed class InvitationCommandService
 
         await _invitationRepository.AddAsync(invitation, cancellationToken);
 
+        await _cacheService.RemoveAsync($"pending-invitations:{trimmedEmail}");
+
         return new InvitationCommandResult(InvitationCommandStatus.Success, new InvitationResponse
         {
             Id = invitation.Id,
@@ -123,6 +129,9 @@ public sealed class InvitationCommandService
             Role = "member",
             CreatedAt = DateTimeOffset.UtcNow
         }, cancellationToken);
+
+        await _cacheService.RemoveAsync($"pending-invitations:{email}");
+        await _cacheService.RemoveAsync($"groups:{userId}");
 
         return new InvitationCommandResult(InvitationCommandStatus.Success, new InvitationResponse
         {
