@@ -12,19 +12,46 @@
             <Button Text="Create Group" Command="{Binding CreateGroupCommand}" />
 
             <Label Text="Pending Invitations" FontAttributes="Bold" />
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding PendingInvitations}" Spacing="8">
-                <BindableLayout.ItemTemplate>
+            <CollectionView ItemsSource="{Binding PendingInvitations}">
+                <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <HorizontalStackLayout Spacing="12">
-                            <Label Text="{Binding InvitedEmail}" VerticalOptions="Center" />
-                            <Button
-                                Text="Accept"
-                                Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference GroupsPage}}"
-                                CommandParameter="{Binding .}" />
-                        </HorizontalStackLayout>
+                        <SwipeView IsEnabled="{OnIdiom Phone=True, Tablet=True, Desktop=False, TV=False}">
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem
+                                        Text="Accept"
+                                        BackgroundColor="#16A34A"
+                                        Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference GroupsPage}}"
+                                        CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem
+                                        Text="Decline"
+                                        BackgroundColor="#DC2626"
+                                        Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference GroupsPage}}"
+                                        CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.LeftItems>
+                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.ShowInvitationDetailsCommand, Source={x:Reference GroupsPage}}"
+                                        CommandParameter="{Binding .}" />
+                                </Grid.GestureRecognizers>
+                                <Label Text="{Binding GroupName}" VerticalOptions="Center" />
+                                <Button
+                                    Grid.Column="1"
+                                    Text="Accept"
+                                    IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}"
+                                    Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference GroupsPage}}"
+                                    CommandParameter="{Binding .}" />
+                            </Grid>
+                        </SwipeView>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
             <Label Text="Owned Groups" FontAttributes="Bold" />
             <VerticalStackLayout BindableLayout.ItemsSource="{Binding OwnedGroups}" Spacing="8">

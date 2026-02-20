@@ -20,6 +20,20 @@ public sealed class GroupRepository : IGroupRepository
         return GetByIdInternalAsync(id);
     }
 
+    public async Task<IReadOnlyList<Group>> ListByIdsAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        if (ids.Count == 0)
+        {
+            return Array.Empty<Group>();
+        }
+
+        var response = await _client.From<GroupRecord>().Get();
+        return response.Models
+            .Where(group => ids.Contains(group.Id))
+            .Select(Map)
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<Group>> ListOwnedAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
     {
         var response = await _client

@@ -47,12 +47,52 @@ public sealed partial class GroupsListViewModel : ObservableObject
         try
         {
             await _invitationsApi.AcceptInvitationAsync(invitation.Id);
-            await LoadAsync();
         }
         finally
         {
             IsBusy = false;
         }
+
+        await LoadCoreAsync();
+    }
+
+    [RelayCommand]
+    private async Task DeclineInvitationAsync(InvitationSummary? invitation)
+    {
+        if (invitation is null || IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            await _invitationsApi.DeclineInvitationAsync(invitation.Id);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        await LoadCoreAsync();
+    }
+
+    [RelayCommand]
+    private Task ShowInvitationDetailsAsync(InvitationSummary? invitation)
+    {
+        if (invitation is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var sentAt = invitation.CreatedAt?.ToLocalTime().ToString("g") ?? "Unknown";
+        var owner = FormatPerson(invitation.OwnerName, invitation.OwnerEmail);
+        var sender = FormatPerson(invitation.SenderName, invitation.SenderEmail);
+
+        return Shell.Current.DisplayAlert(
+            "Invitation",
+            $"Group: {invitation.GroupName}\nOwner: {owner}\nInvited by: {sender}\nSent: {sentAt}",
+            "Close");
     }
 
     [RelayCommand]
@@ -83,6 +123,11 @@ public sealed partial class GroupsListViewModel : ObservableObject
             return;
         }
 
+        await LoadCoreAsync();
+    }
+
+    private async Task LoadCoreAsync()
+    {
         IsBusy = true;
         try
         {
@@ -133,5 +178,20 @@ public sealed partial class GroupsListViewModel : ObservableObject
         {
             IsBusy = false;
         }
+    }
+
+    private static string FormatPerson(string name, string email)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return email;
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return name;
+        }
+
+        return $"{name} ({email})";
     }
 }

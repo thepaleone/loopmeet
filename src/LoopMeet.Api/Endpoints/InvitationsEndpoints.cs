@@ -95,6 +95,29 @@ public static class InvitationsEndpoints
             })
             .RequireAuthorization();
 
+        app.MapPost("/invitations/{invitationId:guid}/decline", async (
+                Guid invitationId,
+                CurrentUserService currentUser,
+                InvitationCommandService invitationCommandService,
+                CancellationToken cancellationToken) =>
+            {
+                var userId = currentUser.UserId;
+                var email = currentUser.Email;
+                if (userId is null || string.IsNullOrWhiteSpace(email))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await invitationCommandService.DeclineAsync(userId.Value, email, invitationId, cancellationToken);
+                return result.Status switch
+                {
+                    InvitationCommandStatus.Success => Results.Ok(result.Invitation),
+                    InvitationCommandStatus.NotFound => Results.NotFound(),
+                    _ => Results.BadRequest()
+                };
+            })
+            .RequireAuthorization();
+
         return app;
     }
 }

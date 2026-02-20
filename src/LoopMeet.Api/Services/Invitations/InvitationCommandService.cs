@@ -141,4 +141,33 @@ public sealed class InvitationCommandService
             Status = invitation.Status
         });
     }
+
+    public async Task<InvitationCommandResult> DeclineAsync(Guid userId, string email, Guid invitationId, CancellationToken cancellationToken = default)
+    {
+        var invitation = await _invitationRepository.GetByIdAsync(invitationId, cancellationToken);
+        if (invitation is null || invitation.Status != "pending")
+        {
+            return new InvitationCommandResult(InvitationCommandStatus.NotFound, null);
+        }
+
+        if (!string.Equals(invitation.InvitedEmail, email, StringComparison.OrdinalIgnoreCase))
+        {
+            return new InvitationCommandResult(InvitationCommandStatus.NotFound, null);
+        }
+
+        invitation.Status = "declined";
+        invitation.AcceptedAt = DateTimeOffset.UtcNow;
+        invitation.InvitedUserId = userId;
+        await _invitationRepository.UpdateAsync(invitation, cancellationToken);
+
+        await _cacheService.RemoveAsync($"pending-invitations:{email}");
+
+        return new InvitationCommandResult(InvitationCommandStatus.Success, new InvitationResponse
+        {
+            Id = invitation.Id,
+            GroupId = invitation.GroupId,
+            InvitedEmail = invitation.InvitedEmail,
+            Status = invitation.Status
+        });
+    }
 }

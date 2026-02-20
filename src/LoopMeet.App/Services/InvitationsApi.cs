@@ -13,6 +13,9 @@ public interface IInvitationsApi
 
     [Post("/invitations/{invitationId}/accept")]
     Task<InvitationSummary> AcceptInvitationAsync(Guid invitationId);
+
+    [Post("/invitations/{invitationId}/decline")]
+    Task<InvitationSummary> DeclineInvitationAsync(Guid invitationId);
 }
 
 public sealed class InvitationsApi
@@ -31,4 +34,7 @@ public sealed class InvitationsApi
 
     public Task<InvitationSummary> AcceptInvitationAsync(Guid invitationId) =>
         _api.AcceptInvitationAsync(invitationId);
+
+    public Task<InvitationSummary> DeclineInvitationAsync(Guid invitationId) =>
+        _api.DeclineInvitationAsync(invitationId);
 }
