@@ -12,22 +12,26 @@ public sealed class GroupQueryService
     private readonly IMembershipRepository _membershipRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICacheService _cacheService;
+    private readonly ILogger<GroupQueryService> _logger;
 
     public GroupQueryService(
         IGroupRepository groupRepository,
         IMembershipRepository membershipRepository,
         IUserRepository userRepository,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        ILogger<GroupQueryService> logger)
     {
         _groupRepository = groupRepository;
         _membershipRepository = membershipRepository;
         _userRepository = userRepository;
         _cacheService = cacheService;
+        _logger = logger;
     }
 
     public async Task<GroupsResponse> GetGroupsAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"groups:{userId}";
+        _logger.LogInformation("Loading groups for {UserId}", userId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
             var ownedGroups = await _groupRepository.ListOwnedAsync(userId, cancellationToken);
@@ -44,6 +48,10 @@ public sealed class GroupQueryService
                 .OrderBy(group => group.Name)
                 .ToList();
 
+            _logger.LogInformation("Loaded groups for {UserId} owned={OwnedCount} member={MemberCount}",
+                userId,
+                owned.Count,
+                member.Count);
             return new GroupsResponse
             {
                 Owned = owned,
@@ -55,11 +63,13 @@ public sealed class GroupQueryService
     public async Task<GroupDetailResponse?> GetGroupDetailAsync(Guid groupId, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"group-detail:{groupId}";
+        _logger.LogInformation("Loading group detail {GroupId}", groupId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
             var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
             if (group is null)
             {
+                _logger.LogWarning("Group detail not found {GroupId}", groupId);
                 return null;
             }
 
@@ -78,6 +88,7 @@ public sealed class GroupQueryService
                 .OrderBy(member => member.DisplayName)
                 .ToList();
 
+            _logger.LogInformation("Loaded group detail {GroupId} members={MemberCount}", groupId, members.Count);
             return new GroupDetailResponse
             {
                 Id = group.Id,

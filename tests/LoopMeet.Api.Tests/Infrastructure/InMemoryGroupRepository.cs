@@ -59,14 +59,26 @@ public sealed class InMemoryGroupRepository : IGroupRepository
         }
     }
 
-    public Task AddAsync(Group group, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<Group>> ListByIdsAsync(IReadOnlyList<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        lock (_store.SyncRoot)
+        {
+            var lookup = ids.ToHashSet();
+            var results = _store.Groups
+                .Where(group => lookup.Contains(group.Id))
+                .ToList();
+            return Task.FromResult<IReadOnlyList<Group>>(results);
+        }
+    }
+
+    public Task<Group> AddAsync(Group group, CancellationToken cancellationToken = default)
     {
         lock (_store.SyncRoot)
         {
             _store.Groups.Add(group);
         }
 
-        return Task.CompletedTask;
+        return Task.FromResult(group);
     }
 
     public Task UpdateAsync(Group group, CancellationToken cancellationToken = default)

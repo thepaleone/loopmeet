@@ -12,22 +12,26 @@ public sealed class InvitationQueryService
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICacheService _cacheService;
+    private readonly ILogger<InvitationQueryService> _logger;
 
     public InvitationQueryService(
         IInvitationRepository invitationRepository,
         IGroupRepository groupRepository,
         IUserRepository userRepository,
-        ICacheService cacheService)
+        ICacheService cacheService,
+        ILogger<InvitationQueryService> logger)
     {
         _invitationRepository = invitationRepository;
         _groupRepository = groupRepository;
         _userRepository = userRepository;
         _cacheService = cacheService;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyList<InvitationResponse>> ListPendingAsync(string email, CancellationToken cancellationToken = default)
     {
         var cacheKey = $"pending-invitations:{email}";
+        _logger.LogInformation("Loading pending invitations for current user");
         var cached = await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
             var invitations = await _invitationRepository.ListPendingByEmailAsync(email, cancellationToken);
@@ -37,7 +41,7 @@ public sealed class InvitationQueryService
             var ownerIds = groups.Select(group => group.OwnerUserId).Distinct().ToList();
             var owners = await _userRepository.ListByIdsAsync(ownerIds, cancellationToken);
             var ownerLookup = owners.ToDictionary(owner => owner.Id, owner => owner);
-            return invitations
+            var responses = invitations
                 .OrderBy(invitation => invitation.CreatedAt)
                 .Select(invitation =>
                 {
@@ -63,6 +67,8 @@ public sealed class InvitationQueryService
                     };
                 })
                 .ToList();
+            _logger.LogInformation("Loaded pending invitations count={Count}", responses.Count);
+            return responses;
         });
 
         return cached ?? new List<InvitationResponse>();

@@ -14,7 +14,7 @@ using Supabase;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
-    .CreateBootstrapLogger();
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
