@@ -5,7 +5,14 @@ using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Features.Invitations.Models;
 using LoopMeet.App.Services;
+using System.Diagnostics;
+using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Controls;
 using Microsoft.Extensions.Logging;
+#if MACCATALYST
+using ObjCRuntime;
+using UIKit;
+#endif
 
 namespace LoopMeet.App.Features.Groups.ViewModels;
 
@@ -177,6 +184,16 @@ public sealed partial class GroupsListViewModel : ObservableObject
                 MemberGroups.Count,
                 PendingInvitations.Count);
         }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Failed to load groups list: API unavailable.");
+            await ShowApiUnavailableAndQuitAsync();
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError(ex, "Failed to load groups list: request timed out.");
+            await ShowApiUnavailableAndQuitAsync();
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load groups list.");
@@ -189,6 +206,36 @@ public sealed partial class GroupsListViewModel : ObservableObject
             IsLoadingOwnedGroups = false;
             IsLoadingMemberGroups = false;
         }
+    }
+
+    private static Task ShowApiUnavailableAndQuitAsync()
+    {
+        return MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+#pragma warning disable CS0618
+            await Shell.Current.DisplayAlertAsync(
+                "Service Unavailable",
+                "We could not contact the LoopMeet service. Please try again later.",
+                "Quit");
+#pragma warning restore CS0618
+
+            Application.Current?.Quit();
+#if MACCATALYST
+            try
+            {
+                UIApplication.SharedApplication.PerformSelector(
+                    new Selector("terminateWithSuccess"),
+                    UIApplication.SharedApplication,
+                    0);
+            }
+            catch
+            {
+            }
+#endif
+            Environment.Exit(0);
+            await Task.Delay(200);
+            Process.GetCurrentProcess().Kill(true);
+        });
     }
 
 }

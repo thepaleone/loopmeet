@@ -1,0 +1,71 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build-maccatalyst-app",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"-t:Build",
+				"-p:Configuration=Debug",
+				"-f",
+				"net10.0-maccatalyst",
+				"-r",
+				"maccatalyst-arm64",
+				"-p:CustomAfterMicrosoftCSharpTargets=/Users/joel/.vscode/extensions/ms-dotnettools.dotnet-maui-1.13.20-darwin-arm64/dist/resources/Custom.After.Microsoft.CSharp.targets",
+				"-p:MauiVSCodeBuildOutputFile=/var/folders/4w/2_3x4c755zs8w24j396zfg580000gn/T/dotnet-maui/maui-vsc-e88e2442-b8aa-46d3-a479-070809126132.json",
+				"-p:MauiTargetProject=/Users/joel/projects/palehorse/loopmeet/src/LoopMeet.App/LoopMeet.App.csproj",
+				"-p:XamlTools=/Users/joel/.vscode/extensions/ms-dotnettools.csharp-2.120.3-darwin-arm64/.xamlTools",
+				"-p:EnableDiagnostics=True",
+				"-p:EnableMauiXamlDiagnostics=True",
+				"/Users/joel/projects/palehorse/loopmeet/src/LoopMeet.App/LoopMeet.App.csproj"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "build-maccatalyst-app",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"-t:Build",
+				"-p:Configuration=Debug",
+				"-f",
+				"net10.0-maccatalyst",
+				"-r",
+				"maccatalyst-arm64",
+				"-p:CustomAfterMicrosoftCSharpTargets=/Users/joel/.vscode/extensions/ms-dotnettools.dotnet-maui-1.13.20-darwin-arm64/dist/resources/Custom.After.Microsoft.CSharp.targets",
+				"-p:MauiVSCodeBuildOutputFile=/var/folders/4w/2_3x4c755zs8w24j396zfg580000gn/T/dotnet-maui/maui-vsc-e88e2442-b8aa-46d3-a479-070809126132.json",
+				"-p:MauiTargetProject=/Users/joel/projects/palehorse/loopmeet/src/LoopMeet.App/LoopMeet.App.csproj",
+				"-p:XamlTools=/Users/joel/.vscode/extensions/ms-dotnettools.csharp-2.120.3-darwin-arm64/.xamlTools",
+				"-p:EnableDiagnostics=True",
+				"-p:EnableMauiXamlDiagnostics=True",
+				"/Users/joel/projects/palehorse/loopmeet/src/LoopMeet.App/LoopMeet.App.csproj"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "build-maccatalyst-app",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"-t:Build",
+				"-p:Configuration=Debug",
+				"-f",
+				"net10.0-maccatalyst",
+				"-r",
+				"maccatalyst-arm64",
+				"-p:CustomAfterMicrosoftCSharpTargets=/Users/joel/.vscode/extensions/ms-dotnettools.dotnet-maui-1.13.20-darwin-arm64/dist/resources/Custom.After.Microsoft.CSharp.targets",
+				"-p:MauiVSCodeBuildOutputFile=/var/folders/4w/2_3x4c755zs8w24j396zfg580000gn/T/dotnet-maui/maui-vsc-1533931d-c902-49d8-aec0-695cc29a6983.json",
+				"-p:MauiTargetProject=/Users/joel/projects/palehorse/loopmeet/src/LoopMeet.App/LoopMeet.App.csproj",
+				"-p:XamlTools=/Users/joel/.vscode/extensions/ms-dotnettools.csharp-2.120.3-darwin-arm64/.xamlTools",
+				"-p:EnableDiagnostics=True",
+				"-p:EnableMauiXamlDiagnostics=True",
+				"/Users/joel/projects/palehorse/loopmeet/src/LoopMeet.App/LoopMeet.App.csproj"
+			],
+			"isBackground": false
+		}
+	]
+}
