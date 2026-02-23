@@ -25,6 +25,9 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     [ObservableProperty]
     private bool _isBusy;
 
+    [ObservableProperty]
+    private bool _isOAuthFlow;
+
     public CreateAccountViewModel(AuthService authService, UsersApi usersApi)
     {
         _authService = authService;
@@ -41,7 +44,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
 
         if (string.IsNullOrWhiteSpace(DisplayName)
             || string.IsNullOrWhiteSpace(Email)
-            || string.IsNullOrWhiteSpace(Password))
+            || (!IsOAuthFlow && string.IsNullOrWhiteSpace(Password)))
         {
             return;
         }
@@ -49,10 +52,13 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            var session = await _authService.SignUpWithEmailAsync(Email, Password);
-            if (string.IsNullOrWhiteSpace(session.AccessToken))
+            if (!IsOAuthFlow)
             {
-                return;
+                var session = await _authService.SignUpWithEmailAsync(Email, Password);
+                if (string.IsNullOrWhiteSpace(session.AccessToken))
+                {
+                    return;
+                }
             }
 
             await _usersApi.UpsertProfileAsync(new UserProfileRequest
@@ -71,8 +77,10 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         }
     }
 
-    public void ApplyPrefill(string? displayName, string? email, string? phone)
+    public void ApplyPrefill(string? displayName, string? email, string? phone, bool isOAuthFlow)
     {
+        IsOAuthFlow = isOAuthFlow;
+
         if (!string.IsNullOrWhiteSpace(displayName) && string.IsNullOrWhiteSpace(DisplayName))
         {
             DisplayName = displayName;
@@ -86,6 +94,11 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         if (!string.IsNullOrWhiteSpace(phone) && string.IsNullOrWhiteSpace(Phone))
         {
             Phone = phone;
+        }
+
+        if (IsOAuthFlow)
+        {
+            Password = string.Empty;
         }
     }
 }

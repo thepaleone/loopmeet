@@ -1,13 +1,17 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
+using Refit;
 
 namespace LoopMeet.App.Features.Auth.ViewModels;
 
 public sealed partial class LoginViewModel : ObservableObject
 {
     private readonly AuthService _authService;
+    private readonly AuthCoordinator _authCoordinator;
+    private readonly UsersApi _usersApi;
     private readonly ILogger<LoginViewModel> _logger;
 
     [ObservableProperty]
@@ -25,9 +29,15 @@ public sealed partial class LoginViewModel : ObservableObject
     [ObservableProperty]
     private bool _showError;
 
-    public LoginViewModel(AuthService authService, ILogger<LoginViewModel> logger)
+    public LoginViewModel(
+        AuthService authService,
+        AuthCoordinator authCoordinator,
+        UsersApi usersApi,
+        ILogger<LoginViewModel> logger)
     {
         _authService = authService;
+        _authCoordinator = authCoordinator;
+        _usersApi = usersApi;
         _logger = logger;
     }
 
@@ -92,6 +102,65 @@ public sealed partial class LoginViewModel : ObservableObject
     [RelayCommand]
     private Task NavigateToCreateAccountAsync()
     {
-        return Shell.Current.GoToAsync("create-account");
+        return _authCoordinator.NavigateToCreateAccountAsync(null, null, null, false);
+    }
+
+    [RelayCommand]
+    private async Task SignInWithGoogleAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ShowError = false;
+        ErrorMessage = string.Empty;
+        try
+        {
+            _logger.LogInformation("Starting Google sign-in.");
+            var authResult = await _authService.SignInWithGoogleAsync();
+            if (string.IsNullOrWhiteSpace(authResult.AccessToken))
+            {
+                ShowError = true;
+                ErrorMessage = "Google sign-in did not complete. Please try again.";
+                return;
+            }
+
+            var profile = await TryGetProfileAsync();
+            if (profile is not null)
+            {
+                await Shell.Current.GoToAsync("//groups");
+                return;
+            }
+
+            await _authCoordinator.NavigateToCreateAccountAsync(
+                authResult.DisplayName,
+                authResult.Email,
+                authResult.Phone,
+                true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Google sign-in failed.");
+            ShowError = true;
+            ErrorMessage = "Google sign-in failed. Please try again.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task<UserProfileResponse?> TryGetProfileAsync()
+    {
+        try
+        {
+            return await _usersApi.GetProfileAsync();
+        }
+        catch (ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
     }
 }

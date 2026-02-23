@@ -23,6 +23,13 @@
                 </DataTrigger>
             </Button.Triggers>
         </Button>
+        <Button Text="Continue with Google" Command="{Binding SignInWithGoogleCommand}">
+            <Button.Triggers>
+                <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="IsEnabled" Value="False" />
+                </DataTrigger>
+            </Button.Triggers>
+        </Button>
         <Button Text="Create Account" Command="{Binding NavigateToCreateAccountCommand}">
             <Button.Triggers>
                 <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">

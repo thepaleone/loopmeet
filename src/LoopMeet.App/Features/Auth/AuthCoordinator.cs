@@ -16,9 +16,9 @@ public sealed class AuthCoordinator
         return Shell.Current.GoToAsync("//groups");
     }
 
-    public async Task NavigateToCreateAccountAsync(string? displayName, string? email, string? phone)
+    public async Task NavigateToCreateAccountAsync(string? displayName, string? email, string? phone, bool isOAuthFlow)
     {
-        _createAccountViewModel.ApplyPrefill(displayName, email, phone);
+        _createAccountViewModel.ApplyPrefill(displayName, email, phone, isOAuthFlow);
         await Shell.Current.GoToAsync("create-account");
     }
 }

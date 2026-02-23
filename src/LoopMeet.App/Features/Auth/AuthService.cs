@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.Json;
 using LoopMeet.App.Features.Auth.Models;
+using Microsoft.Maui.Authentication;
+using Supabase.Gotrue;
 using Microsoft.Maui.Storage;
 using SupabaseClient = Supabase.Client;
 using Supabase.Gotrue;
@@ -10,6 +12,7 @@ namespace LoopMeet.App.Features.Auth;
 public sealed class AuthService
 {
     private const string AccessTokenKey = "loopmeet.auth.access_token";
+    private const string OAuthRedirectUri = "loopmeet://auth-callback";
     private readonly SupabaseClient _client;
     private string? _accessToken;
 
@@ -46,6 +49,34 @@ public sealed class AuthService
         _accessToken = null;
         Preferences.Default.Remove(AccessTokenKey);
         return _client.Auth.SignOut();
+    }
+
+    public async Task<OAuthSignInResult> SignInWithGoogleAsync()
+    {
+        var authState = await _client.Auth.SignIn(Constants.Provider.Google, new SignInOptions
+        {
+            FlowType = Constants.OAuthFlowType.Implicit,
+            RedirectTo = OAuthRedirectUri
+        });
+
+        var result = await WebAuthenticator.AuthenticateAsync(authState.Uri, new Uri(OAuthRedirectUri));
+        if (!result.Properties.TryGetValue("code", out var authCode) || string.IsNullOrWhiteSpace(authCode))
+        {
+            return new OAuthSignInResult();
+        }
+
+        var session = await _client.Auth.ExchangeCodeForSession(authState.PKCEVerifier ?? string.Empty, authCode);
+        _accessToken = session?.AccessToken;
+        SaveAccessToken(_accessToken);
+
+        var user = session?.User;
+        return new OAuthSignInResult
+        {
+            AccessToken = _accessToken ?? string.Empty,
+            DisplayName = GetUserDisplayName(user),
+            Email = user?.Email ?? TryGetJwtClaim(_accessToken, "email"),
+            Phone = user?.Phone
+        };
     }
 
     public Task<AuthSession?> GetCurrentSessionAsync()
@@ -208,6 +239,98 @@ public sealed class AuthService
             if (json.RootElement.TryGetProperty("sub", out var subElement))
             {
                 return subElement.GetString();
+            }
+        }
+        catch
+        {
+            return null;
+        }
+
+        return null;
+    }
+
+    private static string? GetUserDisplayName(User? user)
+    {
+        if (user?.UserMetadata is null || user.UserMetadata.Count == 0)
+        {
+            return null;
+        }
+
+        if (TryGetMetadataValue(user.UserMetadata, "full_name", out var fullName))
+        {
+            return fullName;
+        }
+
+        if (TryGetMetadataValue(user.UserMetadata, "name", out var name))
+        {
+            return name;
+        }
+
+        if (TryGetMetadataValue(user.UserMetadata, "given_name", out var givenName)
+            && TryGetMetadataValue(user.UserMetadata, "family_name", out var familyName))
+        {
+            return $"{givenName} {familyName}".Trim();
+        }
+
+        return null;
+    }
+
+    private static bool TryGetMetadataValue(Dictionary<string, object> metadata, string key, out string value)
+    {
+        value = string.Empty;
+        if (!metadata.TryGetValue(key, out var raw) || raw is null)
+        {
+            return false;
+        }
+
+        switch (raw)
+        {
+            case string text:
+                value = text;
+                return !string.IsNullOrWhiteSpace(value);
+            case JsonElement element when element.ValueKind == JsonValueKind.String:
+                value = element.GetString() ?? string.Empty;
+                return !string.IsNullOrWhiteSpace(value);
+            default:
+                value = raw.ToString() ?? string.Empty;
+                return !string.IsNullOrWhiteSpace(value);
+        }
+    }
+
+    private static string? TryGetJwtClaim(string? token, string claim)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return null;
+        }
+
+        var parts = token.Split('.');
+        if (parts.Length < 2)
+        {
+            return null;
+        }
+
+        var payload = parts[1]
+            .Replace('-', '+')
+            .Replace('_', '/');
+
+        switch (payload.Length % 4)
+        {
+            case 2:
+                payload += "==";
+                break;
+            case 3:
+                payload += "=";
+                break;
+        }
+
+        try
+        {
+            var bytes = Convert.FromBase64String(payload);
+            using var json = JsonDocument.Parse(bytes);
+            if (json.RootElement.TryGetProperty(claim, out var claimElement))
+            {
+                return claimElement.GetString();
             }
         }
         catch

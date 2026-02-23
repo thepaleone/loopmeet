@@ -47,4 +47,10 @@ public sealed class UserProvisioningService
         await _userRepository.UpdateAsync(existing, cancellationToken);
         return existing;
     }
+
+    public async Task<User?> GetProfileAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Loading profile for user {UserId}", userId);
+        return await _userRepository.GetByIdAsync(userId, cancellationToken);
+    }
 }
