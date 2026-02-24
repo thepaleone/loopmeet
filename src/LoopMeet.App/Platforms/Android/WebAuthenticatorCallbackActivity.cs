@@ -1,5 +1,6 @@
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Microsoft.Maui.Authentication;
 
 namespace LoopMeet.App;
@@ -10,6 +11,6 @@ namespace LoopMeet.App;
     Categories = new[] { Intent.CategoryDefault, Intent.CategoryBrowsable },
     DataScheme = "loopmeet",
     DataHost = "auth-callback")]
-public sealed class WebAuthenticatorCallbackActivity : WebAuthenticatorCallbackActivity
+public sealed class LoopMeetWebAuthenticatorCallbackActivity : WebAuthenticatorCallbackActivity
 {
 }
