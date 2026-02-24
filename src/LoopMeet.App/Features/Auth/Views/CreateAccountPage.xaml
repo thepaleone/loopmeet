@@ -17,6 +17,17 @@
                 </DataTrigger>
             </Entry.Triggers>
         </Entry>
+        <Entry Placeholder="Confirm Password" Text="{Binding ConfirmPassword}" IsPassword="True">
+            <Entry.Triggers>
+                <DataTrigger TargetType="Entry" Binding="{Binding IsOAuthFlow}" Value="True">
+                    <Setter Property="IsVisible" Value="False" />
+                </DataTrigger>
+            </Entry.Triggers>
+        </Entry>
+        <Label
+            Text="{Binding ErrorMessage}"
+            TextColor="DarkRed"
+            IsVisible="{Binding ShowError}" />
         <Button Text="Continue" Command="{Binding SaveCommand}" />
     </VerticalStackLayout>
 </ContentPage>

@@ -23,10 +23,19 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     private string _password = string.Empty;
 
     [ObservableProperty]
+    private string _confirmPassword = string.Empty;
+
+    [ObservableProperty]
     private bool _isBusy;
 
     [ObservableProperty]
     private bool _isOAuthFlow;
+
+    [ObservableProperty]
+    private string _errorMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool _showError;
 
     public CreateAccountViewModel(AuthService authService, UsersApi usersApi)
     {
@@ -42,10 +51,22 @@ public sealed partial class CreateAccountViewModel : ObservableObject
             return;
         }
 
+        ShowError = false;
+        ErrorMessage = string.Empty;
+
         if (string.IsNullOrWhiteSpace(DisplayName)
             || string.IsNullOrWhiteSpace(Email)
             || (!IsOAuthFlow && string.IsNullOrWhiteSpace(Password)))
         {
+            ShowError = true;
+            ErrorMessage = "Please complete all required fields.";
+            return;
+        }
+
+        if (!IsOAuthFlow && !string.Equals(Password, ConfirmPassword, StringComparison.Ordinal))
+        {
+            ShowError = true;
+            ErrorMessage = "Passwords do not match.";
             return;
         }
 
@@ -99,6 +120,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         if (IsOAuthFlow)
         {
             Password = string.Empty;
+            ConfirmPassword = string.Empty;
         }
     }
 }
