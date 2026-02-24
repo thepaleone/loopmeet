@@ -147,9 +147,10 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+# site_url = "http://127.0.0.1:3000"
+site_url = "http://dev.loopmeet.io:54321"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["loopmeet://auth-callback","http://10.0.2.2:54321/auth/v1/callback"]
+additional_redirect_urls = ["loopmeet://auth-callback","http://dev.looopmeeet.io","http://10.0.2.2:54321/auth/v1/callback"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 604800
 # JWT signing secret used to sign and verify tokens.
@@ -319,7 +320,8 @@ email_optional = false
 enabled = true
 client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_GOOGLE_SECRET_KEY)"
-redirect_uri = "http://localhost:54321/auth/v1/callback"
+# redirect_uri = "http://localhost:54321/auth/v1/callback"
+redirect_uri = "http://dev.loopmeet.io:54321/auth/v1/callback"
 url = ""
 skip_nonce_check = false
 

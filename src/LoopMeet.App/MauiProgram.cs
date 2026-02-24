@@ -42,15 +42,16 @@ public static class MauiProgram
 		if (isDebug)
 		{
 			supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+			supabaseUrl = "http://dev.loopmeet.io:54321";
 			if (DeviceInfo.Platform == DevicePlatform.Android)
 			{
 				apiBaseUrl = "http://10.0.2.2:5001";
-				supabaseUrl = "http://10.0.2.2:54321";
+				// supabaseUrl = "http://10.0.2.2:54321";
 			}
 			else
 			{
 				apiBaseUrl = "http://localhost:5001";
-				supabaseUrl = "http://localhost:54321";
+				// supabaseUrl = "http://localhost:54321";
 			}
 		}
 
