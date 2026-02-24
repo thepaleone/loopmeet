@@ -134,11 +134,8 @@ public sealed partial class LoginViewModel : ObservableObject
                 return;
             }
 
-            await _authCoordinator.NavigateToCreateAccountAsync(
-                authResult.DisplayName,
-                authResult.Email,
-                authResult.Phone,
-                true);
+            await TryCreateProfileFromOAuthAsync(authResult);
+            await Shell.Current.GoToAsync("//groups");
         }
         catch (Exception ex)
         {
@@ -149,6 +146,33 @@ public sealed partial class LoginViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private async Task<bool> TryCreateProfileFromOAuthAsync(OAuthSignInResult authResult)
+    {
+        if (string.IsNullOrWhiteSpace(authResult.Email))
+        {
+            return false;
+        }
+
+        try
+        {
+            await _usersApi.UpsertProfileAsync(new UserProfileRequest
+            {
+                DisplayName = authResult.DisplayName ?? string.Empty,
+                Email = authResult.Email,
+                Phone = authResult.Phone,
+                Password = string.Empty
+            });
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create profile after Google sign-in.");
+            ShowError = true;
+            ErrorMessage = "We could not finish setting up your account. Please try again.";
+            return false;
         }
     }
 

@@ -277,7 +277,9 @@ public sealed partial class GroupsListViewModel : ObservableObject
 #endif
             Environment.Exit(0);
             await Task.Delay(200);
+#if !IOS
             Process.GetCurrentProcess().Kill(true);
+#endif
         });
     }
 
