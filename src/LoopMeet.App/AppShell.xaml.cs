@@ -39,10 +39,17 @@ public partial class AppShell : Shell
 			return;
 		}
 
-		var session = await authService.RestoreSessionAsync();
-		if (session is not null && !string.IsNullOrWhiteSpace(session.AccessToken))
+		try
 		{
-			await MainThread.InvokeOnMainThreadAsync(() => GoToAsync("//groups"));
+			var session = await authService.RestoreSessionAsync();
+			if (session is not null && !string.IsNullOrWhiteSpace(session.AccessToken))
+			{
+				await MainThread.InvokeOnMainThreadAsync(() => GoToAsync("//groups"));
+			}
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Error restoring session: {ex}");
 		}
 	}
 }

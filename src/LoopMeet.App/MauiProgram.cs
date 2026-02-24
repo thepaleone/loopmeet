@@ -37,8 +37,8 @@ public static class MauiProgram
 #endif
 
 		var apiBaseUrl = "https://api.loopmeet.example.com";
-		var supabaseUrl = "https://your-supabase-url.supabase.co";
-		var supabaseAnonKey = "your-supabase-anon-key";
+		var supabaseUrl = "https://cswfsnikasaorexwhsas.supabase.co";
+		var supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzd2ZzbmlrYXNhb3JleHdoc2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTA2NzMsImV4cCI6MjA4NzQ2NjY3M30.ENWIbaz-dQ-qaCag53EHlHQVdY9Tm7ZpfmVhqjTNIf8";
 		if (isDebug)
 		{
 			supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";

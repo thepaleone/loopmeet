@@ -55,7 +55,7 @@ public sealed class AuthService
     {
         var authState = await _client.Auth.SignIn(Constants.Provider.Google, new SignInOptions
         {
-            FlowType = Constants.OAuthFlowType.Implicit,
+            FlowType = Constants.OAuthFlowType.PKCE,
             RedirectTo = OAuthRedirectUri
         });
 

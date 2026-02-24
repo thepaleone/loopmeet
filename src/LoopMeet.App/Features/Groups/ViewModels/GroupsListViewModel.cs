@@ -125,7 +125,7 @@ public sealed partial class GroupsListViewModel : ObservableObject
         {
             return Task.CompletedTask;
         }
-        
+
         return Shell.Current.GoToAsync("invitation-detail", new Dictionary<string, object>
         {
             ["invitation"] = invitation
@@ -219,10 +219,28 @@ public sealed partial class GroupsListViewModel : ObservableObject
             _logger.LogError(ex, "Failed to load groups list: request timed out.");
             await ShowApiUnavailableAndQuitAsync();
         }
+        catch (Refit.ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            if ((apiEx.ReasonPhrase ?? "").Contains("Unauthorized", StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogError(apiEx, "Failed to load groups list: unauthorized. Access token may be invalid or expired.");
+                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
+            }
+            else
+            {
+                _logger.LogError(apiEx, "Failed to load groups list: API returned unauthorized. Reason: {ReasonPhrase}", apiEx.ReasonPhrase);
+                await ShowApiUnavailableAndQuitAsync();
+            }
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load groups list.");
-            throw;
+            await Shell.Current.DisplayAlertAsync(
+                "Un Oh!", 
+                "Something went pear shaped while trying to load your page. To try to fix this please try logging in again.",
+                "OK");
+            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
+            
         }
         finally
         {
