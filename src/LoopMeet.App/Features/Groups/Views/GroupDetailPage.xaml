@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Groups.Views.GroupDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="{Binding GroupName}">
+
+    <VerticalStackLayout Padding="24" Spacing="12">
+        <Label Text="{Binding GroupName}" FontSize="24" />
+        <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
+        <Button Text="Invite Member" Command="{Binding InviteMemberCommand}" IsVisible="{Binding IsOwner}" />
+        <Label Text="Members" FontAttributes="Bold" />
+        <CollectionView ItemsSource="{Binding Members}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Label Text="{Binding DisplayName}" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </VerticalStackLayout>
+</ContentPage>

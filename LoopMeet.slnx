@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LoopMeet.Api/LoopMeet.Api.csproj" />
+    <Project Path="src/LoopMeet.App/LoopMeet.App.csproj" />
+    <Project Path="src/LoopMeet.Core/LoopMeet.Core.csproj" />
+    <Project Path="src/LoopMeet.Infrastructure/LoopMeet.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LoopMeet.Api.Tests/LoopMeet.Api.Tests.csproj" />
+    <Project Path="tests/LoopMeet.Core.Tests/LoopMeet.Core.Tests.csproj" />
+    <Project Path="tests/LoopMeet.Infrastructure.Tests/LoopMeet.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

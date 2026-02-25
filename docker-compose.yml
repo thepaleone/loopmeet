@@ -1,0 +1,26 @@
+services:
+  api:
+    build:
+      context: ./src
+      dockerfile: LoopMeet.Api/Dockerfile
+    ports:
+      - "5001:5001"
+    extra_hosts:
+      - "dev.loopmeet.io:192.168.127.254"
+    environment:
+      ASPNETCORE_URLS: http://0.0.0.0:${API_PORT:-5001}
+      SUPABASE__URL: http://dev.loopmeet.io:54321
+      SUPABASE__ANONKEY: ${SUPABASE_ANONKEY:?Supabase Anon Key is required}
+      SUPABASE__JWTISSUER: ${SUPABASE_JWTISSUER:?Supabase JWT Issuer is required}
+      SUPABASE__JWTAUDIENCE: ${SUPABASE_JWTAUDIENCE:-loopmeet-api}
+      SUPABASE__JWTKEY: ${SUPABASE_JWTKEY:?Supabase JWT Key is required}
+    volumes:
+      - ~/.microsoft/usersecrets/${API_ID:?Project ID is required}/secrets.json:/root/.microsoft/usersecrets/${API_ID}/secrets.json:ro
+      - type: volume
+        source: web-data
+        target: /root/.aspnet/DataProtection-Keys
+        volume:
+          subpath: DataProtection-Keys
+
+volumes:
+  web-data:

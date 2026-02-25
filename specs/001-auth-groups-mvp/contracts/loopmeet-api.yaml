@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: LoopMeet API
+  version: 1.0.0
+servers:
+  - url: https://api.loopmeet.example.com
+security:
+  - bearerAuth: []
+paths:
+  /groups:
+    get:
+      summary: List groups for the current user
+      responses:
+        "200":
+          description: Groups list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupsResponse"
+    post:
+      summary: Create a new group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGroupRequest"
+      responses:
+        "201":
+          description: Group created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "409":
+          description: Duplicate group name for owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /groups/{groupId}:
+    get:
+      summary: Get group details
+      parameters:
+        - $ref: "#/components/parameters/GroupId"
+      responses:
+        "200":
+          description: Group detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupDetail"
+        "404":
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      summary: Update group name
+      parameters:
+        - $ref: "#/components/parameters/GroupId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGroupRequest"
+      responses:
+        "200":
+          description: Group updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+        "403":
+          description: Not owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Duplicate group name for owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /groups/{groupId}/invitations:
+    post:
+      summary: Invite a user by email
+      parameters:
+        - $ref: "#/components/parameters/GroupId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInvitationRequest"
+      responses:
+        "201":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+        "409":
+          description: User already in group
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /invitations:
+    get:
+      summary: List pending invitations for current user
+      responses:
+        "200":
+          description: Invitations list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationsResponse"
+  /invitations/{invitationId}/accept:
+    post:
+      summary: Accept an invitation
+      parameters:
+        - $ref: "#/components/parameters/InvitationId"
+      responses:
+        "200":
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Invitation"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    GroupId:
+      name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+    InvitationId:
+      name: invitationId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        ownerUserId:
+          type: string
+      required:
+        - id
+        - name
+        - ownerUserId
+    GroupDetail:
+      allOf:
+        - $ref: "#/components/schemas/Group"
+        - type: object
+          properties:
+            members:
+              type: array
+              items:
+                $ref: "#/components/schemas/GroupMember"
+    GroupMember:
+      type: object
+      properties:
+        userId:
+          type: string
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [owner, member]
+      required:
+        - userId
+        - displayName
+        - role
+    Invitation:
+      type: object
+      properties:
+        id:
+          type: string
+        groupId:
+          type: string
+        invitedEmail:
+          type: string
+        status:
+          type: string
+          enum: [pending, accepted]
+      required:
+        - id
+        - groupId
+        - invitedEmail
+        - status
+    CreateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    UpdateGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    CreateInvitationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+      required:
+        - email
+    GroupsResponse:
+      type: object
+      properties:
+        owned:
+          type: array
+          items:
+            $ref: "#/components/schemas/Group"
+        member:
+          type: array
+          items:
+            $ref: "#/components/schemas/Group"
+        pendingInvitations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invitation"
+      required:
+        - owned
+        - member
+        - pendingInvitations
+    InvitationsResponse:
+      type: object
+      properties:
+        invitations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Invitation"
+      required:
+        - invitations
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
