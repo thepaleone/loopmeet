@@ -10,7 +10,7 @@ public static class SignedInTabs
     public const string GroupsShellPath = "//groups";
     public const string InvitationsShellPath = "//invitations";
 
-    public const string HomeIcon = "tab_home.svg";
-    public const string GroupsIcon = "tab_groups.svg";
-    public const string InvitationsIcon = "tab_invitations.svg";
+    public const string HomeIcon = "tab_home_fallback.png";
+    public const string GroupsIcon = "tab_groups_fallback.png";
+    public const string InvitationsIcon = "tab_invitations_fallback.png";
 }

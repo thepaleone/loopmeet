@@ -18,24 +18,30 @@
     <TabBar>
         <Tab
             Title="Home"
-            Icon="tab_home.svg">
+            Icon="tab_home_fallback.png">
             <ShellContent
+                Title="Home"
+                Icon="tab_home_fallback.png"
                 ContentTemplate="{DataTemplate home:HomePage}"
                 Route="home" />
         </Tab>
 
         <Tab
             Title="Groups"
-            Icon="tab_groups.svg">
+            Icon="tab_groups_fallback.png">
             <ShellContent
+                Title="Groups"
+                Icon="tab_groups_fallback.png"
                 ContentTemplate="{DataTemplate groups:GroupsListPage}"
                 Route="groups" />
         </Tab>
 
         <Tab
             Title="Invitations"
-            Icon="tab_invitations.svg">
+            Icon="tab_invitations_fallback.png">
             <ShellContent
+                Title="Invitations"
+                Icon="tab_invitations_fallback.png"
                 ContentTemplate="{DataTemplate inv:PendingInvitationsPage}"
                 Route="invitations" />
         </Tab>
