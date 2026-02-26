@@ -5,6 +5,7 @@ public class GroupSummaryResponse
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
     public Guid OwnerUserId { get; init; }
+    public int MemberCount { get; init; }
 }
 
 public sealed class CreateGroupRequest
