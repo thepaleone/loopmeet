@@ -25,6 +25,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             var settings = new Dictionary<string, string?>
             {
                 ["Supabase:Url"] = "http://localhost",
+                ["Supabase:AnonKey"] = "test-anon-key",
                 ["Supabase:ServiceKey"] = "test-key",
                 ["Supabase:JwtIssuer"] = "http://localhost"
             };
