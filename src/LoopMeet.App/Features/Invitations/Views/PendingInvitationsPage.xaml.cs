@@ -1,31 +1,25 @@
-using LoopMeet.App.Features.Groups.ViewModels;
+using LoopMeet.App.Features.Invitations.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace LoopMeet.App.Features.Groups.Views;
+namespace LoopMeet.App.Features.Invitations.Views;
 
-public partial class GroupsListPage : ContentPage
+public partial class PendingInvitationsPage : ContentPage
 {
     private CancellationTokenSource? _shimmerCts;
 
-    public GroupsListPage()
+    public PendingInvitationsPage()
     {
         InitializeComponent();
 
         var services = Application.Current?.Handler?.MauiContext?.Services;
-        BindingContext = services?.GetService<GroupsListViewModel>();
+        BindingContext = services?.GetService<PendingInvitationsViewModel>();
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
 
-        Shell.SetBackButtonBehavior(this, new BackButtonBehavior
-        {
-            IsEnabled = false,
-            IsVisible = false
-        });
-
-        if (BindingContext is GroupsListViewModel viewModel)
+        if (BindingContext is PendingInvitationsViewModel viewModel)
         {
             viewModel.LoadCommand.Execute(null);
         }
@@ -45,11 +39,8 @@ public partial class GroupsListPage : ContentPage
         _shimmerCts = new CancellationTokenSource();
         var token = _shimmerCts.Token;
 
-        _ = AnimateShimmer(OwnedShimmer1, token, 40);
-        _ = AnimateShimmer(OwnedShimmer2, token, 160);
-        _ = AnimateShimmer(OwnedShimmer3, token, 80);
-        _ = AnimateShimmer(MemberShimmer1, token, 60);
-        _ = AnimateShimmer(MemberShimmer2, token, 140);
+        _ = AnimateShimmer(InvitationsShimmer1, token);
+        _ = AnimateShimmer(InvitationsShimmer2, token, 120);
     }
 
     private void StopShimmer()

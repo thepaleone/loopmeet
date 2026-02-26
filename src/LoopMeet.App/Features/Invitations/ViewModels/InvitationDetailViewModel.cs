@@ -65,7 +65,7 @@ public sealed partial class InvitationDetailViewModel : ObservableObject
         try
         {
             await _invitationsApi.AcceptInvitationAsync(_invitationId);
-            await Shell.Current.GoToAsync("..");
+            await CloseAsync();
         }
         catch
         {
@@ -92,7 +92,7 @@ public sealed partial class InvitationDetailViewModel : ObservableObject
         try
         {
             await _invitationsApi.DeclineInvitationAsync(_invitationId);
-            await Shell.Current.GoToAsync("..");
+            await CloseAsync();
         }
         catch
         {

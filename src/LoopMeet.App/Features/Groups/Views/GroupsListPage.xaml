@@ -17,73 +17,6 @@
             </Grid>
             <Button Text="Create Group" Command="{Binding CreateGroupCommand}" />
 
-            <Label Text="Pending Invitations" FontAttributes="Bold" />
-            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingInvitations}">
-                <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="8">
-                    <Grid x:Name="InvitationsSkeletonRow1" HeightRequest="18">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
-                        </Border>
-                        <Border x:Name="InvitationsShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                    </Grid>
-                    <Grid x:Name="InvitationsSkeletonRow2" HeightRequest="18" Grid.Row="1">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
-                        </Border>
-                        <Border x:Name="InvitationsShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                    </Grid>
-                </Grid>
-            </VerticalStackLayout>
-            <CollectionView ItemsSource="{Binding PendingInvitations}">
-                <CollectionView.Triggers>
-                    <DataTrigger TargetType="CollectionView" Binding="{Binding IsLoadingInvitations}" Value="True">
-                        <Setter Property="IsVisible" Value="False" />
-                    </DataTrigger>
-                </CollectionView.Triggers>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <SwipeView IsEnabled="{OnIdiom Phone=True, Tablet=True, Desktop=False, TV=False}">
-                            <SwipeView.RightItems>
-                                <SwipeItems Mode="Execute">
-                                    <SwipeItem
-                                        Text="Accept"
-                                        BackgroundColor="#16A34A"
-                                        Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference GroupsPage}}"
-                                        CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
-                            <SwipeView.LeftItems>
-                                <SwipeItems Mode="Execute">
-                                    <SwipeItem
-                                        Text="Decline"
-                                        BackgroundColor="#DC2626"
-                                        Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference GroupsPage}}"
-                                        CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.LeftItems>
-                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
-                                <Grid.GestureRecognizers>
-                                    <TapGestureRecognizer
-                                        Command="{Binding BindingContext.ShowInvitationDetailsCommand, Source={x:Reference GroupsPage}}"
-                                        CommandParameter="{Binding .}" />
-                                </Grid.GestureRecognizers>
-                                <Label Text="{Binding GroupName}" VerticalOptions="Center" />
-                                <Button
-                                    Grid.Column="1"
-                                    Text="Accept"
-                                    IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}"
-                                    Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference GroupsPage}}"
-                                    CommandParameter="{Binding .}" />
-                            </Grid>
-                        </SwipeView>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
             <Label Text="Owned Groups" FontAttributes="Bold" />
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingOwnedGroups}">
                 <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="0" RowSpacing="8">
@@ -172,7 +105,7 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
 
-            <Label Text="You have no groups yet. Create one or join with an invitation." IsVisible="{Binding ShowEmptyState}" />
+            <Label Text="You have no groups yet. Create one to get started." IsVisible="{Binding ShowEmptyState}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

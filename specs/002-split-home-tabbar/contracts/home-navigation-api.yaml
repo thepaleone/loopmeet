@@ -1,0 +1,259 @@
+openapi: 3.0.3
+info:
+  title: LoopMeet API (Home Navigation Split Consumer Contract)
+  version: 1.0.0
+  description: >
+    Existing API endpoints consumed by the MAUI app after the Home/Groups/Invitations
+    tab split. This feature does not introduce backend endpoint or schema changes.
+servers:
+  - url: https://api.loopmeet.example.com
+security:
+  - bearerAuth: []
+paths:
+  /groups:
+    get:
+      tags: [Groups]
+      operationId: listGroupsForSignedInUser
+      summary: List groups for the current user
+      description: >
+        Returns owned groups, member groups, and pending invitations in the current API
+        response. For this feature, the Groups tab consumes group collections and the
+        Invitations tab uses /invitations for its primary list.
+      responses:
+        "200":
+          description: Groups response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /groups/{groupId}:
+    get:
+      tags: [Groups]
+      operationId: getGroupDetail
+      summary: Get group details
+      parameters:
+        - $ref: "#/components/parameters/GroupId"
+      responses:
+        "200":
+          description: Group detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GroupDetail"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /invitations:
+    get:
+      tags: [Invitations]
+      operationId: listPendingInvitationsForSignedInUser
+      summary: List pending invitations for the current user
+      responses:
+        "200":
+          description: Invitations response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /invitations/{invitationId}/accept:
+    post:
+      tags: [Invitations]
+      operationId: acceptInvitation
+      summary: Accept a pending invitation
+      parameters:
+        - $ref: "#/components/parameters/InvitationId"
+      responses:
+        "200":
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationSummary"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /invitations/{invitationId}/decline:
+    post:
+      tags: [Invitations]
+      operationId: declineInvitation
+      summary: Decline a pending invitation
+      parameters:
+        - $ref: "#/components/parameters/InvitationId"
+      responses:
+        "200":
+          description: Invitation declined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvitationSummary"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Invitation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    GroupId:
+      name: groupId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    InvitationId:
+      name: invitationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    GroupSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        ownerUserId:
+          type: string
+          format: uuid
+      required: [id, name, ownerUserId]
+    GroupMember:
+      type: object
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [owner, member]
+      required: [userId, displayName, role]
+    GroupDetail:
+      allOf:
+        - $ref: "#/components/schemas/GroupSummary"
+        - type: object
+          properties:
+            members:
+              type: array
+              items:
+                $ref: "#/components/schemas/GroupMember"
+          required: [members]
+    InvitationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        groupId:
+          type: string
+          format: uuid
+        groupName:
+          type: string
+        ownerName:
+          type: string
+        ownerEmail:
+          type: string
+          format: email
+        senderName:
+          type: string
+        senderEmail:
+          type: string
+          format: email
+        invitedEmail:
+          type: string
+          format: email
+        status:
+          type: string
+          enum: [pending, accepted, declined]
+        createdAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - groupId
+        - groupName
+        - ownerName
+        - ownerEmail
+        - senderName
+        - senderEmail
+        - invitedEmail
+        - status
+    GroupsResponse:
+      type: object
+      properties:
+        owned:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupSummary"
+        member:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupSummary"
+        pendingInvitations:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvitationSummary"
+      required: [owned, member, pendingInvitations]
+    InvitationsResponse:
+      type: object
+      properties:
+        invitations:
+          type: array
+          items:
+            $ref: "#/components/schemas/InvitationSummary"
+      required: [invitations]
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+      required: [message]

@@ -4,7 +4,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:auth="clr-namespace:LoopMeet.App.Features.Auth.Views"
+    xmlns:home="clr-namespace:LoopMeet.App.Features.Home.Views"
     xmlns:groups="clr-namespace:LoopMeet.App.Features.Groups.Views"
+    xmlns:inv="clr-namespace:LoopMeet.App.Features.Invitations.Views"
     Title="LoopMeet"
     FlyoutBehavior="Disabled">
 
@@ -13,9 +15,30 @@
         ContentTemplate="{DataTemplate auth:LoginPage}"
         Route="login" />
 
-    <ShellContent
-        Title="Groups"
-        ContentTemplate="{DataTemplate groups:GroupsListPage}"
-        Route="groups" />
+    <TabBar>
+        <Tab
+            Title="Home"
+            Icon="tab_home.svg">
+            <ShellContent
+                ContentTemplate="{DataTemplate home:HomePage}"
+                Route="home" />
+        </Tab>
+
+        <Tab
+            Title="Groups"
+            Icon="tab_groups.svg">
+            <ShellContent
+                ContentTemplate="{DataTemplate groups:GroupsListPage}"
+                Route="groups" />
+        </Tab>
+
+        <Tab
+            Title="Invitations"
+            Icon="tab_invitations.svg">
+            <ShellContent
+                ContentTemplate="{DataTemplate inv:PendingInvitationsPage}"
+                Route="invitations" />
+        </Tab>
+    </TabBar>
 
 </Shell>

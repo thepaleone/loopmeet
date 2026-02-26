@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Services;
 
 namespace LoopMeet.App.Features.Auth.ViewModels;
@@ -90,7 +91,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
                 Password = Password
             });
 
-            await Shell.Current.GoToAsync("//groups");
+            await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
         finally
         {
