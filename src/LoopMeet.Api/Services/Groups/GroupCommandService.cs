@@ -81,7 +81,8 @@ public sealed class GroupCommandService
         {
             Id = newGroup.Id,
             Name = newGroup.Name,
-            OwnerUserId = newGroup.OwnerUserId
+            OwnerUserId = newGroup.OwnerUserId,
+            MemberCount = 1
         });
     }
 
@@ -129,11 +130,14 @@ public sealed class GroupCommandService
             _logger.LogInformation("Rename group no-op {GroupId} by {UserId}", groupId, ownerUserId);
         }
 
+        var memberCount = (await _membershipRepository.ListMembersAsync(groupId, cancellationToken)).Count;
+
         return new GroupCommandResult(GroupCommandStatus.Success, new GroupSummaryResponse
         {
             Id = group.Id,
             Name = group.Name,
-            OwnerUserId = group.OwnerUserId
+            OwnerUserId = group.OwnerUserId,
+            MemberCount = memberCount
         });
     }
 }

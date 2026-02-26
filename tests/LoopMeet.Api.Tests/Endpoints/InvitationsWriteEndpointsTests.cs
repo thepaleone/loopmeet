@@ -27,6 +27,7 @@ public sealed class InvitationsWriteEndpointsTests
         _client.DefaultRequestHeaders.Add("X-Test-UserId", ownerId.ToString());
 
         SeedGroup(ownerId, groupId);
+        SeedUser(ownerId, "Owner Name", "owner@example.com");
 
         var response = await _client.PostAsJsonAsync($"/groups/{groupId}/invitations", new CreateInvitationRequest
         {
@@ -35,10 +36,23 @@ public sealed class InvitationsWriteEndpointsTests
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
+        var payload = await response.Content.ReadFromJsonAsync<InvitationResponse>();
+        Assert.NotNull(payload);
+        Assert.Equal(groupId, payload!.GroupId);
+        Assert.Equal("Group", payload.GroupName);
+        Assert.Equal("Owner Name", payload.OwnerName);
+        Assert.Equal("owner@example.com", payload.OwnerEmail);
+        Assert.Equal("Owner Name", payload.SenderName);
+        Assert.Equal("owner@example.com", payload.SenderEmail);
+        Assert.Equal("invitee@example.com", payload.InvitedEmail);
+        Assert.Equal("pending", payload.Status);
+        Assert.NotNull(payload.CreatedAt);
+
         lock (_store.SyncRoot)
         {
             Assert.Single(_store.Invitations);
             Assert.Equal(groupId, _store.Invitations[0].GroupId);
+            Assert.Equal(ownerId, _store.Invitations[0].InvitedByUserId);
         }
     }
 
@@ -93,6 +107,21 @@ public sealed class InvitationsWriteEndpointsTests
                 Id = groupId,
                 OwnerUserId = ownerId,
                 Name = "Group",
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
+            });
+        }
+    }
+
+    private void SeedUser(Guid userId, string displayName, string email)
+    {
+        lock (_store.SyncRoot)
+        {
+            _store.Users.Add(new User
+            {
+                Id = userId,
+                DisplayName = displayName,
+                Email = email,
                 CreatedAt = DateTimeOffset.UtcNow,
                 UpdatedAt = DateTimeOffset.UtcNow
             });
