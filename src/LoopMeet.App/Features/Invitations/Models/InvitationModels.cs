@@ -12,6 +12,11 @@ public sealed class InvitationSummary
     public string InvitedEmail { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public DateTimeOffset? CreatedAt { get; set; }
+
+    public string OwnerDisplayText =>
+        !string.IsNullOrWhiteSpace(OwnerName)
+            ? $"Owned by {OwnerName}"
+            : (!string.IsNullOrWhiteSpace(OwnerEmail) ? $"Owned by {OwnerEmail}" : "Group owner");
 }
 
 public sealed class InvitationsResponse

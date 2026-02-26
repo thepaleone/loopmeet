@@ -42,36 +42,87 @@
                         <SwipeView IsEnabled="{OnIdiom Phone=True, Tablet=True, Desktop=False, TV=False}">
                             <SwipeView.RightItems>
                                 <SwipeItems Mode="Execute">
-                                    <SwipeItem
-                                        Text="Accept"
+                                    <SwipeItemView
                                         BackgroundColor="#16A34A"
                                         Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
-                                        CommandParameter="{Binding .}" />
+                                        CommandParameter="{Binding .}">
+                                        <Grid Padding="14,0">
+                                            <HorizontalStackLayout
+                                                HorizontalOptions="End"
+                                                VerticalOptions="Center"
+                                                Spacing="6">
+                                                <Label
+                                                    Text="Accept"
+                                                    FontAttributes="Bold"
+                                                    TextColor="White" />
+                                                <Label
+                                                    Text="✓"
+                                                    FontSize="16"
+                                                    TextColor="White" />
+                                            </HorizontalStackLayout>
+                                        </Grid>
+                                    </SwipeItemView>
                                 </SwipeItems>
                             </SwipeView.RightItems>
                             <SwipeView.LeftItems>
                                 <SwipeItems Mode="Execute">
-                                    <SwipeItem
-                                        Text="Decline"
+                                    <SwipeItemView
                                         BackgroundColor="#DC2626"
                                         Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
-                                        CommandParameter="{Binding .}" />
+                                        CommandParameter="{Binding .}">
+                                        <Grid Padding="14,0">
+                                            <HorizontalStackLayout
+                                                HorizontalOptions="Start"
+                                                VerticalOptions="Center"
+                                                Spacing="6">
+                                                <Label
+                                                    Text="🗑"
+                                                    FontSize="16"
+                                                    TextColor="White" />
+                                                <Label
+                                                    Text="Decline"
+                                                    FontAttributes="Bold"
+                                                    TextColor="White" />
+                                            </HorizontalStackLayout>
+                                        </Grid>
+                                    </SwipeItemView>
                                 </SwipeItems>
                             </SwipeView.LeftItems>
-                            <Grid ColumnDefinitions="*,Auto" Padding="0,4">
-                                <Grid.GestureRecognizers>
+                            <Border
+                                Style="{StaticResource BubbleCardCompactBorderStyle}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                                Padding="12,10"
+                                Margin="0,4">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14,18,16,20" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding BindingContext.ShowInvitationDetailsCommand, Source={x:Reference PendingInvitationsPageRoot}}"
                                         CommandParameter="{Binding .}" />
-                                </Grid.GestureRecognizers>
-                                <Label Text="{Binding GroupName}" VerticalOptions="Center" />
-                                <Button
-                                    Grid.Column="1"
-                                    Text="Accept"
-                                    IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}"
-                                    Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
-                                    CommandParameter="{Binding .}" />
-                            </Grid>
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label
+                                            Text="{Binding GroupName}"
+                                            FontAttributes="Bold"
+                                            FontSize="15"
+                                            LineBreakMode="TailTruncation" />
+                                        <Label
+                                            Text="{Binding OwnerDisplayText}"
+                                            FontSize="12"
+                                            LineBreakMode="TailTruncation"
+                                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                                    </VerticalStackLayout>
+                                    <Button
+                                        Grid.Column="1"
+                                        Text="Accept"
+                                        VerticalOptions="Center"
+                                        IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}"
+                                        Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                        CommandParameter="{Binding .}" />
+                                </Grid>
+                            </Border>
                         </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

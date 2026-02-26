@@ -7,6 +7,9 @@ public class GroupSummary
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public Guid OwnerUserId { get; set; }
+    public int MemberCount { get; set; }
+
+    public string MemberCountText => MemberCount == 1 ? "1 member" : $"{MemberCount} members";
 }
 
 public sealed class CreateGroupRequest
