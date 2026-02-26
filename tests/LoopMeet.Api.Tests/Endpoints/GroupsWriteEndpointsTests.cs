@@ -36,6 +36,7 @@ public sealed class GroupsWriteEndpointsTests
         Assert.NotNull(payload);
         Assert.Equal("Weekenders", payload!.Name);
         Assert.Equal(ownerId, payload.OwnerUserId);
+        Assert.Equal(1, payload.MemberCount);
 
         lock (_store.SyncRoot)
         {
@@ -73,6 +74,26 @@ public sealed class GroupsWriteEndpointsTests
 
         var groupId = await SeedGroupAsync(ownerId, "Original");
 
+        lock (_store.SyncRoot)
+        {
+            _store.Memberships.Add(new Membership
+            {
+                Id = Guid.NewGuid(),
+                GroupId = groupId,
+                UserId = ownerId,
+                Role = "owner",
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+            _store.Memberships.Add(new Membership
+            {
+                Id = Guid.NewGuid(),
+                GroupId = groupId,
+                UserId = Guid.NewGuid(),
+                Role = "member",
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+        }
+
         var request = new HttpRequestMessage(HttpMethod.Patch, $"/groups/{groupId}")
         {
             Content = JsonContent.Create(new UpdateGroupRequest
@@ -88,6 +109,7 @@ public sealed class GroupsWriteEndpointsTests
         var payload = await response.Content.ReadFromJsonAsync<GroupSummaryResponse>();
         Assert.NotNull(payload);
         Assert.Equal("Updated", payload!.Name);
+        Assert.Equal(2, payload.MemberCount);
 
         lock (_store.SyncRoot)
         {
