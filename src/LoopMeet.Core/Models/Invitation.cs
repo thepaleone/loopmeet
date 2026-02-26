@@ -4,6 +4,7 @@ public sealed class Invitation
 {
     public Guid Id { get; set; }
     public Guid GroupId { get; set; }
+    public Guid? InvitedByUserId { get; set; }
     public string InvitedEmail { get; set; } = string.Empty;
     public Guid? InvitedUserId { get; set; }
     public string Status { get; set; } = string.Empty;

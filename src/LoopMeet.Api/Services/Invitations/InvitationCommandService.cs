@@ -87,6 +87,7 @@ public sealed class InvitationCommandService
         {
             Id = Guid.NewGuid(),
             GroupId = groupId,
+            InvitedByUserId = ownerUserId,
             InvitedEmail = trimmedEmail,
             InvitedUserId = existingUser?.Id,
             Status = "pending",
@@ -101,12 +102,21 @@ public sealed class InvitationCommandService
             groupId,
             ownerUserId);
 
+        var owner = await _userRepository.GetByIdAsync(ownerUserId, cancellationToken);
+
         return new InvitationCommandResult(InvitationCommandStatus.Success, new InvitationResponse
         {
             Id = invitation.Id,
             GroupId = invitation.GroupId,
+            GroupName = group.Name,
+            OwnerName = owner?.DisplayName ?? string.Empty,
+            OwnerEmail = owner?.Email ?? string.Empty,
+            // Current business rule: only the owner can invite members.
+            SenderName = owner?.DisplayName ?? string.Empty,
+            SenderEmail = owner?.Email ?? string.Empty,
             InvitedEmail = invitation.InvitedEmail,
-            Status = invitation.Status
+            Status = invitation.Status,
+            CreatedAt = invitation.CreatedAt
         });
     }
 

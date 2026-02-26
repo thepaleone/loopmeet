@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Invitations.Views.PendingInvitationsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="PendingInvitationsPageRoot"
+    Title="Invitations">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12">
+            <Label Text="Pending Invitations" FontSize="20" FontAttributes="Bold" />
+
+            <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoading}">
+                <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="8">
+                    <Grid HeightRequest="18">
+                        <Border BackgroundColor="#E2E8F0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+                        </Border>
+                        <Border x:Name="InvitationsShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                    </Grid>
+                    <Grid HeightRequest="18" Grid.Row="1">
+                        <Border BackgroundColor="#E2E8F0">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="6" />
+                            </Border.StrokeShape>
+                        </Border>
+                        <Border x:Name="InvitationsShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                    </Grid>
+                </Grid>
+            </VerticalStackLayout>
+
+            <CollectionView ItemsSource="{Binding PendingInvitations}">
+                <CollectionView.Triggers>
+                    <DataTrigger TargetType="CollectionView" Binding="{Binding IsLoading}" Value="True">
+                        <Setter Property="IsVisible" Value="False" />
+                    </DataTrigger>
+                </CollectionView.Triggers>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <SwipeView IsEnabled="{OnIdiom Phone=True, Tablet=True, Desktop=False, TV=False}">
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItemView
+                                        BackgroundColor="#16A34A"
+                                        Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                        CommandParameter="{Binding .}">
+                                        <Grid Padding="14,0">
+                                            <HorizontalStackLayout
+                                                HorizontalOptions="End"
+                                                VerticalOptions="Center"
+                                                Spacing="6">
+                                                <Label
+                                                    Text="Accept"
+                                                    FontAttributes="Bold"
+                                                    TextColor="White" />
+                                                <Label
+                                                    Text="✓"
+                                                    FontSize="16"
+                                                    TextColor="White" />
+                                            </HorizontalStackLayout>
+                                        </Grid>
+                                    </SwipeItemView>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItemView
+                                        BackgroundColor="#DC2626"
+                                        Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                        CommandParameter="{Binding .}">
+                                        <Grid Padding="14,0">
+                                            <HorizontalStackLayout
+                                                HorizontalOptions="Start"
+                                                VerticalOptions="Center"
+                                                Spacing="6">
+                                                <Label
+                                                    Text="🗑"
+                                                    FontSize="16"
+                                                    TextColor="White" />
+                                                <Label
+                                                    Text="Decline"
+                                                    FontAttributes="Bold"
+                                                    TextColor="White" />
+                                            </HorizontalStackLayout>
+                                        </Grid>
+                                    </SwipeItemView>
+                                </SwipeItems>
+                            </SwipeView.LeftItems>
+                            <Border
+                                Style="{StaticResource BubbleCardCompactBorderStyle}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                                Padding="12,10"
+                                Margin="0,4">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14,18,16,20" />
+                                </Border.StrokeShape>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.ShowInvitationDetailsCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label
+                                            Text="{Binding GroupName}"
+                                            FontAttributes="Bold"
+                                            FontSize="15"
+                                            LineBreakMode="TailTruncation" />
+                                        <Label
+                                            Text="{Binding OwnerDisplayText}"
+                                            FontSize="12"
+                                            LineBreakMode="TailTruncation"
+                                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
+                                    </VerticalStackLayout>
+                                    <Button
+                                        Grid.Column="1"
+                                        Text="Accept"
+                                        VerticalOptions="Center"
+                                        IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}"
+                                        Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                        CommandParameter="{Binding .}" />
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label
+                Text="You do not have any pending invitations."
+                IsVisible="{Binding ShowEmptyState}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

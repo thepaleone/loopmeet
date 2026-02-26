@@ -75,6 +75,7 @@ public sealed class InvitationRepository : IInvitationRepository
         {
             Id = record.Id,
             GroupId = record.GroupId,
+            InvitedByUserId = record.InvitedByUserId,
             InvitedEmail = record.InvitedEmail,
             InvitedUserId = record.InvitedUserId,
             Status = record.Status,
@@ -89,6 +90,7 @@ public sealed class InvitationRepository : IInvitationRepository
         {
             Id = invitation.Id,
             GroupId = invitation.GroupId,
+            InvitedByUserId = invitation.InvitedByUserId,
             InvitedEmail = invitation.InvitedEmail,
             InvitedUserId = invitation.InvitedUserId,
             Status = invitation.Status,

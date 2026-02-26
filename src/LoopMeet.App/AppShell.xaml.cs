@@ -1,5 +1,6 @@
 ﻿using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Auth.Views;
+using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.Views;
 using Microsoft.Maui.ApplicationModel;
@@ -44,7 +45,7 @@ public partial class AppShell : Shell
 			var session = await authService.RestoreSessionAsync();
 			if (session is not null && !string.IsNullOrWhiteSpace(session.AccessToken))
 			{
-				await MainThread.InvokeOnMainThreadAsync(() => GoToAsync("//groups"));
+				await MainThread.InvokeOnMainThreadAsync(() => GoToAsync(SignedInTabs.HomeShellPath));
 			}
 		}
 		catch (Exception ex)

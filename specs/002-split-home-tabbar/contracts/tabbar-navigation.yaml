@@ -1,0 +1,94 @@
+version: 1
+feature: home-tab-navigation-split
+status: planned
+description: >
+  UI navigation contract for the signed-in MAUI Shell tab bar introduced by the
+  Home Tab Navigation Split feature.
+
+signedInTabBar:
+  visibleWhen: authenticated
+  defaultTabId: home
+  layout:
+    iconPlacement: above-title
+    titleVisible: true
+  iconPolicy:
+    preferredStyle: emoji-static
+    allowedFallbacks:
+      - image-asset
+      - font-glyph
+    disallowedForInitialImplementation:
+      - animated-gif
+  tabs:
+    - id: home
+      title: Home
+      route: //home
+      icon:
+        semantic: home
+        style: emoji-static
+      contentType: placeholder
+      dataDependencies: []
+    - id: groups
+      title: Groups
+      route: //groups
+      icon:
+        semantic: groups
+        style: emoji-static
+      contentType: groups-list
+      dataDependencies:
+        - api:listGroupsForSignedInUser
+    - id: invitations
+      title: Invitations
+      route: //invitations
+      icon:
+        semantic: invitation
+        style: emoji-static
+      contentType: pending-invitations-list
+      dataDependencies:
+        - api:listPendingInvitationsForSignedInUser
+
+screenResponsibilities:
+  home:
+    includes:
+      - placeholder-title
+      - placeholder-supporting-text
+    excludes:
+      - groups-list
+      - invitations-list
+  groups:
+    includes:
+      - owned-groups-list
+      - member-groups-list
+      - groups-empty-state
+    excludes:
+      - pending-invitations-list
+  invitations:
+    includes:
+      - pending-invitations-list
+      - invitation-actions-accept-decline
+      - invitations-empty-state
+    excludes:
+      - owned-groups-list
+      - member-groups-list
+
+actions:
+  openGroupDetail:
+    sourceTab: groups
+    route: group-detail
+    apiDependency: getGroupDetail
+  openInvitationDetail:
+    sourceTab: invitations
+    route: invitation-detail
+    apiDependency: none-required-for-route
+  acceptInvitation:
+    sourceTab: invitations
+    apiDependency: acceptInvitation
+    postAction: refresh-invitations-list
+  declineInvitation:
+    sourceTab: invitations
+    apiDependency: declineInvitation
+    postAction: refresh-invitations-list
+
+reliabilityRules:
+  - Tab switching must not require re-authentication.
+  - API errors must surface as existing user-friendly error handling, not blank screens.
+  - Invitations list refresh after accept/decline must remove completed pending invitation entries.

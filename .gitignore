@@ -73,3 +73,7 @@ Temporary Items
 packages/
 .env*
 signing_keys.json
+Thumbs.db
+*.tmp
+*.swp
+.idea/

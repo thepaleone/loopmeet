@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Groups.Models;
-using LoopMeet.App.Features.Invitations.Models;
 using LoopMeet.App.Services;
 using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel;
@@ -21,21 +20,16 @@ public sealed partial class GroupsListViewModel : ObservableObject
 {
     private readonly AuthService _authService;
     private readonly GroupsApi _groupsApi;
-    private readonly InvitationsApi _invitationsApi;
     private readonly ILogger<GroupsListViewModel> _logger;
 
     public ObservableCollection<GroupSummary> OwnedGroups { get; } = new();
     public ObservableCollection<GroupSummary> MemberGroups { get; } = new();
-    public ObservableCollection<InvitationSummary> PendingInvitations { get; } = new();
 
     [ObservableProperty]
     private bool _isBusy;
 
     [ObservableProperty]
     private bool _showEmptyState;
-
-    [ObservableProperty]
-    private bool _isLoadingInvitations;
 
     [ObservableProperty]
     private bool _isLoadingOwnedGroups;
@@ -46,12 +40,10 @@ public sealed partial class GroupsListViewModel : ObservableObject
     public GroupsListViewModel(
         AuthService authService,
         GroupsApi groupsApi,
-        InvitationsApi invitationsApi,
         ILogger<GroupsListViewModel> logger)
     {
         _authService = authService;
         _groupsApi = groupsApi;
-        _invitationsApi = invitationsApi;
         _logger = logger;
     }
 
@@ -74,62 +66,6 @@ public sealed partial class GroupsListViewModel : ObservableObject
         }
 
         await Shell.Current.GoToAsync("//login");
-    }
-
-    [RelayCommand]
-    private async Task AcceptInvitationAsync(InvitationSummary? invitation)
-    {
-        if (invitation is null || IsBusy)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            await _invitationsApi.AcceptInvitationAsync(invitation.Id);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-
-        await LoadCoreAsync();
-    }
-
-    [RelayCommand]
-    private async Task DeclineInvitationAsync(InvitationSummary? invitation)
-    {
-        if (invitation is null || IsBusy)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            await _invitationsApi.DeclineInvitationAsync(invitation.Id);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-
-        await LoadCoreAsync();
-    }
-
-    [RelayCommand]
-    private Task ShowInvitationDetailsAsync(InvitationSummary? invitation)
-    {
-        if (invitation is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        return Shell.Current.GoToAsync("invitation-detail", new Dictionary<string, object>
-        {
-            ["invitation"] = invitation
-        });
     }
 
     [RelayCommand]
@@ -166,16 +102,14 @@ public sealed partial class GroupsListViewModel : ObservableObject
     private async Task LoadCoreAsync()
     {
         IsBusy = true;
-        IsLoadingInvitations = true;
         IsLoadingOwnedGroups = true;
         IsLoadingMemberGroups = true;
         try
         {
-            _logger.LogInformation("Loading groups list...");
+            _logger.LogInformation("Loading groups tab list...");
             var response = await _groupsApi.GetGroupsAsync();
             OwnedGroups.Clear();
             MemberGroups.Clear();
-            PendingInvitations.Clear();
 
             if (response?.Owned is not null)
             {
@@ -193,51 +127,42 @@ public sealed partial class GroupsListViewModel : ObservableObject
                 }
             }
 
-            if (response?.PendingInvitations is not null)
-            {
-                foreach (var invitation in response.PendingInvitations)
-                {
-                    PendingInvitations.Add(invitation);
-                }
-            }
-
             ShowEmptyState = OwnedGroups.Count == 0 && MemberGroups.Count == 0;
 
             _logger.LogInformation(
-                "Groups list loaded. Owned: {OwnedCount}, Member: {MemberCount}, Invitations: {InvitationCount}",
+                "Groups tab list loaded. Owned: {OwnedCount}, Member: {MemberCount}",
                 OwnedGroups.Count,
-                MemberGroups.Count,
-                PendingInvitations.Count);
+                MemberGroups.Count);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Failed to load groups list: API unavailable.");
+            _logger.LogError(ex, "Failed to load groups tab list: API unavailable.");
             await ShowApiUnavailableAndQuitAsync();
         }
         catch (TaskCanceledException ex)
         {
-            _logger.LogError(ex, "Failed to load groups list: request timed out.");
+            _logger.LogError(ex, "Failed to load groups tab list: request timed out.");
             await ShowApiUnavailableAndQuitAsync();
         }
         catch (Refit.ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             if ((apiEx.ReasonPhrase ?? "").Contains("Unauthorized", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogError(apiEx, "Failed to load groups list: unauthorized. Access token may be invalid or expired.");
+                _logger.LogError(apiEx, "Failed to load groups tab list: unauthorized. Access token may be invalid or expired.");
                 await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
             }
             else
             {
-                _logger.LogError(apiEx, "Failed to load groups list: API returned unauthorized. Reason: {ReasonPhrase}", apiEx.ReasonPhrase);
+                _logger.LogError(apiEx, "Failed to load groups tab list: API returned unauthorized. Reason: {ReasonPhrase}", apiEx.ReasonPhrase);
                 await ShowApiUnavailableAndQuitAsync();
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load groups list.");
+            _logger.LogError(ex, "Failed to load groups tab list.");
             await Shell.Current.DisplayAlertAsync(
                 "Un Oh!", 
-                "Something went pear shaped while trying to load your page. To try to fix this please try logging in again.",
+                "Something went pear shaped while trying to load your groups. To try to fix this please try logging in again.",
                 "OK");
             await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
             
@@ -245,7 +170,6 @@ public sealed partial class GroupsListViewModel : ObservableObject
         finally
         {
             IsBusy = false;
-            IsLoadingInvitations = false;
             IsLoadingOwnedGroups = false;
             IsLoadingMemberGroups = false;
         }

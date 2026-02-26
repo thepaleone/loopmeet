@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
 using Refit;
@@ -58,7 +59,7 @@ public sealed partial class LoginViewModel : ObservableObject
             var session = await _authService.SignInWithEmailAsync(Email, Password);
             if (!string.IsNullOrWhiteSpace(session.AccessToken))
             {
-                await Shell.Current.GoToAsync("//groups");
+                await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
 
@@ -130,12 +131,12 @@ public sealed partial class LoginViewModel : ObservableObject
             var profile = await TryGetProfileAsync();
             if (profile is not null)
             {
-                await Shell.Current.GoToAsync("//groups");
+                await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
 
             await TryCreateProfileFromOAuthAsync(authResult);
-            await Shell.Current.GoToAsync("//groups");
+            await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
         catch (Exception ex)
         {

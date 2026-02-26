@@ -36,15 +36,21 @@ public sealed class GroupQueryService
         {
             var ownedGroups = await _groupRepository.ListOwnedAsync(userId, cancellationToken);
             var memberGroups = await _groupRepository.ListMemberAsync(userId, cancellationToken);
+            var allGroups = ownedGroups
+                .Concat(memberGroups)
+                .GroupBy(group => group.Id)
+                .Select(group => group.First())
+                .ToList();
+            var memberCounts = await GetMemberCountsAsync(allGroups, cancellationToken);
 
             var owned = ownedGroups
-                .Select(MapSummary)
+                .Select(group => MapSummary(group, memberCounts))
                 .OrderBy(group => group.Name)
                 .ToList();
 
             var member = memberGroups
                 .Where(group => group.OwnerUserId != userId)
-                .Select(MapSummary)
+                .Select(group => MapSummary(group, memberCounts))
                 .OrderBy(group => group.Name)
                 .ToList();
 
@@ -94,18 +100,36 @@ public sealed class GroupQueryService
                 Id = group.Id,
                 Name = group.Name,
                 OwnerUserId = group.OwnerUserId,
+                MemberCount = members.Count,
                 Members = members
             };
         });
     }
 
-    private static GroupSummaryResponse MapSummary(Group group)
+    private async Task<Dictionary<Guid, int>> GetMemberCountsAsync(
+        IReadOnlyList<Group> groups,
+        CancellationToken cancellationToken)
+    {
+        var tasks = groups
+            .Select(async group =>
+            {
+                var memberships = await _membershipRepository.ListMembersAsync(group.Id, cancellationToken);
+                return (group.Id, Count: memberships.Count);
+            })
+            .ToList();
+
+        var counts = await Task.WhenAll(tasks);
+        return counts.ToDictionary(item => item.Id, item => item.Count);
+    }
+
+    private static GroupSummaryResponse MapSummary(Group group, IReadOnlyDictionary<Guid, int> memberCounts)
     {
         return new GroupSummaryResponse
         {
             Id = group.Id,
             Name = group.Name,
-            OwnerUserId = group.OwnerUserId
+            OwnerUserId = group.OwnerUserId,
+            MemberCount = memberCounts.TryGetValue(group.Id, out var count) ? count : 0
         };
     }
 }

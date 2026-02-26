@@ -45,8 +45,6 @@ public partial class GroupsListPage : ContentPage
         _shimmerCts = new CancellationTokenSource();
         var token = _shimmerCts.Token;
 
-        _ = AnimateShimmer(InvitationsShimmer1, token);
-        _ = AnimateShimmer(InvitationsShimmer2, token, 120);
         _ = AnimateShimmer(OwnedShimmer1, token, 40);
         _ = AnimateShimmer(OwnedShimmer2, token, 160);
         _ = AnimateShimmer(OwnedShimmer3, token, 80);

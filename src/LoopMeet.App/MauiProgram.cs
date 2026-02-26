@@ -1,6 +1,8 @@
 ﻿using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Auth.ViewModels;
 using LoopMeet.App.Features.Auth.Views;
+using LoopMeet.App.Features.Home.ViewModels;
+using LoopMeet.App.Features.Home.Views;
 using LoopMeet.App.Features.Groups.ViewModels;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.ViewModels;
@@ -80,20 +82,24 @@ public static class MauiProgram
 		builder.Services.AddSingleton<UsersApi>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();
+		builder.Services.AddTransient<HomeViewModel>();
 		builder.Services.AddTransient<GroupsListViewModel>();
 		builder.Services.AddTransient<GroupDetailViewModel>();
 		builder.Services.AddTransient<CreateGroupViewModel>();
 		builder.Services.AddTransient<EditGroupViewModel>();
 		builder.Services.AddTransient<InviteMemberViewModel>();
 		builder.Services.AddTransient<InvitationDetailViewModel>();
+		builder.Services.AddTransient<PendingInvitationsViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
+		builder.Services.AddTransient<HomePage>();
 		builder.Services.AddTransient<GroupsListPage>();
 		builder.Services.AddTransient<GroupDetailPage>();
 		builder.Services.AddTransient<CreateGroupPage>();
 		builder.Services.AddTransient<EditGroupPage>();
 		builder.Services.AddTransient<InviteMemberPage>();
 		builder.Services.AddTransient<InvitationDetailPage>();
+		builder.Services.AddTransient<PendingInvitationsPage>();
 
 		return builder.Build();
 	}

@@ -41,7 +41,15 @@ public sealed partial class InvitationDetailViewModel : ObservableObject
         _invitationId = invitation.Id;
         GroupName = invitation.GroupName;
         OwnerDisplay = FormatPerson(invitation.OwnerName, invitation.OwnerEmail);
-        SenderDisplay = FormatPerson(invitation.SenderName, invitation.SenderEmail);
+        var senderName = invitation.SenderName;
+        var senderEmail = invitation.SenderEmail;
+        if (string.IsNullOrWhiteSpace(senderName) && string.IsNullOrWhiteSpace(senderEmail))
+        {
+            senderName = invitation.OwnerName;
+            senderEmail = invitation.OwnerEmail;
+        }
+
+        SenderDisplay = FormatPerson(senderName, senderEmail);
         SentDisplay = invitation.CreatedAt?.ToLocalTime().ToString("f") ?? "Unknown";
     }
 
@@ -65,7 +73,7 @@ public sealed partial class InvitationDetailViewModel : ObservableObject
         try
         {
             await _invitationsApi.AcceptInvitationAsync(_invitationId);
-            await Shell.Current.GoToAsync("..");
+            await CloseAsync();
         }
         catch
         {
@@ -92,7 +100,7 @@ public sealed partial class InvitationDetailViewModel : ObservableObject
         try
         {
             await _invitationsApi.DeclineInvitationAsync(_invitationId);
-            await Shell.Current.GoToAsync("..");
+            await CloseAsync();
         }
         catch
         {

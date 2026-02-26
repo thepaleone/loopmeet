@@ -39,8 +39,17 @@ public sealed class InvitationQueryService
             var groups = await _groupRepository.ListByIdsAsync(groupIds, cancellationToken);
             var groupLookup = groups.ToDictionary(group => group.Id, group => group);
             var ownerIds = groups.Select(group => group.OwnerUserId).Distinct().ToList();
-            var owners = await _userRepository.ListByIdsAsync(ownerIds, cancellationToken);
-            var ownerLookup = owners.ToDictionary(owner => owner.Id, owner => owner);
+            var senderIds = invitations
+                .Where(invitation => invitation.InvitedByUserId.HasValue)
+                .Select(invitation => invitation.InvitedByUserId!.Value)
+                .Distinct()
+                .ToList();
+            var lookupUserIds = ownerIds
+                .Concat(senderIds)
+                .Distinct()
+                .ToList();
+            var users = await _userRepository.ListByIdsAsync(lookupUserIds, cancellationToken);
+            var userLookup = users.ToDictionary(user => user.Id, user => user);
             var responses = invitations
                 .OrderBy(invitation => invitation.CreatedAt)
                 .Select(invitation =>
@@ -49,8 +58,15 @@ public sealed class InvitationQueryService
                     User? owner = null;
                     if (group is not null)
                     {
-                        ownerLookup.TryGetValue(group.OwnerUserId, out owner);
+                        userLookup.TryGetValue(group.OwnerUserId, out owner);
                     }
+                    User? sender = null;
+                    if (invitation.InvitedByUserId.HasValue)
+                    {
+                        userLookup.TryGetValue(invitation.InvitedByUserId.Value, out sender);
+                    }
+
+                    sender ??= owner;
 
                     return new InvitationResponse
                     {
@@ -59,8 +75,8 @@ public sealed class InvitationQueryService
                         GroupName = group?.Name ?? string.Empty,
                         OwnerName = owner?.DisplayName ?? string.Empty,
                         OwnerEmail = owner?.Email ?? string.Empty,
-                        SenderName = owner?.DisplayName ?? string.Empty,
-                        SenderEmail = owner?.Email ?? string.Empty,
+                        SenderName = sender?.DisplayName ?? string.Empty,
+                        SenderEmail = sender?.Email ?? string.Empty,
                         InvitedEmail = invitation.InvitedEmail,
                         Status = invitation.Status,
                         CreatedAt = invitation.CreatedAt

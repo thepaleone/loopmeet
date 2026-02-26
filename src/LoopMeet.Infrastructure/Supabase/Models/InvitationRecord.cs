@@ -12,6 +12,9 @@ public sealed class InvitationRecord : BaseModel
     [Column("group_id")]
     public Guid GroupId { get; set; }
 
+    [Column("invited_by_user_id")]
+    public Guid? InvitedByUserId { get; set; }
+
     [Column("invited_email")]
     public string InvitedEmail { get; set; } = string.Empty;
 

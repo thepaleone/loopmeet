@@ -19,23 +19,16 @@
         Padding="30">
         <Border
             x:Name="Card"
-            BackgroundColor="White"
             HorizontalOptions="Center"
             MaximumWidthRequest="420"
             Padding="20"
             VerticalOptions="Center"
             Opacity="1"
-            Scale="0.96">
+            Scale="0.96"
+            Style="{StaticResource BubbleCardBorderStyle}">
             <Border.StrokeShape>
-                <RoundRectangle CornerRadius="16" />
+                <RoundRectangle CornerRadius="18,24,20,26" />
             </Border.StrokeShape>
-            <Border.Shadow>
-                <Shadow
-                    Brush="#1F000000"
-                    Offset="0,6"
-                    Radius="16"
-                    Opacity="0.6" />
-            </Border.Shadow>
             <Border.GestureRecognizers>
                 <TapGestureRecognizer />
             </Border.GestureRecognizers>
@@ -54,16 +47,13 @@
                     </Label>
                 </Grid>
 
-                <Border BackgroundColor="#F8FAFC" Stroke="#F8FAFC" Padding="12">
-                    <Border.Shadow>
-                        <Shadow
-                            Brush="#C0C0C0"
-                            Offset="0,2"
-                            Radius="12"
-                            Opacity="0.5" />
-                    </Border.Shadow>
+                <Border
+                    Style="{StaticResource BubbleCardCompactBorderStyle}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                    Padding="12">
                     <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="12" />
+                        <RoundRectangle CornerRadius="14,18,16,20" />
                     </Border.StrokeShape>
                     <VerticalStackLayout Spacing="12">
                         <VerticalStackLayout Spacing="6">
@@ -94,9 +84,13 @@
                     IsVisible="{Binding ShowError}" />
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                    <Border Stroke="#E2E8F0" BackgroundColor="#F8FAFC" Padding="12">
+                    <Border
+                        Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                        Padding="12">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10" />
+                            <RoundRectangle CornerRadius="12,14,12,16" />
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AcceptCommand}" />
@@ -106,9 +100,14 @@
                             <Label Text="Accept" FontAttributes="Bold" TextColor="#16A34A" />
                         </HorizontalStackLayout>
                     </Border>
-                    <Border Grid.Column="1" Stroke="#E2E8F0" BackgroundColor="#F8FAFC" Padding="12">
+                    <Border
+                        Grid.Column="1"
+                        Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                        Padding="12">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10" />
+                            <RoundRectangle CornerRadius="12,14,12,16" />
                         </Border.StrokeShape>
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding DeclineCommand}" />
