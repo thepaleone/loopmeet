@@ -1,0 +1,97 @@
+name: Build
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build-dotnet:
+    name: Build API and Libraries
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/packages.lock.json
+            global.json
+
+      - name: Restore backend/library projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in \
+            src/LoopMeet.Core/LoopMeet.Core.csproj \
+            src/LoopMeet.Infrastructure/LoopMeet.Infrastructure.csproj \
+            src/LoopMeet.Api/LoopMeet.Api.csproj; do
+            echo "Restoring $project"
+            dotnet restore "$project"
+          done
+
+      - name: Build backend/library projects
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in \
+            src/LoopMeet.Core/LoopMeet.Core.csproj \
+            src/LoopMeet.Infrastructure/LoopMeet.Infrastructure.csproj \
+            src/LoopMeet.Api/LoopMeet.Api.csproj; do
+            echo "Building $project"
+            dotnet build "$project" --configuration Release --no-restore
+          done
+
+  build-maui-android:
+    name: Compile MAUI App (Android)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java (JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+          cache: true
+          cache-dependency-path: |
+            **/*.csproj
+            **/packages.lock.json
+            global.json
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Restore MAUI app
+        run: dotnet restore src/LoopMeet.App/LoopMeet.App.csproj
+
+      - name: Compile MAUI app (Android)
+        run: dotnet build src/LoopMeet.App/LoopMeet.App.csproj -f net10.0-android -t:Compile --configuration Release --no-restore
