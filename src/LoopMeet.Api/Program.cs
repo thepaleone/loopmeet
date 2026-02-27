@@ -27,6 +27,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
 
 builder.Services.AddOpenApi();
 
+builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 var redisConnection = builder.Configuration["Redis:ConnectionString"];
 if (!string.IsNullOrWhiteSpace(redisConnection))
@@ -69,6 +70,9 @@ builder.Services.AddScoped(provider =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<UserProvisioningService>();
+builder.Services.AddScoped<UserProfileProjectionService>();
+builder.Services.AddSingleton<ProfileAvatarResolver>();
+builder.Services.AddScoped<IPasswordChangeService, SupabasePasswordChangeService>();
 builder.Services.Configure<PasswordPolicyOptions>(builder.Configuration.GetSection("PasswordPolicy"));
 builder.Services.AddSingleton<PasswordPolicyValidator>();
 builder.Services.AddScoped<GroupQueryService>();

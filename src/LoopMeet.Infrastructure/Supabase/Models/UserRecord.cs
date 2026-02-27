@@ -18,6 +18,12 @@ public sealed class UserRecord : BaseModel
     [Column("phone")]
     public string? Phone { get; set; }
 
+    [Column("social_avatar_url")]
+    public string? SocialAvatarUrl { get; set; }
+
+    [Column("avatar_override_url")]
+    public string? AvatarOverrideUrl { get; set; }
+
     [Column("created_at")]
     public DateTimeOffset CreatedAt { get; set; }
 

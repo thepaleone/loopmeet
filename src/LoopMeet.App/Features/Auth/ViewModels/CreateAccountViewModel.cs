@@ -10,6 +10,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
 {
     private readonly AuthService _authService;
     private readonly UsersApi _usersApi;
+    private readonly UserProfileCache _userProfileCache;
 
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -27,6 +28,9 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     private string _confirmPassword = string.Empty;
 
     [ObservableProperty]
+    private string? _socialAvatarUrl;
+
+    [ObservableProperty]
     private bool _isBusy;
 
     [ObservableProperty]
@@ -38,10 +42,11 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     [ObservableProperty]
     private bool _showError;
 
-    public CreateAccountViewModel(AuthService authService, UsersApi usersApi)
+    public CreateAccountViewModel(AuthService authService, UsersApi usersApi, UserProfileCache userProfileCache)
     {
         _authService = authService;
         _usersApi = usersApi;
+        _userProfileCache = userProfileCache;
     }
 
     [RelayCommand]
@@ -83,12 +88,27 @@ public sealed partial class CreateAccountViewModel : ObservableObject
                 }
             }
 
-            await _usersApi.UpsertProfileAsync(new UserProfileRequest
+            var profile = await _usersApi.UpsertProfileAsync(new UserProfileRequest
             {
                 DisplayName = DisplayName,
                 Email = Email,
                 Phone = Phone,
-                Password = Password
+                Password = Password,
+                SocialAvatarUrl = SocialAvatarUrl
+            });
+            _userProfileCache.SetCachedProfile(new Features.Profile.Models.UserProfileResponse
+            {
+                DisplayName = profile.DisplayName,
+                Email = profile.Email,
+                Phone = profile.Phone,
+                AvatarUrl = profile.AvatarUrl,
+                AvatarSource = profile.AvatarSource,
+                UserSince = profile.UserSince,
+                GroupCount = profile.GroupCount,
+                CanChangePassword = profile.CanChangePassword,
+                HasEmailProvider = profile.HasEmailProvider,
+                RequiresCurrentPassword = profile.RequiresCurrentPassword,
+                RequiresEmailForPasswordSetup = profile.RequiresEmailForPasswordSetup
             });
 
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
@@ -99,9 +119,10 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         }
     }
 
-    public void ApplyPrefill(string? displayName, string? email, string? phone, bool isOAuthFlow)
+    public void ApplyPrefill(string? displayName, string? email, string? phone, bool isOAuthFlow, string? socialAvatarUrl = null)
     {
         IsOAuthFlow = isOAuthFlow;
+        SocialAvatarUrl = socialAvatarUrl;
 
         if (!string.IsNullOrWhiteSpace(displayName) && string.IsNullOrWhiteSpace(DisplayName))
         {

@@ -1,0 +1,14 @@
+.git/
+.gitignore
+.dockerignore
+Dockerfile*
+**/bin/
+**/obj/
+**/node_modules/
+**/coverage/
+*.log
+*.log.*
+.env
+.env.*
+specs/
+tests/

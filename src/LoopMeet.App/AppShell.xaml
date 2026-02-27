@@ -7,6 +7,7 @@
     xmlns:home="clr-namespace:LoopMeet.App.Features.Home.Views"
     xmlns:groups="clr-namespace:LoopMeet.App.Features.Groups.Views"
     xmlns:inv="clr-namespace:LoopMeet.App.Features.Invitations.Views"
+    xmlns:profile="clr-namespace:LoopMeet.App.Features.Profile.Views"
     Title="LoopMeet"
     FlyoutBehavior="Disabled">
 
@@ -44,6 +45,16 @@
                 Icon="tab_invitations_fallback.png"
                 ContentTemplate="{DataTemplate inv:PendingInvitationsPage}"
                 Route="invitations" />
+        </Tab>
+
+        <Tab
+            Title="Profile"
+            Icon="tab_profile_fallback.png">
+            <ShellContent
+                Title="Profile"
+                Icon="tab_profile_fallback.png"
+                ContentTemplate="{DataTemplate profile:ProfilePage}"
+                Route="profile" />
         </Tab>
     </TabBar>
 

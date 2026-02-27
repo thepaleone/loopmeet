@@ -13,6 +13,7 @@ public sealed partial class LoginViewModel : ObservableObject
     private readonly AuthService _authService;
     private readonly AuthCoordinator _authCoordinator;
     private readonly UsersApi _usersApi;
+    private readonly UserProfileCache _userProfileCache;
     private readonly ILogger<LoginViewModel> _logger;
 
     [ObservableProperty]
@@ -34,11 +35,13 @@ public sealed partial class LoginViewModel : ObservableObject
         AuthService authService,
         AuthCoordinator authCoordinator,
         UsersApi usersApi,
+        UserProfileCache userProfileCache,
         ILogger<LoginViewModel> logger)
     {
         _authService = authService;
         _authCoordinator = authCoordinator;
         _usersApi = usersApi;
+        _userProfileCache = userProfileCache;
         _logger = logger;
     }
 
@@ -59,6 +62,7 @@ public sealed partial class LoginViewModel : ObservableObject
             var session = await _authService.SignInWithEmailAsync(Email, Password);
             if (!string.IsNullOrWhiteSpace(session.AccessToken))
             {
+                await CacheProfileSummaryAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
@@ -131,11 +135,13 @@ public sealed partial class LoginViewModel : ObservableObject
             var profile = await TryGetProfileAsync();
             if (profile is not null)
             {
+                await CacheProfileSummaryAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
 
             await TryCreateProfileFromOAuthAsync(authResult);
+            await CacheProfileSummaryAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
         catch (Exception ex)
@@ -164,7 +170,8 @@ public sealed partial class LoginViewModel : ObservableObject
                 DisplayName = authResult.DisplayName ?? string.Empty,
                 Email = authResult.Email,
                 Phone = authResult.Phone,
-                Password = string.Empty
+                Password = string.Empty,
+                SocialAvatarUrl = authResult.AvatarUrl
             });
             return true;
         }
@@ -187,5 +194,11 @@ public sealed partial class LoginViewModel : ObservableObject
         {
             return null;
         }
+    }
+
+    private async Task CacheProfileSummaryAsync()
+    {
+        var profile = await _usersApi.GetProfileSummaryAsync();
+        _userProfileCache.SetCachedProfile(profile);
     }
 }

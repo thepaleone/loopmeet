@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Services;
 using Microsoft.Maui.Authentication;
 using Supabase.Gotrue;
 using Microsoft.Maui.Storage;
@@ -13,11 +14,13 @@ public sealed class AuthService
     private const string AccessTokenKey = "loopmeet.auth.access_token";
     private const string OAuthRedirectUri = "loopmeet://auth-callback";
     private readonly SupabaseClient _client;
+    private readonly UserProfileCache _userProfileCache;
     private string? _accessToken;
 
-    public AuthService(SupabaseClient client)
+    public AuthService(SupabaseClient client, UserProfileCache userProfileCache)
     {
         _client = client;
+        _userProfileCache = userProfileCache;
     }
 
     public async Task<AuthSession> SignInWithEmailAsync(string email, string password)
@@ -47,6 +50,7 @@ public sealed class AuthService
     {
         _accessToken = null;
         Preferences.Default.Remove(AccessTokenKey);
+        _userProfileCache.Clear();
         return _client.Auth.SignOut();
     }
 
@@ -74,7 +78,8 @@ public sealed class AuthService
             AccessToken = _accessToken ?? string.Empty,
             DisplayName = GetUserDisplayName(user),
             Email = user?.Email ?? TryGetJwtClaim(_accessToken, "email"),
-            Phone = user?.Phone
+            Phone = user?.Phone,
+            AvatarUrl = GetUserAvatarUrl(user)
         };
     }
 
@@ -269,6 +274,26 @@ public sealed class AuthService
             && TryGetMetadataValue(user.UserMetadata, "family_name", out var familyName))
         {
             return $"{givenName} {familyName}".Trim();
+        }
+
+        return null;
+    }
+
+    private static string? GetUserAvatarUrl(User? user)
+    {
+        if (user?.UserMetadata is null || user.UserMetadata.Count == 0)
+        {
+            return null;
+        }
+
+        if (TryGetMetadataValue(user.UserMetadata, "avatar_url", out var avatarUrl))
+        {
+            return avatarUrl;
+        }
+
+        if (TryGetMetadataValue(user.UserMetadata, "picture", out var picture))
+        {
+            return picture;
         }
 
         return null;
