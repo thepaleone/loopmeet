@@ -7,6 +7,8 @@ using LoopMeet.App.Features.Groups.ViewModels;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.ViewModels;
 using LoopMeet.App.Features.Invitations.Views;
+using LoopMeet.App.Features.Profile.ViewModels;
+using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Services;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
@@ -71,6 +73,7 @@ public static class MauiProgram
 			AutoRefreshToken = true,
 			SessionHandler = new MauiSessionPersistence()
 		}));
+		builder.Services.AddSingleton<UserProfileCache>();
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<AuthCoordinator>();
 		builder.Services.AddTransient<ApiAuthHandler>();
@@ -90,6 +93,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<InviteMemberViewModel>();
 		builder.Services.AddTransient<InvitationDetailViewModel>();
 		builder.Services.AddTransient<PendingInvitationsViewModel>();
+		builder.Services.AddTransient<ProfileViewModel>();
+		builder.Services.AddTransient<ChangePasswordViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<HomePage>();
@@ -100,6 +105,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<InviteMemberPage>();
 		builder.Services.AddTransient<InvitationDetailPage>();
 		builder.Services.AddTransient<PendingInvitationsPage>();
+		builder.Services.AddTransient<ProfilePage>();
+		builder.Services.AddTransient<ChangePasswordPage>();
 
 		return builder.Build();
 	}

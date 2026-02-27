@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Profile.Views.ProfilePage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Profile">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12">
+            <Label Text="Profile" FontSize="20" FontAttributes="Bold" />
+
+            <Label Text="Display name" FontAttributes="Bold" />
+            <Entry Text="{Binding DisplayName}" Placeholder="Display name" />
+
+            <Label Text="Email" FontAttributes="Bold" />
+            <Label Text="{Binding Email}" />
+
+            <Label Text="Avatar URL" FontAttributes="Bold" />
+            <Entry Text="{Binding AvatarInput}" Placeholder="https://..." />
+            <Label Text="{Binding AvatarSource, StringFormat='Avatar source: {0}'}" />
+
+            <Label Text="{Binding UserSince, StringFormat='User since: {0:yyyy-MM-dd}'}" />
+            <Label Text="{Binding GroupCount, StringFormat='Groups: {0}'}" />
+
+            <HorizontalStackLayout Spacing="8">
+                <Button Text="Save" Command="{Binding SaveProfileCommand}" />
+                <Button
+                    Text="Change Password"
+                    IsVisible="{Binding CanChangePassword}"
+                    Command="{Binding OpenPasswordChangeCommand}" />
+            </HorizontalStackLayout>
+
+            <Label Text="{Binding StatusMessage}" IsVisible="{Binding ShowStatus}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
