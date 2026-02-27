@@ -31,4 +31,20 @@ public sealed class CurrentUserService
                 ?? user?.FindFirst("email")?.Value;
         }
     }
+
+    public string? AccessToken
+    {
+        get
+        {
+            var authHeader = _httpContextAccessor.HttpContext?.Request.Headers.Authorization.ToString();
+            if (string.IsNullOrWhiteSpace(authHeader))
+            {
+                return null;
+            }
+
+            return authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                ? authHeader["Bearer ".Length..].Trim()
+                : null;
+        }
+    }
 }

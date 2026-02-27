@@ -81,6 +81,8 @@ public sealed class UserRepository : IUserRepository
             DisplayName = record.DisplayName,
             Email = record.Email,
             Phone = record.Phone,
+            SocialAvatarUrl = record.SocialAvatarUrl,
+            AvatarOverrideUrl = record.AvatarOverrideUrl,
             CreatedAt = record.CreatedAt,
             UpdatedAt = record.UpdatedAt
         };
@@ -94,6 +96,8 @@ public sealed class UserRepository : IUserRepository
             DisplayName = user.DisplayName,
             Email = user.Email,
             Phone = user.Phone,
+            SocialAvatarUrl = user.SocialAvatarUrl,
+            AvatarOverrideUrl = user.AvatarOverrideUrl,
             CreatedAt = user.CreatedAt,
             UpdatedAt = user.UpdatedAt
         };

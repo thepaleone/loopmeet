@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using LoopMeet.Api.Services.Auth;
 using LoopMeet.Core.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -39,6 +40,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IMembershipRepository>();
             services.RemoveAll<IInvitationRepository>();
             services.RemoveAll<IAuthIdentityRepository>();
+            services.RemoveAll<IPasswordChangeService>();
 
             services.AddSingleton(_store);
             services.AddScoped<IUserRepository, InMemoryUserRepository>();
@@ -46,6 +48,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IMembershipRepository, InMemoryMembershipRepository>();
             services.AddScoped<IInvitationRepository, InMemoryInvitationRepository>();
             services.AddScoped<IAuthIdentityRepository, InMemoryAuthIdentityRepository>();
+            services.AddScoped<IPasswordChangeService, InMemoryPasswordChangeService>();
 
             services.AddAuthentication("Test")
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", _ => { });

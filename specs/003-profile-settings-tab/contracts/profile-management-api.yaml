@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  title: LoopMeet API - Profile Management Contract
+  version: 1.0.0
+  description: >
+    Contract for the Profile tab feature. Defines profile read/update projection,
+    avatar source behavior inputs, and dedicated password-change operation.
+servers:
+  - url: https://api.loopmeet.example.com
+security:
+  - bearerAuth: []
+paths:
+  /users/profile:
+    get:
+      tags: [Users]
+      operationId: getCurrentUserProfile
+      summary: Get profile data for the authenticated user
+      responses:
+        "200":
+          description: Profile projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      tags: [Users]
+      operationId: updateCurrentUserProfile
+      summary: Update editable profile fields for the authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdateRequest"
+      responses:
+        "200":
+          description: Updated profile projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "400":
+          description: Validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users/password:
+    post:
+      tags: [Users]
+      operationId: changeCurrentUserPassword
+      summary: Change password for the authenticated user
+      description: >
+        Called from the Profile page's dedicated Change Password modal flow.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChangeRequest"
+      responses:
+        "204":
+          description: Password changed successfully
+        "400":
+          description: Validation error (policy mismatch, confirm mismatch, missing fields)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Current password is incorrect
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    UserProfileResponse:
+      type: object
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+        avatarSource:
+          type: string
+          enum: [none, social, user_override]
+        userSince:
+          type: string
+          format: date-time
+        groupCount:
+          type: integer
+          minimum: 0
+        canChangePassword:
+          type: boolean
+      required:
+        - displayName
+        - email
+        - avatarSource
+        - userSince
+        - groupCount
+        - canChangePassword
+    UserProfileUpdateRequest:
+      type: object
+      description: >
+        Supports standard profile edits and social-profile bootstrap updates.
+        If `avatarOverrideUrl` is provided, it takes precedence over social avatar.
+      properties:
+        displayName:
+          type: string
+        phone:
+          type: string
+          nullable: true
+        avatarOverrideUrl:
+          type: string
+          format: uri
+          nullable: true
+        socialAvatarUrl:
+          type: string
+          format: uri
+          nullable: true
+      additionalProperties: false
+    PasswordChangeRequest:
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+        confirmPassword:
+          type: string
+      required:
+        - currentPassword
+        - newPassword
+        - confirmPassword
+      additionalProperties: false
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - message

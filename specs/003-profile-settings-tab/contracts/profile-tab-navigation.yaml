@@ -1,0 +1,70 @@
+version: 1
+feature: profile-tab-and-profile-management
+status: planned
+description: >
+  UI behavior contract for the signed-in Profile tab and profile management flows.
+
+signedInTabBar:
+  visibleWhen: authenticated
+  tabs:
+    - id: home
+      route: //home
+      sortOrder: 1
+    - id: groups
+      route: //groups
+      sortOrder: 2
+    - id: invitations
+      route: //invitations
+      sortOrder: 3
+    - id: profile
+      title: Profile
+      route: //profile
+      sortOrder: 4
+      requiredPlacement: last
+      contentType: profile-management
+
+profileScreen:
+  requiredFields:
+    - displayName
+    - avatar
+    - userSince
+    - groupCount
+  actions:
+    - id: edit-display-name
+      behavior: inline-edit-save
+    - id: change-avatar
+      behavior: inline-edit-save
+    - id: change-password
+      behavior: open-modal
+  constraints:
+    - Password fields must not render on the profile page outside the modal.
+    - Avatar override selected by user must remain effective across social sign-ins.
+
+passwordModal:
+  openTrigger: profile-screen-change-password-action
+  requiredInputs:
+    - currentPassword
+    - newPassword
+    - confirmPassword
+  successBehavior:
+    - show-success-feedback
+    - close-modal
+    - keep-profile-screen-context
+  failureBehavior:
+    - show-actionable-error
+    - remain-open-for-correction
+
+avatarSourceRules:
+  precedenceOrder:
+    - user_override
+    - social
+    - none
+  bootstrapRule:
+    when: social-signup-or-profile-bootstrap
+    applySocialAvatarOnlyIf:
+      - avatarOverrideNotEstablished
+
+reliabilityRules:
+  - Profile tab navigation must not require re-authentication.
+  - Profile save failures must preserve the current editing context.
+  - Password modal failures must not discard unrelated profile edits.

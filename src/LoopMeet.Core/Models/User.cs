@@ -6,6 +6,8 @@ public sealed class User
     public string DisplayName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string? Phone { get; set; }
+    public string? SocialAvatarUrl { get; set; }
+    public string? AvatarOverrideUrl { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }
