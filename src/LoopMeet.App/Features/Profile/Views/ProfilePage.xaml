@@ -23,12 +23,24 @@
             <Label Text="{Binding GroupCount, StringFormat='Groups: {0}'}" />
 
             <HorizontalStackLayout Spacing="8">
-                <Button Text="Save" Command="{Binding SaveProfileCommand}" />
+                <Button
+                    Text="Save"
+                    ImageSource="ic_save.png"
+                    ContentLayout="Left,8"
+                    Command="{Binding SaveProfileCommand}" />
                 <Button
                     Text="Change Password"
                     IsVisible="{Binding CanChangePassword}"
                     Command="{Binding OpenPasswordChangeCommand}" />
             </HorizontalStackLayout>
+
+            <Button
+                Text="Log out"
+                ImageSource="ic_logout.png"
+                ContentLayout="Left,8"
+                BackgroundColor="Transparent"
+                TextColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource Secondary}}"
+                Command="{Binding LogoutCommand}" />
 
             <Label Text="{Binding StatusMessage}" IsVisible="{Binding ShowStatus}" />
         </VerticalStackLayout>

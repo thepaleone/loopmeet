@@ -18,9 +18,9 @@
 
 **Purpose**: Source and add the three new icon pairs to `src/LoopMeet.App/Resources/Images/`. These are prerequisites for US1, US4, and US5 (US2 and US3 need no new image assets and can start immediately in parallel).
 
-- [ ] T001 [P] Source `ic_logout.svg` (e.g., Heroicons `arrow-right-on-rectangle`, MIT licence) and export `ic_logout_fallback.png` at 32×32px; add both to `src/LoopMeet.App/Resources/Images/`
-- [ ] T002 [P] Source `ic_save.svg` (e.g., Heroicons `cloud-arrow-up` or `archive-box-arrow-down`, MIT licence) and export `ic_save_fallback.png` at 32×32px; add both to `src/LoopMeet.App/Resources/Images/`
-- [ ] T003 [P] Source `ic_invite.svg` (e.g., Heroicons `envelope` or `user-plus`, MIT licence) and export `ic_invite_fallback.png` at 32×32px; add both to `src/LoopMeet.App/Resources/Images/`
+- [x] T001 [P] Source `ic_logout.svg` (e.g., Heroicons `arrow-right-on-rectangle`, MIT licence) and export `ic_logout_fallback.png` at 32×32px; add both to `src/LoopMeet.App/Resources/Images/`
+- [x] T002 [P] Source `ic_save.svg` (e.g., Heroicons `cloud-arrow-up` or `archive-box-arrow-down`, MIT licence) and export `ic_save_fallback.png` at 32×32px; add both to `src/LoopMeet.App/Resources/Images/`
+- [x] T003 [P] Source `ic_invite.svg` (e.g., Heroicons `envelope` or `user-plus`, MIT licence) and export `ic_invite_fallback.png` at 32×32px; add both to `src/LoopMeet.App/Resources/Images/`
 
 **Checkpoint**: Three SVG + PNG fallback pairs present in `Resources/Images/`. US2 and US3 can start immediately without waiting for this phase.
 
@@ -36,11 +36,11 @@
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US1] Add `LogoutAsync()` method and `[RelayCommand]`-decorated `LogoutCommand` (guarded by `IsBusy`) to `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs` — copy implementation from `GroupsListViewModel.LogoutAsync()` (`_authService.SignOutAsync()` then `Shell.Current.GoToAsync("//login")`)
-- [ ] T005 [US1] Add Logout `<Button>` to `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml` after the Change Password button, with `Text="Log out"`, `ImageSource="ic_logout_fallback.png"`, `ContentLayout="Left,8"`, `Command="{Binding LogoutCommand}"`, and a visually distinct (secondary/danger) style
-- [ ] T006 [P] [US1] Remove the `LogoutCommand` binding `<Button>` and its parent two-column `<Grid>` from `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`; replace with a plain `<Label Text="Groups" .../>` header
-- [ ] T007 [P] [US1] Remove `LogoutAsync()` and `LogoutCommand` from `src/LoopMeet.App/Features/Groups/ViewModels/GroupsListViewModel.cs`; remove `IAuthService` constructor parameter only if no other command in this ViewModel uses it
-- [ ] T008 [US1] Write unit test `LogoutCommand_SignsOutAndNavigatesAndIsNotOnGroupsViewModel` in `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs` verifying: (a) `LogoutCommand` exists on `ProfileViewModel` and invokes `_authService.SignOutAsync()`; (b) `GroupsListViewModel` no longer exposes a `LogoutCommand` property
+- [x] T004 [US1] Add `LogoutAsync()` method and `[RelayCommand]`-decorated `LogoutCommand` (guarded by `IsBusy`) to `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs` — copy implementation from `GroupsListViewModel.LogoutAsync()` (`_authService.SignOutAsync()` then `Shell.Current.GoToAsync("//login")`)
+- [x] T005 [US1] Add Logout `<Button>` to `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml` after the Change Password button, with `Text="Log out"`, `ImageSource="ic_logout_fallback.png"`, `ContentLayout="Left,8"`, `Command="{Binding LogoutCommand}"`, and a visually distinct (secondary/danger) style
+- [x] T006 [P] [US1] Remove the `LogoutCommand` binding `<Button>` and its parent two-column `<Grid>` from `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`; replace with a plain `<Label Text="Groups" .../>` header
+- [x] T007 [P] [US1] Remove `LogoutAsync()` and `LogoutCommand` from `src/LoopMeet.App/Features/Groups/ViewModels/GroupsListViewModel.cs`; remove `IAuthService` constructor parameter only if no other command in this ViewModel uses it
+- [x] T008 [US1] Write unit test `LogoutCommand_SignsOutAndNavigatesAndIsNotOnGroupsViewModel` in `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs` verifying: (a) `LogoutCommand` exists on `ProfileViewModel` and invokes `_authService.SignOutAsync()`; (b) `GroupsListViewModel` no longer exposes a `LogoutCommand` property
 
 **Checkpoint**: Profile page has a working Logout button with icon. Groups page has no Logout button. Unit test passes. US1 independently verified.
 
@@ -56,10 +56,10 @@
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Restructure the root layout of `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`: wrap the existing content (header + scroll area) in a single-row, single-column `<Grid>` so the FAB can float above it
-- [ ] T010 [US2] Add bottom margin/padding (`Margin="0,0,0,80"` or equivalent) to the `CollectionView` or `ScrollView` in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml` so the last list item is never permanently obscured by the FAB
-- [ ] T011 [US2] Add the circular FAB `<Button>` as the last child of the root `<Grid>` in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`: `VerticalOptions="End"`, `HorizontalOptions="End"`, `Margin="0,0,16,32"`, `WidthRequest="56"`, `HeightRequest="56"`, `CornerRadius="28"`, `Text="+"`, `FontSize="28"`, `FontAttributes="Bold"`, `TextColor="White"`, `BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"`, `Command="{Binding CreateGroupCommand}"`
-- [ ] T012 [US2] Remove the original `<Button Text="Create Group" .../>` from the page body in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`
+- [x] T009 [US2] Restructure the root layout of `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`: wrap the existing content (header + scroll area) in a single-row, single-column `<Grid>` so the FAB can float above it
+- [x] T010 [US2] Add bottom margin/padding (`Margin="0,0,0,80"` or equivalent) to the `CollectionView` or `ScrollView` in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml` so the last list item is never permanently obscured by the FAB
+- [x] T011 [US2] Add the circular FAB `<Button>` as the last child of the root `<Grid>` in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`: `VerticalOptions="End"`, `HorizontalOptions="End"`, `Margin="0,0,16,32"`, `WidthRequest="56"`, `HeightRequest="56"`, `CornerRadius="28"`, `Text="+"`, `FontSize="28"`, `FontAttributes="Bold"`, `TextColor="White"`, `BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"`, `Command="{Binding CreateGroupCommand}"`
+- [x] T012 [US2] Remove the original `<Button Text="Create Group" .../>` from the page body in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`
 
 **Checkpoint**: Groups page shows circular "+" FAB at bottom-right. No "Create Group" text button. FAB remains visible while scrolling. Tapping FAB opens Create Group flow. US2 independently verified.
 
@@ -75,9 +75,9 @@
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US3] In `src/LoopMeet.App/Features/Invitations/Views/PendingInvitationsPage.xaml`, wrap the existing desktop Accept `<Button>` in a `<HorizontalStackLayout Grid.Column="1" Spacing="8" IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}">` container; move the `IsVisible` idiom binding from the button to the container
-- [ ] T014 [US3] Update the Accept button `Text` to `"✓ Accept"` in `src/LoopMeet.App/Features/Invitations/Views/PendingInvitationsPage.xaml` (remove the now-redundant `IsVisible` from the button itself since the container controls visibility)
-- [ ] T015 [US3] Add a Decline `<Button>` inside the `HorizontalStackLayout` in `src/LoopMeet.App/Features/Invitations/Views/PendingInvitationsPage.xaml` with `Text="🗑 Decline"`, `BackgroundColor="#DC2626"`, `TextColor="White"`, `Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"`, `CommandParameter="{Binding .}"`
+- [x] T013 [US3] In `src/LoopMeet.App/Features/Invitations/Views/PendingInvitationsPage.xaml`, wrap the existing desktop Accept `<Button>` in a `<HorizontalStackLayout Grid.Column="1" Spacing="8" IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}">` container; move the `IsVisible` idiom binding from the button to the container
+- [x] T014 [US3] Update the Accept button `Text` to `"✓ Accept"` in `src/LoopMeet.App/Features/Invitations/Views/PendingInvitationsPage.xaml` (remove the now-redundant `IsVisible` from the button itself since the container controls visibility)
+- [x] T015 [US3] Add a Decline `<Button>` inside the `HorizontalStackLayout` in `src/LoopMeet.App/Features/Invitations/Views/PendingInvitationsPage.xaml` with `Text="🗑 Decline"`, `BackgroundColor="#DC2626"`, `TextColor="White"`, `Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"`, `CommandParameter="{Binding .}"`
 
 **Checkpoint**: Desktop shows both "✓ Accept" and "🗑 Decline" buttons per invitation row. Mobile shows only swipe actions. Tapping each button fires the correct command. US3 independently verified.
 
@@ -93,7 +93,7 @@
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] Add `ImageSource="ic_save_fallback.png"` and `ContentLayout="Left,8"` to the existing Save `<Button>` in `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml`
+- [x] T016 [US4] Add `ImageSource="ic_save_fallback.png"` and `ContentLayout="Left,8"` to the existing Save `<Button>` in `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml`
 
 **Checkpoint**: Profile Save button shows save icon. Save functionality unchanged. US4 independently verified.
 
@@ -109,8 +109,8 @@
 
 ### Implementation for User Story 5
 
-- [ ] T017 [P] [US5] Add `ImageSource="ic_invite_fallback.png"` and `ContentLayout="Left,8"` to the Invite Member `<Button>` in `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml`
-- [ ] T018 [P] [US5] Add `ImageSource="ic_invite_fallback.png"` and `ContentLayout="Left,8"` to the Send Invite `<Button>` in `src/LoopMeet.App/Features/Invitations/Views/InviteMemberPage.xaml`
+- [x] T017 [P] [US5] Add `ImageSource="ic_invite_fallback.png"` and `ContentLayout="Left,8"` to the Invite Member `<Button>` in `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml`
+- [x] T018 [P] [US5] Add `ImageSource="ic_invite_fallback.png"` and `ContentLayout="Left,8"` to the Send Invite `<Button>` in `src/LoopMeet.App/Features/Invitations/Views/InviteMemberPage.xaml`
 
 **Checkpoint**: Both invite-related buttons show the ic_invite icon. No behavioural regression on either page. US5 independently verified.
 
@@ -120,10 +120,10 @@
 
 **Purpose**: End-to-end validation across all platforms and final quality checks.
 
-- [ ] T019 Run the app on all four target platforms (iOS, Android, macOS, Windows) and verify each item in the acceptance checklist in `specs/004-ui-polish/quickstart.md` — specifically confirm all icons render correctly in both light mode and dark mode on each platform
-- [ ] T020 [P] Verify the Groups page FAB does not obscure any list item when scrolled to the bottom on a device with a small screen; adjust bottom margin if needed in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`
-- [ ] T021 [P] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm all tests pass including T008's new unit test
-- [ ] T022 Update `specs/004-ui-polish/checklists/requirements.md` to mark all feature-readiness items as verified
+- [ ] T019 Run the app on all four target platforms (manual — pending) (iOS, Android, macOS, Windows) and verify each item in the acceptance checklist in `specs/004-ui-polish/quickstart.md` — specifically confirm all icons render correctly in both light mode and dark mode on each platform
+- [ ] T020 [P] Verify the Groups page FAB does not obscure (manual — pending) any list item when scrolled to the bottom on a device with a small screen; adjust bottom margin if needed in `src/LoopMeet.App/Features/Groups/Views/GroupsListPage.xaml`
+- [x] T021 [P] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm all tests pass including T008's new unit test
+- [x] T022 Update `specs/004-ui-polish/checklists/requirements.md` to mark all feature-readiness items as verified
 
 ---
 

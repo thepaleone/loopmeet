@@ -114,13 +114,22 @@
                                             LineBreakMode="TailTruncation"
                                             TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                                     </VerticalStackLayout>
-                                    <Button
+                                    <HorizontalStackLayout
                                         Grid.Column="1"
-                                        Text="Accept"
+                                        Spacing="8"
                                         VerticalOptions="Center"
-                                        IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}"
-                                        Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
-                                        CommandParameter="{Binding .}" />
+                                        IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}">
+                                        <Button
+                                            Text="✓ Accept"
+                                            Command="{Binding BindingContext.AcceptInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                            CommandParameter="{Binding .}" />
+                                        <Button
+                                            Text="🗑 Decline"
+                                            BackgroundColor="#DC2626"
+                                            TextColor="White"
+                                            Command="{Binding BindingContext.DeclineInvitationCommand, Source={x:Reference PendingInvitationsPageRoot}}"
+                                            CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
                                 </Grid>
                             </Border>
                         </SwipeView>

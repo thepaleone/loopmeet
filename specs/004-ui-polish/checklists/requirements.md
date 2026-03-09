@@ -31,6 +31,7 @@
 
 ## Notes
 
-- All checklist items pass. Spec is ready for `/speckit.plan`.
-- Assumption noted: Group Detail page invitation button label to be confirmed during planning (see Assumptions section in spec).
-- Icon delivery methodology (PNG/SVG MAUI assets) documented in Assumptions; the spec intentionally avoids naming specific icon files or libraries.
+- All checklist items pass. Spec ready for planning; planning and implementation complete.
+- Group Detail page invitation button confirmed as "Invite Member" during implementation.
+- Icon delivery: SVG + PNG fallback pairs (`ic_logout`, `ic_save`, `ic_invite`) added to `Resources/Images/` following tab icon convention.
+- Implementation complete: 10/10 tests passing. T019/T020 (cross-platform manual acceptance tests) remain pending — run on device before merge.
