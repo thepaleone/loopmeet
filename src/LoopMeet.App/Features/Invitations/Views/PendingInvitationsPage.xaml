@@ -39,7 +39,7 @@
                 </CollectionView.Triggers>
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
-                        <SwipeView IsEnabled="{OnIdiom Phone=True, Tablet=True, Desktop=False, TV=False}">
+                        <SwipeView>
                             <SwipeView.RightItems>
                                 <SwipeItems Mode="Execute">
                                     <SwipeItemView
