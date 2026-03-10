@@ -80,6 +80,53 @@ public static class UserEndpoints
             })
             .RequireAuthorization();
 
+        app.MapPost("/users/avatar", async (
+                HttpRequest httpRequest,
+                CurrentUserService currentUser,
+                UserProvisioningService provisioningService,
+                UserProfileProjectionService projectionService,
+                ILogger<UserEndpoints.LogMarker> logger,
+                CancellationToken cancellationToken) =>
+            {
+                var userId = currentUser.UserId;
+                if (userId is null)
+                {
+                    logger.LogWarning("Avatar upload unauthorized: missing user id");
+                    return Results.Unauthorized();
+                }
+
+                if (!httpRequest.HasFormContentType)
+                {
+                    return Results.BadRequest(new { code = "invalid_content_type", message = "Request must be multipart/form-data." });
+                }
+
+                var form = await httpRequest.ReadFormAsync(cancellationToken);
+                var file = form.Files.GetFile("image");
+                if (file is null || file.Length == 0)
+                {
+                    return Results.BadRequest(new { code = "missing_image", message = "An image file is required." });
+                }
+
+                var contentType = file.ContentType;
+                if (!contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Results.BadRequest(new { code = "invalid_content_type", message = "Only image files are accepted." });
+                }
+
+                logger.LogInformation("Uploading avatar for user {UserId}", userId);
+                await using var stream = file.OpenReadStream();
+                var user = await provisioningService.UploadAvatarAsync(userId.Value, stream, file.FileName, contentType, cancellationToken);
+                if (user is null)
+                {
+                    return Results.NotFound();
+                }
+
+                logger.LogInformation("Avatar uploaded for user {UserId}", userId);
+                return Results.Ok(await projectionService.BuildAsync(user, cancellationToken));
+            })
+            .RequireAuthorization()
+            .DisableAntiforgery();
+
         app.MapPost("/users/password", async (
                 PasswordChangeRequest request,
                 CurrentUserService currentUser,

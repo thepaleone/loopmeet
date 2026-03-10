@@ -70,6 +70,7 @@ builder.Services.AddScoped(provider =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<UserProvisioningService>();
+builder.Services.AddSingleton<AvatarStorageService>();
 builder.Services.AddScoped<UserProfileProjectionService>();
 builder.Services.AddSingleton<ProfileAvatarResolver>();
 builder.Services.AddScoped<IPasswordChangeService, SupabasePasswordChangeService>();
