@@ -15,6 +15,12 @@ public sealed partial class HomeViewModel(UserProfileCache userProfileCache) : O
     [ObservableProperty]
     private string _supportingText = "This tab is a placeholder for a future LoopMeet feature. Use Groups or Invitations to continue.";
 
+    [ObservableProperty]
+    private string? _avatarUrl;
+
+    [ObservableProperty]
+    private bool _hasAvatar;
+
     [RelayCommand]
     private Task LoadAsync()
     {
@@ -22,6 +28,8 @@ public sealed partial class HomeViewModel(UserProfileCache userProfileCache) : O
         Title = cached is not null && !string.IsNullOrWhiteSpace(cached.DisplayName)
             ? $"Hello {cached.DisplayName}"
             : "Hello";
+        AvatarUrl = cached?.AvatarUrl;
+        HasAvatar = !string.IsNullOrWhiteSpace(AvatarUrl);
         return Task.CompletedTask;
     }
 }
