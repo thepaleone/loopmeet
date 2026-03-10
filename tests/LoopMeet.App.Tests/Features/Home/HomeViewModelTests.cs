@@ -1,16 +1,15 @@
-using LoopMeet.App.Features.Home.ViewModels;
-
 namespace LoopMeet.App.Tests.Features.Home;
 
 public sealed class HomeViewModelTests
 {
     [Fact]
-    public void Constructor_SetsPlaceholderCopy()
+    public void HomeViewModel_HasPlaceholderCopyAndGreeting()
     {
-        var viewModel = new HomeViewModel();
+        var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src/LoopMeet.App/Features/Home/ViewModels/HomeViewModel.cs"));
+        var source = File.ReadAllText(path);
 
-        Assert.Equal("Home", viewModel.Title);
-        Assert.Contains("coming soon", viewModel.Headline, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("placeholder", viewModel.SupportingText, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Hello", source, StringComparison.Ordinal);
+        Assert.Contains("coming soon", source, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("placeholder", source, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Services;
 using System.Diagnostics;
@@ -18,7 +17,6 @@ namespace LoopMeet.App.Features.Groups.ViewModels;
 
 public sealed partial class GroupsListViewModel : ObservableObject
 {
-    private readonly AuthService _authService;
     private readonly GroupsApi _groupsApi;
     private readonly ILogger<GroupsListViewModel> _logger;
 
@@ -38,34 +36,11 @@ public sealed partial class GroupsListViewModel : ObservableObject
     private bool _isLoadingMemberGroups;
 
     public GroupsListViewModel(
-        AuthService authService,
         GroupsApi groupsApi,
         ILogger<GroupsListViewModel> logger)
     {
-        _authService = authService;
         _groupsApi = groupsApi;
         _logger = logger;
-    }
-
-    [RelayCommand]
-    private async Task LogoutAsync()
-    {
-        if (IsBusy)
-        {
-            return;
-        }
-
-        IsBusy = true;
-        try
-        {
-            await _authService.SignOutAsync();
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-
-        await Shell.Current.GoToAsync("//login");
     }
 
     [RelayCommand]

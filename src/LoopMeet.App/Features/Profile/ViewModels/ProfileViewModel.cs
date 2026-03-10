@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,7 @@ namespace LoopMeet.App.Features.Profile.ViewModels;
 
 public sealed partial class ProfileViewModel : ObservableObject
 {
+    private readonly AuthService _authService;
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
     private readonly ILogger<ProfileViewModel> _logger;
@@ -45,11 +47,33 @@ public sealed partial class ProfileViewModel : ObservableObject
     [ObservableProperty]
     private bool _showStatus;
 
-    public ProfileViewModel(UsersApi usersApi, UserProfileCache userProfileCache, ILogger<ProfileViewModel> logger)
+    public ProfileViewModel(AuthService authService, UsersApi usersApi, UserProfileCache userProfileCache, ILogger<ProfileViewModel> logger)
     {
+        _authService = authService;
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
         _logger = logger;
+    }
+
+    [RelayCommand]
+    private async Task LogoutAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            await _authService.SignOutAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
+        await Shell.Current.GoToAsync("//login");
     }
 
     [RelayCommand]

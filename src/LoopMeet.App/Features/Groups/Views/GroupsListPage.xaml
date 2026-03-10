@@ -6,16 +6,10 @@
     x:Name="GroupsPage"
     Title="LoopMeet">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="12">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <Label Text="Groups" FontSize="18" VerticalOptions="Center" />
-                <Button
-                    Grid.Column="1"
-                    Text="Log out"
-                    Command="{Binding LogoutCommand}" />
-            </Grid>
-            <Button Text="Create Group" Command="{Binding CreateGroupCommand}" />
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="24" Spacing="12" Margin="0,0,0,80">
+                <Label Text="Groups" FontSize="18" FontAttributes="Bold" />
 
             <Label Text="Owned Groups" FontAttributes="Bold" />
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingOwnedGroups}">
@@ -133,7 +127,22 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
 
-            <Label Text="You have no groups yet. Create one to get started." IsVisible="{Binding ShowEmptyState}" />
-        </VerticalStackLayout>
-    </ScrollView>
+                <Label Text="You have no groups yet. Create one to get started." IsVisible="{Binding ShowEmptyState}" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button
+            VerticalOptions="End"
+            HorizontalOptions="End"
+            Margin="0,0,16,32"
+            WidthRequest="56"
+            HeightRequest="56"
+            CornerRadius="28"
+            Text="+"
+            FontSize="28"
+            FontAttributes="Bold"
+            TextColor="White"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+            Command="{Binding CreateGroupCommand}" />
+    </Grid>
 </ContentPage>

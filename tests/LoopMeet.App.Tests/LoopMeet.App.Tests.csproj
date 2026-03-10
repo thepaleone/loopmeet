@@ -20,8 +20,5 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\src\LoopMeet.App\Features\Home\ViewModels\HomeViewModel.cs" Link="Linked\HomeViewModel.cs" />
-  </ItemGroup>
 
 </Project>

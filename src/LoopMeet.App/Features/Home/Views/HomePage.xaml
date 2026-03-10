@@ -7,8 +7,34 @@
 
     <ScrollView>
         <VerticalStackLayout Padding="24" Spacing="12">
-            <Label Text="{Binding Title}" FontSize="24" FontAttributes="Bold" />
-            <Label Text="{Binding Headline}" FontSize="18" />
+            <HorizontalStackLayout Spacing="16" VerticalOptions="Center">
+                <Border
+                    WidthRequest="56"
+                    HeightRequest="56"
+                    StrokeThickness="0"
+                    BackgroundColor="{StaticResource Gray400}">
+                    <Border.StrokeShape>
+                        <Ellipse />
+                    </Border.StrokeShape>
+                    <Grid WidthRequest="56" HeightRequest="56">
+                        <Image
+                            Source="tab_profile_fallback.png"
+                            Aspect="AspectFit"
+                            WidthRequest="32"
+                            HeightRequest="32"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Image
+                            Source="{Binding AvatarUrl}"
+                            Aspect="AspectFill"
+                            IsVisible="{Binding HasAvatar}" />
+                    </Grid>
+                </Border>
+                <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                    <Label Text="{Binding Title}" FontSize="24" FontAttributes="Bold" />
+                    <Label Text="{Binding Headline}" FontSize="18" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
             <Border
                 Padding="16"
                 Style="{StaticResource BubbleCardBorderStyle}">

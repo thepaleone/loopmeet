@@ -9,6 +9,10 @@
         <Label Text="Invite Member" FontSize="24" />
         <Entry Placeholder="Email address" Text="{Binding Email}" Keyboard="Email" />
         <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
-        <Button Text="Send Invite" Command="{Binding SendCommand}" />
+        <Button
+            Text="Send Invite"
+            ImageSource="ic_invite.png"
+            ContentLayout="Left,8"
+            Command="{Binding SendCommand}" />
     </VerticalStackLayout>
 </ContentPage>

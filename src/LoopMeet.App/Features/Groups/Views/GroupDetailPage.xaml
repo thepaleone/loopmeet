@@ -8,7 +8,12 @@
     <VerticalStackLayout Padding="24" Spacing="12">
         <Label Text="{Binding GroupName}" FontSize="24" />
         <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
-        <Button Text="Invite Member" Command="{Binding InviteMemberCommand}" IsVisible="{Binding IsOwner}" />
+        <Button
+            Text="Invite Member"
+            ImageSource="ic_invite.png"
+            ContentLayout="Left,8"
+            Command="{Binding InviteMemberCommand}"
+            IsVisible="{Binding IsOwner}" />
         <Label Text="Members" FontAttributes="Bold" />
         <CollectionView ItemsSource="{Binding Members}">
             <CollectionView.ItemTemplate>

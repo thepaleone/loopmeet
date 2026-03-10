@@ -12,4 +12,12 @@ public partial class HomePage : ContentPage
         var services = Application.Current?.Handler?.MauiContext?.Services;
         BindingContext = services?.GetService<HomeViewModel>();
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (BindingContext is HomeViewModel viewModel)
+            viewModel.LoadCommand.Execute(null);
+    }
 }
