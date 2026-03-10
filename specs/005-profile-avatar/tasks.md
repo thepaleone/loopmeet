@@ -16,7 +16,7 @@
 
 **Purpose**: Establish baseline before any story work begins.
 
-- [ ] T001 Verify `dotnet test tests/LoopMeet.App.Tests/` passes (10 tests) on branch `005-profile-avatar` to confirm clean baseline
+- [x] T001 Verify `dotnet test tests/LoopMeet.App.Tests/` passes (10 tests) on branch `005-profile-avatar` to confirm clean baseline
 
 ---
 
@@ -26,7 +26,7 @@
 
 **⚠️ CRITICAL**: T002 must complete before Phase 3 begins.
 
-- [ ] T002 Add `public string? SocialAvatarUrl { get; set; }` to `UserProfileUpdateRequest` in `src/LoopMeet.App/Features/Profile/Models/ProfileModels.cs`
+- [x] T002 Add `public string? SocialAvatarUrl { get; set; }` to `UserProfileUpdateRequest` in `src/LoopMeet.App/Features/Profile/Models/ProfileModels.cs`
 
 **Checkpoint**: Model updated — US1, US2, and US3 can now proceed independently.
 
@@ -40,12 +40,12 @@
 
 ### Tests for User Story 1
 
-- [ ] T003 [US1] Add source-inspection test `LoginViewModel_HasSocialAvatarSyncAfterGoogleSignIn` to `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs` — asserts `LoginViewModel.cs` source contains `SocialAvatarUrl`, `GetCachedProfile`, and `AvatarUrl` check
+- [x] T003 [US1] Add source-inspection test `LoginViewModel_HasSocialAvatarSyncAfterGoogleSignIn` to `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs` — asserts `LoginViewModel.cs` source contains `SocialAvatarUrl`, `GetCachedProfile`, and `AvatarUrl` check
 
 ### Implementation for User Story 1
 
-- [ ] T004 [P] [US1] Read `src/LoopMeet.App/Features/Auth/ViewModels/LoginViewModel.cs` and locate the returning-user post-sign-in path in `SignInWithGoogleAsync` — add best-effort avatar sync: if `OAuthSignInResult.AvatarUrl` is non-empty and cached profile has no `AvatarUrl`, fire-and-forget `UpdateProfileAsync(new UserProfileUpdateRequest { DisplayName = cached?.DisplayName ?? string.Empty, SocialAvatarUrl = oauthResult.AvatarUrl })`
-- [ ] T005 [US1] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm T003 test passes and no regressions
+- [x] T004 [P] [US1] Read `src/LoopMeet.App/Features/Auth/ViewModels/LoginViewModel.cs` and locate the returning-user post-sign-in path in `SignInWithGoogleAsync` — add best-effort avatar sync: if `OAuthSignInResult.AvatarUrl` is non-empty and cached profile has no `AvatarUrl`, fire-and-forget `UpdateProfileAsync(new UserProfileUpdateRequest { DisplayName = cached?.DisplayName ?? string.Empty, SocialAvatarUrl = oauthResult.AvatarUrl })`
+- [x] T005 [US1] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm T003 test passes and no regressions
 
 **Checkpoint**: Story 1 complete — social avatar sync working for returning users independently testable.
 
@@ -59,22 +59,22 @@
 
 ### Tests for User Story 2
 
-- [ ] T006 [US2] Add three source-inspection tests to `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs`:
+- [x] T006 [US2] Add three source-inspection tests to `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs`:
   - `ProfileViewModel_DoesNotHaveAvatarInputOrAvatarSource` — asserts `ProfileViewModel.cs` does NOT contain `AvatarInput` or `AvatarSource`
   - `ProfilePage_HasCircularAvatarBesideDisplayName` — asserts `ProfilePage.xaml` contains `Ellipse`, `tab_profile_fallback.png`, `HasAvatar`
   - `ProfilePage_DoesNotHaveAvatarUrlEntry` — asserts `ProfilePage.xaml` does NOT contain `AvatarInput`
 
 ### Implementation for User Story 2
 
-- [ ] T007 [P] [US2] Update `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs`:
+- [x] T007 [P] [US2] Update `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs`:
   - Remove `_avatarInput` / `AvatarInput` property and its use in `Apply()`
   - Remove `_avatarSource` / `AvatarSource` property and its use in `Apply()`
   - Add `[ObservableProperty] private bool _hasAvatar;` updated in `Apply()` as `HasAvatar = !string.IsNullOrWhiteSpace(AvatarUrl)`
   - Remove `AvatarOverrideUrl = string.IsNullOrWhiteSpace(AvatarInput) ? null : AvatarInput` from `SaveProfileAsync` — save only sends `DisplayName`
-- [ ] T008 [US2] Update `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml`:
+- [x] T008 [US2] Update `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml`:
   - Remove: Avatar URL `Label`, Avatar URL `Entry` (`Text="{Binding AvatarInput}"`), Avatar source `Label` (`Text="{Binding AvatarSource, ...}"`)
   - Add `HorizontalStackLayout` wrapping the display name section, with a `Border` (56×56, `StrokeShape=Ellipse`, `BackgroundColor={StaticResource Gray400}`) containing a `Grid` with `tab_profile_fallback.png` placeholder and `Image Source="{Binding AvatarUrl}" IsVisible="{Binding HasAvatar}"` on top — matching the pattern in `src/LoopMeet.App/Features/Home/Views/HomePage.xaml`
-- [ ] T009 [US2] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm all T006 tests pass and no regressions
+- [x] T009 [US2] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm all T006 tests pass and no regressions
 
 **Checkpoint**: Story 2 complete — Profile page displays circular avatar with placeholder independently testable.
 
@@ -88,24 +88,24 @@
 
 ### Tests for User Story 3
 
-- [ ] T010 [US3] Add two source-inspection tests to `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs`:
+- [x] T010 [US3] Add two source-inspection tests to `tests/LoopMeet.App.Tests/Features/Profile/ProfileViewModelTests.cs`:
   - `ProfileViewModel_HasPickAvatarCommandWithMediaPicker` — asserts `ProfileViewModel.cs` contains `PickAvatarAsync`, `MediaPicker`, `IsCaptureSupported`, `StreamPart`, `UploadAvatarAsync`
   - `UsersApi_HasUploadAvatarMethod` — asserts `UsersApi.cs` contains `UploadAvatarAsync` and `StreamPart`
 
 ### Implementation for User Story 3
 
-- [ ] T011 [P] [US3] Add multipart avatar upload to `src/LoopMeet.App/Services/UsersApi.cs`:
+- [x] T011 [P] [US3] Add multipart avatar upload to `src/LoopMeet.App/Services/UsersApi.cs`:
   - Add to `IUsersApi`: `[Multipart] [Post("/users/avatar")] Task<UserProfileResponse> UploadAvatarAsync([AliasAs("image")] StreamPart image);`
   - Add wrapper method `UploadAvatarAsync(StreamPart image)` to `UsersApi` class
-- [ ] T012 [P] [US3] Add camera and photo library usage descriptions to `src/LoopMeet.App/Platforms/iOS/Info.plist`:
+- [x] T012 [P] [US3] Add camera and photo library usage descriptions to `src/LoopMeet.App/Platforms/iOS/Info.plist`:
   - `NSCameraUsageDescription`: "LoopMeet needs camera access to take a profile photo."
   - `NSPhotoLibraryUsageDescription`: "LoopMeet needs photo library access to choose a profile photo."
-- [ ] T013 [P] [US3] Add camera and photo library usage descriptions to `src/LoopMeet.App/Platforms/MacCatalyst/Info.plist` (same keys and values as T012)
-- [ ] T014 [P] [US3] Add camera and photo library permissions to `src/LoopMeet.App/Platforms/Android/AndroidManifest.xml`:
+- [x] T013 [P] [US3] Add camera and photo library usage descriptions to `src/LoopMeet.App/Platforms/MacCatalyst/Info.plist` (same keys and values as T012)
+- [x] T014 [P] [US3] Add camera and photo library permissions to `src/LoopMeet.App/Platforms/Android/AndroidManifest.xml`:
   - `<uses-permission android:name="android.permission.CAMERA" />`
   - `<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />`
   - `<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />`
-- [ ] T015 [US3] Add `PickAvatarAsync` RelayCommand and `IsUploading` bool property to `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs` (depends on T011):
+- [x] T015 [US3] Add `PickAvatarAsync` RelayCommand and `IsUploading` bool property to `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs` (depends on T011):
   - Check `MediaPicker.Default.IsCaptureSupported` to conditionally show "Take a new photo"
   - Use `DisplayActionSheet` for the choice prompt
   - Request `Permissions.Camera` before camera, `Permissions.Photos` before library
@@ -113,8 +113,8 @@
   - On selection: open stream, call `_usersApi.UploadAvatarAsync(new StreamPart(...))`, call `Apply()` and update cache on success
   - On failure: log via `_logger`, set `StatusMessage` and `ShowStatus = true`
   - Set `IsUploading` true/false around the upload
-- [ ] T016 [US3] Add `TapGestureRecognizer` bound to `PickAvatarCommand` on the avatar `Border` in `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml` (depends on T015)
-- [ ] T017 [US3] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm all T010 tests pass and no regressions
+- [x] T016 [US3] Add `TapGestureRecognizer` bound to `PickAvatarCommand` on the avatar `Border` in `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml` (depends on T015)
+- [x] T017 [US3] Run `dotnet test tests/LoopMeet.App.Tests/` and confirm all T010 tests pass and no regressions
 
 **Checkpoint**: All 3 stories complete — avatar tap-to-replace works on all platforms independently testable.
 
@@ -122,7 +122,7 @@
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T018 [P] Run full `dotnet test tests/LoopMeet.App.Tests/` and confirm all tests pass (expected: at least 16 tests)
+- [x] T018 [P] Run full `dotnet test tests/LoopMeet.App.Tests/` and confirm all tests pass (expected: at least 16 tests)
 - [ ] T019 [P] Manual acceptance testing on macOS (Mac Catalyst) per `specs/005-profile-avatar/quickstart.md` — all three story checklists
 - [ ] T020 [P] Manual acceptance testing on iOS per `specs/005-profile-avatar/quickstart.md` — all three story checklists
 - [ ] T021 [P] Manual acceptance testing on Android per `specs/005-profile-avatar/quickstart.md` — all three story checklists

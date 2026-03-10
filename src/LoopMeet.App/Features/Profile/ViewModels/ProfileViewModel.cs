@@ -4,6 +4,7 @@ using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
+using Refit;
 
 namespace LoopMeet.App.Features.Profile.ViewModels;
 
@@ -27,7 +28,7 @@ public sealed partial class ProfileViewModel : ObservableObject
     private string? _avatarUrl;
 
     [ObservableProperty]
-    private string _avatarSource = "none";
+    private bool _hasAvatar;
 
     [ObservableProperty]
     private DateTimeOffset _userSince;
@@ -36,10 +37,10 @@ public sealed partial class ProfileViewModel : ObservableObject
     private int _groupCount;
 
     [ObservableProperty]
-    private string _avatarInput = string.Empty;
+    private bool _canChangePassword = true;
 
     [ObservableProperty]
-    private bool _canChangePassword = true;
+    private bool _isUploading;
 
     [ObservableProperty]
     private string _statusMessage = string.Empty;
@@ -131,8 +132,7 @@ public sealed partial class ProfileViewModel : ObservableObject
         {
             var updated = await _usersApi.UpdateProfileAsync(new UserProfileUpdateRequest
             {
-                DisplayName = DisplayName,
-                AvatarOverrideUrl = string.IsNullOrWhiteSpace(AvatarInput) ? null : AvatarInput
+                DisplayName = DisplayName
             });
 
             _userProfileCache.SetCachedProfile(updated);
@@ -158,13 +158,108 @@ public sealed partial class ProfileViewModel : ObservableObject
         await Shell.Current.GoToAsync("change-password");
     }
 
+    [RelayCommand]
+    private async Task PickAvatarAsync()
+    {
+        if (IsBusy || IsUploading)
+        {
+            return;
+        }
+
+        FileResult? file;
+        try
+        {
+#if MACCATALYST
+            file = await MainThread.InvokeOnMainThreadAsync(() =>
+                FilePicker.Default.PickAsync(new PickOptions
+                {
+                    FileTypes = FilePickerFileType.Images
+                }));
+#else
+            var options = new List<string> { "Choose from library" };
+            if (MediaPicker.Default.IsCaptureSupported)
+            {
+                options.Insert(0, "Take a new photo");
+            }
+
+            var action = await Shell.Current.DisplayActionSheetAsync("Profile photo", "Cancel", null, options.ToArray());
+            if (string.IsNullOrEmpty(action) || action == "Cancel")
+            {
+                return;
+            }
+
+            if (action == "Take a new photo")
+            {
+                var cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+                if (cameraStatus != PermissionStatus.Granted)
+                {
+                    return;
+                }
+                file = await MediaPicker.Default.CapturePhotoAsync();
+            }
+            else
+            {
+                if (DeviceInfo.Platform == DevicePlatform.Android)
+                {
+                    var storageStatus = await Permissions.RequestAsync<Permissions.StorageRead>();
+                    if (storageStatus != PermissionStatus.Granted)
+                    {
+                        return;
+                    }
+                }
+                var photos = await MediaPicker.Default.PickPhotosAsync();
+                file = photos?.FirstOrDefault();
+            }
+#endif
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to capture or pick photo.");
+            return;
+        }
+
+        if (file is null)
+        {
+            return;
+        }
+
+        IsUploading = true;
+        ShowStatus = false;
+        StatusMessage = string.Empty;
+        try
+        {
+            await using var stream = await file.OpenReadAsync();
+            var ext = Path.GetExtension(file.FileName ?? "").TrimStart('.').ToLowerInvariant();
+            var contentType = ext switch
+            {
+                "png" => "image/png",
+                "gif" => "image/gif",
+                "webp" => "image/webp",
+                _ => "image/jpeg"
+            };
+            var part = new StreamPart(stream, file.FileName ?? "photo.jpg", contentType);
+            var updated = await _usersApi.UploadAvatarAsync(part);
+            _userProfileCache.SetCachedProfile(updated);
+            Apply(updated);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to upload avatar.");
+            ShowStatus = true;
+            StatusMessage = "Unable to update profile photo. Please try again.";
+        }
+        finally
+        {
+            IsUploading = false;
+        }
+    }
+
     private void Apply(UserProfileResponse profile)
     {
         DisplayName = profile.DisplayName;
         Email = profile.Email;
         AvatarUrl = profile.AvatarUrl;
-        AvatarSource = profile.AvatarSource;
-        AvatarInput = profile.AvatarUrl ?? string.Empty;
+        HasAvatar = !string.IsNullOrWhiteSpace(AvatarUrl);
         UserSince = profile.UserSince;
         GroupCount = profile.GroupCount;
         CanChangePassword = profile.CanChangePassword;

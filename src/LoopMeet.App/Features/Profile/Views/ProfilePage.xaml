@@ -9,15 +9,40 @@
         <VerticalStackLayout Padding="24" Spacing="12">
             <Label Text="Profile" FontSize="20" FontAttributes="Bold" />
 
-            <Label Text="Display name" FontAttributes="Bold" />
-            <Entry Text="{Binding DisplayName}" Placeholder="Display name" />
+            <HorizontalStackLayout Spacing="16" VerticalOptions="Start">
+                <Border
+                    WidthRequest="56"
+                    HeightRequest="56"
+                    StrokeThickness="0"
+                    BackgroundColor="{StaticResource Gray400}">
+                    <Border.StrokeShape>
+                        <Ellipse />
+                    </Border.StrokeShape>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding PickAvatarCommand}" />
+                    </Border.GestureRecognizers>
+                    <Grid WidthRequest="56" HeightRequest="56">
+                        <Image
+                            Source="tab_profile_fallback.png"
+                            Aspect="AspectFit"
+                            WidthRequest="32"
+                            HeightRequest="32"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Image
+                            Source="{Binding AvatarUrl}"
+                            Aspect="AspectFill"
+                            IsVisible="{Binding HasAvatar}" />
+                    </Grid>
+                </Border>
+                <VerticalStackLayout Spacing="4" VerticalOptions="Center">
+                    <Label Text="Display name" FontAttributes="Bold" />
+                    <Entry Text="{Binding DisplayName}" Placeholder="Display name" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
 
             <Label Text="Email" FontAttributes="Bold" />
             <Label Text="{Binding Email}" />
-
-            <Label Text="Avatar URL" FontAttributes="Bold" />
-            <Entry Text="{Binding AvatarInput}" Placeholder="https://..." />
-            <Label Text="{Binding AvatarSource, StringFormat='Avatar source: {0}'}" />
 
             <Label Text="{Binding UserSince, StringFormat='User since: {0:yyyy-MM-dd}'}" />
             <Label Text="{Binding GroupCount, StringFormat='Groups: {0}'}" />

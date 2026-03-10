@@ -1,5 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+		<CodesignEntitlements>Platforms/MacCatalyst/Entitlements.plist</CodesignEntitlements>
+	</PropertyGroup> -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst'))">
+    <CodesignEntitlements>Platforms/MacCatalyst/Entitlements.plist</CodesignEntitlements>
+		<UseAppSandbox>true</UseAppSandbox>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>

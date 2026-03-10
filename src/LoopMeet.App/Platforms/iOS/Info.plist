@@ -37,6 +37,10 @@
 		</array>
 		<key>XSAppIconAssets</key>
 		<string>Assets.xcassets/appicon.appiconset</string>
+		<key>NSCameraUsageDescription</key>
+		<string>LoopMeet needs camera access to let you take a new profile photo.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>LoopMeet needs photo library access to let you choose a profile photo.</string>
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSExceptionDomains</key>

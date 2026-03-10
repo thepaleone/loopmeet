@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth.Models;
 using LoopMeet.App.Features.Home.Models;
+using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
 using Refit;
@@ -135,6 +136,15 @@ public sealed partial class LoginViewModel : ObservableObject
             var profile = await TryGetProfileAsync();
             if (profile is not null)
             {
+                if (!string.IsNullOrWhiteSpace(authResult.AvatarUrl) && string.IsNullOrWhiteSpace(profile.AvatarUrl))
+                {
+                    _ = _usersApi.UpdateProfileAsync(new UserProfileUpdateRequest
+                    {
+                        DisplayName = profile.DisplayName,
+                        SocialAvatarUrl = authResult.AvatarUrl
+                    });
+                }
+
                 await CacheProfileSummaryAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
@@ -184,7 +194,7 @@ public sealed partial class LoginViewModel : ObservableObject
         }
     }
 
-    private async Task<UserProfileResponse?> TryGetProfileAsync()
+    private async Task<LoopMeet.App.Features.Auth.Models.UserProfileResponse?> TryGetProfileAsync()
     {
         try
         {
