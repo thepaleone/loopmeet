@@ -12,32 +12,57 @@
                 <Label Text="Groups" FontSize="18" FontAttributes="Bold" />
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingOwnedGroups}">
-                <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="0" RowSpacing="8">
-                    <Grid x:Name="OwnedSkeletonRow1" HeightRequest="18">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
+                <!-- Skeleton card 1 -->
+                <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        Padding="12,10" Margin="0,0,0,4">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
+                            <Border.StrokeShape><Ellipse /></Border.StrokeShape>
                         </Border>
-                        <Border x:Name="OwnedShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
+                            <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                            </Border>
+                            <Border x:Name="OwnedShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        </Grid>
                     </Grid>
-                    <Grid x:Name="OwnedSkeletonRow2" HeightRequest="18" Grid.Row="1">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
+                </Border>
+                <!-- Skeleton card 2 -->
+                <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        Padding="12,10" Margin="0,0,0,4">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
+                            <Border.StrokeShape><Ellipse /></Border.StrokeShape>
                         </Border>
-                        <Border x:Name="OwnedShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
+                            <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                            </Border>
+                            <Border x:Name="OwnedShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        </Grid>
                     </Grid>
-                    <Grid x:Name="OwnedSkeletonRow3" HeightRequest="18" Grid.Row="2">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
+                </Border>
+                <!-- Skeleton card 3 -->
+                <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        Padding="12,10" Margin="0,0,0,4">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
+                            <Border.StrokeShape><Ellipse /></Border.StrokeShape>
                         </Border>
-                        <Border x:Name="OwnedShimmer3" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
+                            <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                            </Border>
+                            <Border x:Name="OwnedShimmer3" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Border>
             </VerticalStackLayout>
             <VerticalStackLayout BindableLayout.ItemsSource="{Binding OwnedGroups}" Spacing="8">
                 <VerticalStackLayout.Triggers>
@@ -124,24 +149,40 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingMemberGroups}">
-                <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto" ColumnSpacing="0" RowSpacing="8">
-                    <Grid x:Name="MemberSkeletonRow1" HeightRequest="18">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
+                <!-- Skeleton card 1 -->
+                <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        Padding="12,10" Margin="0,0,0,4">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
+                            <Border.StrokeShape><Ellipse /></Border.StrokeShape>
                         </Border>
-                        <Border x:Name="MemberShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
+                            <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                            </Border>
+                            <Border x:Name="MemberShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        </Grid>
                     </Grid>
-                    <Grid x:Name="MemberSkeletonRow2" HeightRequest="18" Grid.Row="1">
-                        <Border BackgroundColor="#E2E8F0">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6" />
-                            </Border.StrokeShape>
+                </Border>
+                <!-- Skeleton card 2 -->
+                <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                        Padding="12,10" Margin="0,0,0,4">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
+                        <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
+                            <Border.StrokeShape><Ellipse /></Border.StrokeShape>
                         </Border>
-                        <Border x:Name="MemberShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
+                            <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                            </Border>
+                            <Border x:Name="MemberShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Border>
             </VerticalStackLayout>
             <VerticalStackLayout BindableLayout.ItemsSource="{Binding MemberGroups}" Spacing="8">
                 <VerticalStackLayout.Triggers>
