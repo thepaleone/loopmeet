@@ -148,14 +148,14 @@ public sealed class InvitationCommandService
         invitation.InvitedUserId = userId;
         await _invitationRepository.UpdateAsync(invitation, cancellationToken);
 
-        await _membershipRepository.AddAsync(new Membership
+        await _membershipRepository.AddFromInvitationAsync(new Membership
         {
             Id = Guid.NewGuid(),
             GroupId = invitation.GroupId,
             UserId = userId,
             Role = "member",
             CreatedAt = DateTimeOffset.UtcNow
-        }, cancellationToken);
+        }, email, cancellationToken);
 
         await _cacheService.RemoveAsync($"pending-invitations:{email}");
         await _cacheService.RemoveAsync($"groups:{userId}");
