@@ -1,4 +1,5 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Services.Auth;
 using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Core.Models;
@@ -11,6 +12,7 @@ public sealed class GroupQueryService
     private readonly IGroupRepository _groupRepository;
     private readonly IMembershipRepository _membershipRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ProfileAvatarResolver _avatarResolver;
     private readonly ICacheService _cacheService;
     private readonly ILogger<GroupQueryService> _logger;
 
@@ -18,12 +20,14 @@ public sealed class GroupQueryService
         IGroupRepository groupRepository,
         IMembershipRepository membershipRepository,
         IUserRepository userRepository,
+        ProfileAvatarResolver avatarResolver,
         ICacheService cacheService,
         ILogger<GroupQueryService> logger)
     {
         _groupRepository = groupRepository;
         _membershipRepository = membershipRepository;
         _userRepository = userRepository;
+        _avatarResolver = avatarResolver;
         _cacheService = cacheService;
         _logger = logger;
     }
@@ -43,14 +47,18 @@ public sealed class GroupQueryService
                 .ToList();
             var memberCounts = await GetMemberCountsAsync(allGroups, cancellationToken);
 
+            var ownerIds = allGroups.Select(g => g.OwnerUserId).Distinct().ToList();
+            var ownerUsers = await _userRepository.ListByIdsAsync(ownerIds, cancellationToken);
+            var ownerLookup = ownerUsers.ToDictionary(u => u.Id);
+
             var owned = ownedGroups
-                .Select(group => MapSummary(group, memberCounts))
+                .Select(group => MapSummary(group, memberCounts, ownerLookup))
                 .OrderBy(group => group.Name)
                 .ToList();
 
             var member = memberGroups
                 .Where(group => group.OwnerUserId != userId)
-                .Select(group => MapSummary(group, memberCounts))
+                .Select(group => MapSummary(group, memberCounts, ownerLookup))
                 .OrderBy(group => group.Name)
                 .ToList();
 
@@ -122,14 +130,20 @@ public sealed class GroupQueryService
         return counts.ToDictionary(item => item.Id, item => item.Count);
     }
 
-    private static GroupSummaryResponse MapSummary(Group group, IReadOnlyDictionary<Guid, int> memberCounts)
+    private GroupSummaryResponse MapSummary(
+        Group group,
+        IReadOnlyDictionary<Guid, int> memberCounts,
+        IReadOnlyDictionary<Guid, LoopMeet.Core.Models.User> ownerLookup)
     {
+        ownerLookup.TryGetValue(group.OwnerUserId, out var owner);
         return new GroupSummaryResponse
         {
             Id = group.Id,
             Name = group.Name,
             OwnerUserId = group.OwnerUserId,
-            MemberCount = memberCounts.TryGetValue(group.Id, out var count) ? count : 0
+            MemberCount = memberCounts.TryGetValue(group.Id, out var count) ? count : 0,
+            OwnerDisplayName = owner?.DisplayName ?? string.Empty,
+            OwnerAvatarUrl = owner != null ? _avatarResolver.ResolveEffectiveAvatarUrl(owner) : string.Empty
         };
     }
 }

@@ -8,8 +8,14 @@ public class GroupSummary
     public string Name { get; set; } = string.Empty;
     public Guid OwnerUserId { get; set; }
     public int MemberCount { get; set; }
+    public string OwnerDisplayName { get; set; } = string.Empty;
+    public string OwnerAvatarUrl { get; set; } = string.Empty;
 
     public string MemberCountText => MemberCount == 1 ? "1 member" : $"{MemberCount} members";
+    public string OwnerInitial => OwnerDisplayName.Length > 0
+        ? OwnerDisplayName[0].ToString().ToUpperInvariant()
+        : "?";
+    public bool HasOwnerAvatar => !string.IsNullOrWhiteSpace(OwnerAvatarUrl);
 }
 
 public sealed class CreateGroupRequest

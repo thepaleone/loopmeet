@@ -6,6 +6,8 @@ public class GroupSummaryResponse
     public string Name { get; init; } = string.Empty;
     public Guid OwnerUserId { get; init; }
     public int MemberCount { get; init; }
+    public string OwnerDisplayName { get; init; } = string.Empty;
+    public string OwnerAvatarUrl { get; init; } = string.Empty;
 }
 
 public sealed class CreateGroupRequest
