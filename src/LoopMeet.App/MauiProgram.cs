@@ -49,8 +49,12 @@ public static class MauiProgram
 			supabaseUrl = "http://dev.loopmeet.io:54321";
 			if (DeviceInfo.Platform == DevicePlatform.Android)
 			{
-				apiBaseUrl = "http://10.0.2.2:5001";
-				// supabaseUrl = "http://10.0.2.2:54321";
+				apiBaseUrl = DeviceInfo.DeviceType == DeviceType.Physical
+					? "http://192.168.1.24:5001"
+					: "http://10.0.2.2:5001";
+				// supabaseUrl = DeviceInfo.DeviceType == DeviceType.Physical
+				//     ? "http://192.168.1.24:54321"
+				//     : "http://10.0.2.2:54321";
 			}
 			else
 			{
