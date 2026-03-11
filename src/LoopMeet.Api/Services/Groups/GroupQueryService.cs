@@ -90,14 +90,19 @@ public sealed class GroupQueryService
             var memberships = await _membershipRepository.ListMembersAsync(groupId, cancellationToken);
             var userIds = memberships.Select(member => member.UserId).Distinct().ToList();
             var users = await _userRepository.ListByIdsAsync(userIds, cancellationToken);
-            var userLookup = users.ToDictionary(user => user.Id, user => user.DisplayName);
+            var userLookup = users.ToDictionary(user => user.Id);
 
             var members = memberships
-                .Select(member => new GroupMemberResponse
+                .Select(member =>
                 {
-                    UserId = member.UserId,
-                    DisplayName = userLookup.TryGetValue(member.UserId, out var name) ? name : "",
-                    Role = member.Role
+                    userLookup.TryGetValue(member.UserId, out var memberUser);
+                    return new GroupMemberResponse
+                    {
+                        UserId = member.UserId,
+                        DisplayName = memberUser?.DisplayName ?? string.Empty,
+                        Role = member.Role,
+                        AvatarUrl = memberUser != null ? _avatarResolver.ResolveEffectiveAvatarUrl(memberUser) : string.Empty
+                    };
                 })
                 .OrderBy(member => member.DisplayName)
                 .ToList();

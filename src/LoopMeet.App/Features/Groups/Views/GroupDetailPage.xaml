@@ -5,22 +5,65 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     Title="{Binding GroupName}">
 
-    <VerticalStackLayout Padding="24" Spacing="12">
-        <Label Text="{Binding GroupName}" FontSize="24" />
-        <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
-        <Button
-            Text="Invite Member"
-            ImageSource="ic_invite.png"
-            ContentLayout="Left,8"
-            Command="{Binding InviteMemberCommand}"
-            IsVisible="{Binding IsOwner}" />
-        <Label Text="Members" FontAttributes="Bold" />
-        <CollectionView ItemsSource="{Binding Members}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding DisplayName}" />
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12">
+            <Label Text="{Binding GroupName}" FontSize="24" FontAttributes="Bold" />
+            <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
+            <Button
+                Text="Invite Member"
+                ImageSource="ic_invite.png"
+                ContentLayout="Left,8"
+                Command="{Binding InviteMemberCommand}"
+                IsVisible="{Binding IsOwner}" />
+            <Label Text="Members" FontAttributes="Bold" FontSize="16" Margin="0,8,0,4" />
+            <FlexLayout
+                BindableLayout.ItemsSource="{Binding Members}"
+                Wrap="Wrap"
+                Direction="Row"
+                JustifyContent="Start"
+                AlignItems="Start">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Style="{StaticResource BubbleCardCompactBorderStyle}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                            Padding="10,8"
+                            Margin="0,0,8,8">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="14,18,16,20" />
+                            </Border.StrokeShape>
+                            <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                <!-- Avatar circle -->
+                                <Border
+                                    WidthRequest="40" HeightRequest="40"
+                                    BackgroundColor="{StaticResource Gray400}"
+                                    StrokeThickness="0">
+                                    <Border.StrokeShape><Ellipse /></Border.StrokeShape>
+                                    <Grid WidthRequest="40" HeightRequest="40">
+                                        <Label
+                                            Text="{Binding Initial}"
+                                            FontSize="15" FontAttributes="Bold"
+                                            TextColor="White"
+                                            HorizontalOptions="Center" VerticalOptions="Center" />
+                                        <Image
+                                            Source="{Binding AvatarUrl}"
+                                            Aspect="AspectFill"
+                                            IsVisible="{Binding HasAvatar}" />
+                                    </Grid>
+                                </Border>
+                                <!-- Member name -->
+                                <Label
+                                    Text="{Binding DisplayName}"
+                                    FontSize="12"
+                                    MaximumWidthRequest="80"
+                                    HorizontalOptions="Center"
+                                    HorizontalTextAlignment="Center"
+                                    LineBreakMode="TailTruncation" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </FlexLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

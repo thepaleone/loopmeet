@@ -88,25 +88,23 @@
                             <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
                                 <!-- Owner avatar + member badge -->
                                 <Grid WidthRequest="48" HeightRequest="48">
-                                    <!-- Fallback: Gray circle with initial -->
+                                    <!-- Gray circle with initial + avatar overlay -->
                                     <Border
                                         WidthRequest="48" HeightRequest="48"
                                         BackgroundColor="{StaticResource Gray400}"
                                         StrokeThickness="0">
                                         <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                                        <Label
-                                            Text="{Binding OwnerInitial}"
-                                            FontSize="18" FontAttributes="Bold"
-                                            TextColor="White"
-                                            HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Border>
-                                    <!-- Avatar image (shown when available) -->
-                                    <Border
-                                        WidthRequest="48" HeightRequest="48"
-                                        StrokeThickness="0"
-                                        IsVisible="{Binding HasOwnerAvatar}">
-                                        <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                                        <Image Source="{Binding OwnerAvatarUrl}" Aspect="AspectFill" />
+                                        <Grid WidthRequest="48" HeightRequest="48">
+                                            <Label
+                                                Text="{Binding OwnerInitial}"
+                                                FontSize="18" FontAttributes="Bold"
+                                                TextColor="White"
+                                                HorizontalOptions="Center" VerticalOptions="Center" />
+                                            <Image
+                                                Source="{Binding OwnerAvatarUrl}"
+                                                Aspect="AspectFill"
+                                                IsVisible="{Binding HasOwnerAvatar}" />
+                                        </Grid>
                                     </Border>
                                     <!-- Member count badge (lower-right) -->
                                     <Border
@@ -208,25 +206,23 @@
                             <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
                                 <!-- Owner avatar + member badge -->
                                 <Grid WidthRequest="48" HeightRequest="48">
-                                    <!-- Fallback: Gray circle with initial -->
+                                    <!-- Gray circle with initial + avatar overlay -->
                                     <Border
                                         WidthRequest="48" HeightRequest="48"
                                         BackgroundColor="{StaticResource Gray400}"
                                         StrokeThickness="0">
                                         <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                                        <Label
-                                            Text="{Binding OwnerInitial}"
-                                            FontSize="18" FontAttributes="Bold"
-                                            TextColor="White"
-                                            HorizontalOptions="Center" VerticalOptions="Center" />
-                                    </Border>
-                                    <!-- Avatar image (shown when available) -->
-                                    <Border
-                                        WidthRequest="48" HeightRequest="48"
-                                        StrokeThickness="0"
-                                        IsVisible="{Binding HasOwnerAvatar}">
-                                        <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                                        <Image Source="{Binding OwnerAvatarUrl}" Aspect="AspectFill" />
+                                        <Grid WidthRequest="48" HeightRequest="48">
+                                            <Label
+                                                Text="{Binding OwnerInitial}"
+                                                FontSize="18" FontAttributes="Bold"
+                                                TextColor="White"
+                                                HorizontalOptions="Center" VerticalOptions="Center" />
+                                            <Image
+                                                Source="{Binding OwnerAvatarUrl}"
+                                                Aspect="AspectFill"
+                                                IsVisible="{Binding HasOwnerAvatar}" />
+                                        </Grid>
                                     </Border>
                                     <!-- Member count badge (lower-right) -->
                                     <Border

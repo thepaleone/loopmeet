@@ -33,6 +33,12 @@ public sealed class GroupMember
     public Guid UserId { get; set; }
     public string DisplayName { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public string AvatarUrl { get; set; } = string.Empty;
+
+    public string Initial => DisplayName.Length > 0
+        ? DisplayName[0].ToString().ToUpperInvariant()
+        : "?";
+    public bool HasAvatar => !string.IsNullOrWhiteSpace(AvatarUrl);
 }
 
 public sealed class GroupDetail : GroupSummary
