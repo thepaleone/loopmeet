@@ -41,4 +41,14 @@ public sealed class InMemoryMembershipRepository : IMembershipRepository
 
         return Task.CompletedTask;
     }
+
+    public Task AddFromInvitationAsync(Membership membership, string invitedEmail, CancellationToken cancellationToken = default)
+    {
+        lock (_store.SyncRoot)
+        {
+            _store.Memberships.Add(membership);
+        }
+
+        return Task.CompletedTask;
+    }
 }
