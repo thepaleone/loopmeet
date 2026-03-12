@@ -7,6 +7,12 @@ public sealed class InvitationSummary
     public string GroupName { get; set; } = string.Empty;
     public string OwnerName { get; set; } = string.Empty;
     public string OwnerEmail { get; set; } = string.Empty;
+    public string OwnerAvatarUrl { get; set; } = string.Empty;
+
+    public string OwnerInitial => OwnerName.Length > 0
+        ? OwnerName[0].ToString().ToUpperInvariant()
+        : (!string.IsNullOrWhiteSpace(OwnerEmail) ? OwnerEmail[0].ToString().ToUpperInvariant() : "?");
+    public bool HasOwnerAvatar => !string.IsNullOrWhiteSpace(OwnerAvatarUrl);
     public string SenderName { get; set; } = string.Empty;
     public string SenderEmail { get; set; } = string.Empty;
     public string InvitedEmail { get; set; } = string.Empty;

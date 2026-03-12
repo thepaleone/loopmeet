@@ -7,4 +7,5 @@ public interface IMembershipRepository
     Task<Membership?> GetByUserAndGroupAsync(Guid userId, Guid groupId, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<Membership>> ListMembersAsync(Guid groupId, CancellationToken cancellationToken = default);
     Task AddAsync(Membership membership, CancellationToken cancellationToken = default);
+    Task AddFromInvitationAsync(Membership membership, string invitedEmail, CancellationToken cancellationToken = default);
 }

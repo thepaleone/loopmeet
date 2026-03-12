@@ -38,6 +38,19 @@ public sealed class MembershipRepository : IMembershipRepository
         await _client.From<MembershipRecord>().Insert(record);
     }
 
+    public async Task AddFromInvitationAsync(Membership membership, string invitedEmail, CancellationToken cancellationToken = default)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            ["p_id"] = membership.Id,
+            ["p_group_id"] = membership.GroupId,
+            ["p_member_user_id"] = membership.UserId,
+            ["p_role"] = membership.Role,
+            ["p_email"] = invitedEmail
+        };
+        await _client.Rpc("create_membership_from_invitation", parameters);
+    }
+
     private async Task<Membership?> GetByUserAndGroupInternalAsync(Guid userId, Guid groupId)
     {
         var response = await _client

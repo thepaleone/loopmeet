@@ -17,6 +17,10 @@ public interface IUsersApi
 
     [Post("/users/password")]
     Task ChangePasswordAsync([Body] ProfileModels.PasswordChangeRequest request);
+
+    [Multipart]
+    [Post("/users/avatar")]
+    Task<AuthModels.UserProfileResponse> UploadAvatarAsync([AliasAs("image")] StreamPart image);
 }
 
 public sealed class UsersApi
@@ -40,6 +44,9 @@ public sealed class UsersApi
         Map(await _api.UpdateProfileAsync(request));
 
     public Task ChangePasswordAsync(ProfileModels.PasswordChangeRequest request) => _api.ChangePasswordAsync(request);
+
+    public async Task<ProfileModels.UserProfileResponse> UploadAvatarAsync(StreamPart image) =>
+        Map(await _api.UploadAvatarAsync(image));
 
     private static ProfileModels.UserProfileResponse Map(AuthModels.UserProfileResponse response)
     {

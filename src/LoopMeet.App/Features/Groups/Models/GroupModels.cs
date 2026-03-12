@@ -8,8 +8,14 @@ public class GroupSummary
     public string Name { get; set; } = string.Empty;
     public Guid OwnerUserId { get; set; }
     public int MemberCount { get; set; }
+    public string OwnerDisplayName { get; set; } = string.Empty;
+    public string OwnerAvatarUrl { get; set; } = string.Empty;
 
     public string MemberCountText => MemberCount == 1 ? "1 member" : $"{MemberCount} members";
+    public string OwnerInitial => OwnerDisplayName.Length > 0
+        ? OwnerDisplayName[0].ToString().ToUpperInvariant()
+        : "?";
+    public bool HasOwnerAvatar => !string.IsNullOrWhiteSpace(OwnerAvatarUrl);
 }
 
 public sealed class CreateGroupRequest
@@ -27,6 +33,12 @@ public sealed class GroupMember
     public Guid UserId { get; set; }
     public string DisplayName { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public string AvatarUrl { get; set; } = string.Empty;
+
+    public string Initial => DisplayName.Length > 0
+        ? DisplayName[0].ToString().ToUpperInvariant()
+        : "?";
+    public bool HasAvatar => !string.IsNullOrWhiteSpace(AvatarUrl);
 }
 
 public sealed class GroupDetail : GroupSummary

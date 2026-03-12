@@ -65,5 +65,7 @@
 		</dict>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/appicon.appiconset</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>LoopMeet needs access to your photo library to let you set a profile picture.</string>
 </dict>
 </plist>

@@ -1,4 +1,5 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Services.Auth;
 using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Core.Models;
@@ -11,6 +12,7 @@ public sealed class InvitationQueryService
     private readonly IInvitationRepository _invitationRepository;
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
+    private readonly ProfileAvatarResolver _avatarResolver;
     private readonly ICacheService _cacheService;
     private readonly ILogger<InvitationQueryService> _logger;
 
@@ -18,12 +20,14 @@ public sealed class InvitationQueryService
         IInvitationRepository invitationRepository,
         IGroupRepository groupRepository,
         IUserRepository userRepository,
+        ProfileAvatarResolver avatarResolver,
         ICacheService cacheService,
         ILogger<InvitationQueryService> logger)
     {
         _invitationRepository = invitationRepository;
         _groupRepository = groupRepository;
         _userRepository = userRepository;
+        _avatarResolver = avatarResolver;
         _cacheService = cacheService;
         _logger = logger;
     }
@@ -75,6 +79,7 @@ public sealed class InvitationQueryService
                         GroupName = group?.Name ?? string.Empty,
                         OwnerName = owner?.DisplayName ?? string.Empty,
                         OwnerEmail = owner?.Email ?? string.Empty,
+                        OwnerAvatarUrl = owner != null ? _avatarResolver.ResolveEffectiveAvatarUrl(owner) : string.Empty,
                         SenderName = sender?.DisplayName ?? string.Empty,
                         SenderEmail = sender?.Email ?? string.Empty,
                         InvitedEmail = invitation.InvitedEmail,

@@ -8,18 +8,21 @@ public sealed class UserProvisioningService
 {
     private readonly IUserRepository _userRepository;
     private readonly ProfileAvatarResolver _avatarResolver;
+    private readonly AvatarStorageService _avatarStorageService;
     private readonly PasswordPolicyValidator _passwordPolicyValidator;
     private readonly IPasswordChangeService _passwordChangeService;
     private readonly ILogger<UserProvisioningService> _logger;
 
     public UserProvisioningService(IUserRepository userRepository,
         ProfileAvatarResolver avatarResolver,
+        AvatarStorageService avatarStorageService,
         PasswordPolicyValidator passwordPolicyValidator,
         IPasswordChangeService passwordChangeService,
         ILogger<UserProvisioningService> logger)
     {
         _userRepository = userRepository;
         _avatarResolver = avatarResolver;
+        _avatarStorageService = avatarStorageService;
         _passwordPolicyValidator = passwordPolicyValidator;
         _passwordChangeService = passwordChangeService;
         _logger = logger;
@@ -73,6 +76,22 @@ public sealed class UserProvisioningService
         existing.DisplayName = request.DisplayName;
         existing.Phone = request.Phone;
         _avatarResolver.ApplyFromRequest(existing, request.SocialAvatarUrl, request.AvatarOverrideUrl);
+        existing.UpdatedAt = DateTimeOffset.UtcNow;
+
+        await _userRepository.UpdateAsync(existing, cancellationToken);
+        return existing;
+    }
+
+    public async Task<User?> UploadAvatarAsync(Guid userId, Stream stream, string fileName, string contentType, CancellationToken cancellationToken = default)
+    {
+        var existing = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (existing is null)
+        {
+            return null;
+        }
+
+        var publicUrl = await _avatarStorageService.UploadAsync(userId, stream, fileName, contentType, cancellationToken);
+        existing.AvatarOverrideUrl = publicUrl;
         existing.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _userRepository.UpdateAsync(existing, cancellationToken);
