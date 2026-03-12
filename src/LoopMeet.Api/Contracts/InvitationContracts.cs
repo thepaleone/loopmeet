@@ -7,6 +7,7 @@ public sealed class InvitationResponse
     public string GroupName { get; init; } = string.Empty;
     public string OwnerName { get; init; } = string.Empty;
     public string OwnerEmail { get; init; } = string.Empty;
+    public string OwnerAvatarUrl { get; init; } = string.Empty;
     public string SenderName { get; init; } = string.Empty;
     public string SenderEmail { get; init; } = string.Empty;
     public string InvitedEmail { get; init; } = string.Empty;

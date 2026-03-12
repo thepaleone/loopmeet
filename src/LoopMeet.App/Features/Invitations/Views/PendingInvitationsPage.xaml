@@ -101,8 +101,27 @@
                                         Command="{Binding BindingContext.ShowInvitationDetailsCommand, Source={x:Reference PendingInvitationsPageRoot}}"
                                         CommandParameter="{Binding .}" />
                                 </Border.GestureRecognizers>
-                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                    <VerticalStackLayout Spacing="2">
+                                <Grid ColumnDefinitions="54,*,Auto" ColumnSpacing="12">
+                                    <!-- Owner avatar circle -->
+                                    <Border
+                                        WidthRequest="48" HeightRequest="48"
+                                        BackgroundColor="{StaticResource Gray400}"
+                                        StrokeThickness="0"
+                                        VerticalOptions="Center">
+                                        <Border.StrokeShape><Ellipse /></Border.StrokeShape>
+                                        <Grid WidthRequest="48" HeightRequest="48">
+                                            <Label
+                                                Text="{Binding OwnerInitial}"
+                                                FontSize="18" FontAttributes="Bold"
+                                                TextColor="White"
+                                                HorizontalOptions="Center" VerticalOptions="Center" />
+                                            <Image
+                                                Source="{Binding OwnerAvatarUrl}"
+                                                Aspect="AspectFill"
+                                                IsVisible="{Binding HasOwnerAvatar}" />
+                                        </Grid>
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                         <Label
                                             Text="{Binding GroupName}"
                                             FontAttributes="Bold"
@@ -115,7 +134,7 @@
                                             TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                                     </VerticalStackLayout>
                                     <HorizontalStackLayout
-                                        Grid.Column="1"
+                                        Grid.Column="2"
                                         Spacing="8"
                                         VerticalOptions="Center"
                                         IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}">
