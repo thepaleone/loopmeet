@@ -61,10 +61,10 @@
 
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash_ios.png" Color="#fcdcb5" BaseSize="565,565"
-			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'" />
-		<MauiSplashScreen Include="Resources\Splash\splash_ios.png" Color="#fcdcb5" BaseSize="565,565"
-			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+		<!-- <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#fcdcb5" BaseSize="565,565"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'" /> -->
+		<MauiSplashScreen Include="Resources\Splash\splash_ios.png" Color="#fcdcb5" BaseSize="261,370" />
+			<!-- Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" /> -->
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
