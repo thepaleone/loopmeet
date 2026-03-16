@@ -6,6 +6,7 @@ using Microsoft.Maui.Authentication;
 using Supabase.Gotrue;
 using Microsoft.Maui.Storage;
 using SupabaseClient = Supabase.Client;
+using LoopMeet.App;
 
 namespace LoopMeet.App.Features.Auth;
 

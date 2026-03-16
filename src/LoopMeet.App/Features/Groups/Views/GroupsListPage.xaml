@@ -231,7 +231,7 @@
                                         Stroke="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
                                         HorizontalOptions="End" VerticalOptions="End"
                                         Padding="4,2"
-                                        Margin="0,0,-6,-6">
+                                        Margin="{OnPlatform Default='0,0,-6,-6', Android='0,0,-6,-2'}">
                                         <Border.StrokeShape><RoundRectangle CornerRadius="10" /></Border.StrokeShape>
                                         <HorizontalStackLayout Spacing="2" VerticalOptions="Center">
                                             <Grid WidthRequest="13" HeightRequest="9">

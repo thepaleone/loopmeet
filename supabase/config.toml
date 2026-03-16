@@ -86,7 +86,8 @@ enabled = true
 # Port to use for Supabase Studio.
 port = 54323
 # External URL of the API server that frontend connects to.
-api_url = "http://127.0.0.1"
+api_url = "http://dev.loopmeet.io"
+# api_url = "http://127.0.0.1"
 # OpenAI API Key to use for Supabase AI in the Supabase Studio.
 openai_api_key = "env(OPENAI_API_KEY)"
 
@@ -154,12 +155,11 @@ additional_redirect_urls = ["loopmeet://auth-callback","http://dev.looopmeeet.io
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 604800
 # JWT signing secret used to sign and verify tokens.
-jwt_secret = "mP7ZyE2vQ4sN6xB8cJ1hK3tR5uF7aV9dL0gS2wX4yZ6nH8pT1rD3kM5bQ7cE9uA"
+# jwt_secret = "mP7ZyE2vQ4sN6xB8cJ1hK3tR5uF7aV9dL0gS2wX4yZ6nH8pT1rD3kM5bQ7cE9uA"
 # JWT issuer URL. If not set, defaults to the local API URL (http://127.0.0.1:<port>/auth/v1).
 jwt_issuer = "env(SUPABASE_JWTISSUER)"
 # Path to JWT signing key. DO NOT commit your signing keys file to git.
-# signing_keys_path = "./signing_keys.json"
-# If disabled, the refresh token will never expire.
+signing_keys_path = "./signing_keys.json"
 enable_refresh_token_rotation = true
 # Allows refresh tokens to be reused after expiry, up to the specified interval in seconds.
 # Requires enable_refresh_token_rotation = true.

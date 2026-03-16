@@ -20,6 +20,9 @@ public sealed partial class HomeViewModel(UserProfileCache userProfileCache) : O
 
     [ObservableProperty]
     private bool _hasAvatar;
+    
+    [ObservableProperty]
+    private string _userInitial = "";
 
     [RelayCommand]
     private Task LoadAsync()
@@ -30,6 +33,9 @@ public sealed partial class HomeViewModel(UserProfileCache userProfileCache) : O
             : "Hello";
         AvatarUrl = cached?.AvatarUrl;
         HasAvatar = !string.IsNullOrWhiteSpace(AvatarUrl);
+        UserInitial = cached?.DisplayName?.Length > 0
+            ? cached.DisplayName[0].ToString().ToUpperInvariant()
+            : "?";
         return Task.CompletedTask;
     }
 }

@@ -4,5 +4,5 @@ public sealed class AppConfig
 {
     public string ApiBaseUrl { get; init; } = "";
     public string SupabaseUrl { get; init; } = "";
-    public string SupabaseAnonKey { get; init; } = "";
+    public string SupabaseAnonOrPublisableKey { get; init; } = "";
 }

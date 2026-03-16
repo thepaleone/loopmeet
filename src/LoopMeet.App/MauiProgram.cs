@@ -42,23 +42,24 @@ public static class MauiProgram
 
 		var apiBaseUrl = "https://api.loopmeet.example.com";
 		var supabaseUrl = "https://cswfsnikasaorexwhsas.supabase.co";
-		var supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzd2ZzbmlrYXNhb3JleHdoc2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTA2NzMsImV4cCI6MjA4NzQ2NjY3M30.ENWIbaz-dQ-qaCag53EHlHQVdY9Tm7ZpfmVhqjTNIf8";
+		var supabaseAnonOrPublishableKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzd2ZzbmlrYXNhb3JleHdoc2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTA2NzMsImV4cCI6MjA4NzQ2NjY3M30.ENWIbaz-dQ-qaCag53EHlHQVdY9Tm7ZpfmVhqjTNIf8";
 		if (isDebug)
 		{
-			supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+			// supabaseAnonOrPublishableKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+			supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
 			supabaseUrl = "http://dev.loopmeet.io:54321";
 			if (DeviceInfo.Platform == DevicePlatform.Android)
 			{
 				apiBaseUrl = DeviceInfo.DeviceType == DeviceType.Physical
-					? "http://192.168.1.24:5001"
-					: "http://10.0.2.2:5001";
+					? "http://192.168.1.24:8080"
+					: "http://10.0.2.2:8080";
 				// supabaseUrl = DeviceInfo.DeviceType == DeviceType.Physical
 				//     ? "http://192.168.1.24:54321"
 				//     : "http://10.0.2.2:54321";
 			}
 			else
 			{
-				apiBaseUrl = "http://localhost:5001";
+				apiBaseUrl = "http://localhost:8080";
 				// supabaseUrl = "http://localhost:54321";
 			}
 		}
@@ -67,11 +68,11 @@ public static class MauiProgram
 		{
 			ApiBaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_API_BASE_URL") ?? apiBaseUrl,
 			SupabaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_URL") ?? supabaseUrl,
-			SupabaseAnonKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonKey
+			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey
 		};
 
 		builder.Services.AddSingleton(config);
-		builder.Services.AddSingleton(_ => new Client(config.SupabaseUrl, config.SupabaseAnonKey, new SupabaseOptions
+		builder.Services.AddSingleton(_ => new Client(config.SupabaseUrl, config.SupabaseAnonOrPublisableKey, new SupabaseOptions
 		{
 			AutoConnectRealtime = false,
 			AutoRefreshToken = true,

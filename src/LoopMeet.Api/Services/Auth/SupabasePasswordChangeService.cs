@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using LoopMeet.Api.Services.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace LoopMeet.Api.Services.Auth;
 
@@ -27,20 +29,14 @@ public sealed class SupabasePasswordChangeService : IPasswordChangeService
 
     public SupabasePasswordChangeService(
         IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
+        IOptions<SupabaseConfigOptions> options,
         ILogger<SupabasePasswordChangeService> logger)
     {
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _supabaseUrl = ResolveConfigValue(configuration,
-            "Supabase:Url",
-            "SUPABASE__URL",
-            "SUPABASE_URL");
-        _anonKey = ResolveConfigValue(configuration,
-            "Supabase:AnonKey",
-            "SUPABASE__ANONKEY",
-            "SUPABASE_ANONKEY",
-            "SUPABASE_ANON_KEY");
+        var config = options.Value;
+        _supabaseUrl = config.Url.TrimEnd('/');
+        _anonKey = config.AnonOrPublishableKey;
     }
 
     public async Task<PasswordChangeResult> ChangePasswordAsync(
@@ -380,19 +376,5 @@ public sealed class SupabasePasswordChangeService : IPasswordChangeService
         }
 
         return (null, false, false, false, false);
-    }
-
-    private static string ResolveConfigValue(IConfiguration configuration, params string[] keys)
-    {
-        foreach (var key in keys)
-        {
-            var value = configuration[key];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return value;
-            }
-        }
-
-        return string.Empty;
     }
 }

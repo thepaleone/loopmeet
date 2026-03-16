@@ -5,6 +5,7 @@ using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
 using Refit;
+using Supabase.Gotrue;
 
 namespace LoopMeet.App.Features.Profile.ViewModels;
 
@@ -47,6 +48,8 @@ public sealed partial class ProfileViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _showStatus;
+    [ObservableProperty]
+    private string _userInitial = "";
 
     public ProfileViewModel(AuthService authService, UsersApi usersApi, UserProfileCache userProfileCache, ILogger<ProfileViewModel> logger)
     {
@@ -260,6 +263,9 @@ public sealed partial class ProfileViewModel : ObservableObject
         Email = profile.Email;
         AvatarUrl = profile.AvatarUrl;
         HasAvatar = !string.IsNullOrWhiteSpace(AvatarUrl);
+        UserInitial = DisplayName.Length > 0
+            ? DisplayName[0].ToString().ToUpperInvariant()
+            : "?";
         UserSince = profile.UserSince;
         GroupCount = profile.GroupCount;
         CanChangePassword = profile.CanChangePassword;
