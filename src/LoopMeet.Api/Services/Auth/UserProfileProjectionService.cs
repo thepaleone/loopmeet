@@ -1,6 +1,8 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Services.Configuration;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Core.Models;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
@@ -21,21 +23,17 @@ public sealed class UserProfileProjectionService
         ProfileAvatarResolver avatarResolver,
         CurrentUserService currentUser,
         IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
+        IOptions<SupabaseConfigOptions> options,
         ILogger<UserProfileProjectionService> logger)
     {
         _groupRepository = groupRepository;
         _avatarResolver = avatarResolver;
         _currentUser = currentUser;
+        var config = options.Value;
+        _supabaseUrl = config.Url.TrimEnd('/');
+        _anonKey = config.AnonOrPublishableKey;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
-        _supabaseUrl = ResolveConfigValue(configuration, "Supabase:Url", "SUPABASE__URL", "SUPABASE_URL");
-        _anonKey = ResolveConfigValue(
-            configuration,
-            "Supabase:AnonKey",
-            "SUPABASE__ANONKEY",
-            "SUPABASE_ANONKEY",
-            "SUPABASE_ANON_KEY");
     }
 
     public async Task<UserProfileResponse> BuildAsync(User user, CancellationToken cancellationToken = default)
@@ -141,19 +139,5 @@ public sealed class UserProfileProjectionService
         }
 
         return false;
-    }
-
-    private static string ResolveConfigValue(IConfiguration configuration, params string[] keys)
-    {
-        foreach (var key in keys)
-        {
-            var value = configuration[key];
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                return value;
-            }
-        }
-
-        return string.Empty;
     }
 }

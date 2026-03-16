@@ -1,40 +1,45 @@
 using System.Net.Http.Headers;
+using LoopMeet.Api.Services.Configuration;
+using Microsoft.Extensions.Options;
+using Supabase;
 
 namespace LoopMeet.Api.Services.Auth;
 
 public sealed class AvatarStorageService
 {
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly CurrentUserService _currentUser;
     private readonly string _supabaseUrl;
-    private readonly string _serviceKey;
-    private readonly string _anonKey;
+    private readonly string _anonOrPublishableKey;
     private readonly string _bucketName;
     private readonly ILogger<AvatarStorageService> _logger;
 
-    public AvatarStorageService(IHttpClientFactory httpClientFactory, IConfiguration configuration, ILogger<AvatarStorageService> logger)
+    public AvatarStorageService(IHttpClientFactory httpClientFactory, CurrentUserService currentUser, IOptions<SupabaseConfigOptions> options, ILogger<AvatarStorageService> logger)
     {
         _httpClientFactory = httpClientFactory;
-        _supabaseUrl = (configuration["Supabase:Url"] ?? string.Empty).TrimEnd('/');
-        _serviceKey = configuration["Supabase:ServiceKey"] ?? string.Empty;
-        _anonKey = configuration["Supabase:AnonKey"] ?? string.Empty;
-        _bucketName = configuration["Supabase:AvatarBucketName"] ?? "avatars";
+        _currentUser = currentUser;
+        var config = options.Value;
+        _supabaseUrl = config.Url.TrimEnd('/');
+        _anonOrPublishableKey = config.AnonOrPublishableKey;
+        _bucketName = config.AvatarBucketName;
         _logger = logger;
 
         _logger.LogInformation(
-            "AvatarStorageService initialized. Url configured: {HasUrl}, ServiceKey length: {KeyLength}, AnonKey length: {AnonKeyLength}, Bucket: {Bucket}",
+            "AvatarStorageService initialized. Url configured: {HasUrl}, AnonKey length: {AnonKeyLength}, Bucket: {Bucket}",
             !string.IsNullOrWhiteSpace(_supabaseUrl),
-            _serviceKey.Length,
-            _anonKey.Length,
+            _anonOrPublishableKey.Length,
             _bucketName);
     }
 
     public async Task<string> UploadAsync(Guid userId, Stream stream, string fileName, string contentType, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(_serviceKey))
+        var accessToken = _currentUser.AccessToken;
+        if(string.IsNullOrEmpty(accessToken))
         {
-            throw new InvalidOperationException("Supabase:ServiceKey is not configured. Avatar uploads require the service_role key.");
+            _logger.LogWarning("No access token available for current user. Avatar upload may fail if service key is not configured.");
+            throw new InvalidOperationException("Current user does not have an access token. Avatar upload requires authentication.");
         }
-
+        
         if (string.IsNullOrWhiteSpace(_supabaseUrl))
         {
             throw new InvalidOperationException("Supabase:Url is not configured.");
@@ -58,8 +63,8 @@ public sealed class AvatarStorageService
             userId, uploadUrl, bytes.Length);
 
         using var httpClient = _httpClientFactory.CreateClient();
-        httpClient.DefaultRequestHeaders.Add("apikey", _serviceKey);
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _serviceKey);
+        httpClient.DefaultRequestHeaders.Add("apikey", _anonOrPublishableKey);
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
         using var content = new ByteArrayContent(bytes);
         content.Headers.ContentType = new MediaTypeHeaderValue(contentType);

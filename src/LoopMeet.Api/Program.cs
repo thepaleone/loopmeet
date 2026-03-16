@@ -1,6 +1,7 @@
 using LoopMeet.Api.Services;
 using LoopMeet.Api.Services.Auth;
 using LoopMeet.Api.Services.Cache;
+using LoopMeet.Api.Services.Configuration;
 using LoopMeet.Api.Endpoints;
 using LoopMeet.Api.Services.Groups;
 using LoopMeet.Api.Services.Invitations;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Caching.Distributed;
 using Serilog;
 using Supabase;
+using Microsoft.Extensions.Options;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -32,9 +34,10 @@ if(isDevelopment)
 }
 
 builder.Services.AddOpenApi();
-
 builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
+
+builder.Services.Configure<SupabaseConfigOptions>(c => SupabaseConfigOptions.FromConfiguration(builder.Configuration, c));
 var redisConnection = builder.Configuration["Redis:ConnectionString"];
 if (!string.IsNullOrWhiteSpace(redisConnection))
 {
@@ -47,8 +50,8 @@ builder.Services.AddSingleton<ICacheService>(provider =>
     new CacheService(provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
         provider.GetService<IDistributedCache>()));
 
-var supabaseUrl = builder.Configuration["Supabase:Url"] ?? string.Empty;
-var supabaseAnonKey = builder.Configuration["Supabase:AnonKey"] ?? string.Empty;
+// var supabaseUrl = builder.Configuration["Supabase:Url"] ?? string.Empty;
+// var supabaseAnonKey = builder.Configuration["Supabase:AnonKey"] ?? string.Empty;
 builder.Services.AddScoped(provider =>
 {
     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
@@ -62,13 +65,14 @@ builder.Services.AddScoped(provider =>
         throw new InvalidOperationException("Missing bearer token for Supabase request.");
     }
 
-    return new Client(supabaseUrl, supabaseAnonKey, new SupabaseOptions
+    var options = provider.GetRequiredService<IOptions<SupabaseConfigOptions>>().Value;
+    return new Client(options.Url, options.AnonOrPublishableKey, new SupabaseOptions
     {
         AutoConnectRealtime = false,
         Headers = new Dictionary<string, string>
         {
             ["Authorization"] = $"Bearer {bearerToken}",
-            ["apikey"] = supabaseAnonKey
+            ["apikey"] = options.AnonOrPublishableKey
         }
     });
 });
@@ -76,7 +80,7 @@ builder.Services.AddScoped(provider =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<UserProvisioningService>();
-builder.Services.AddSingleton<AvatarStorageService>();
+builder.Services.AddScoped<AvatarStorageService>();
 builder.Services.AddScoped<UserProfileProjectionService>();
 builder.Services.AddSingleton<ProfileAvatarResolver>();
 builder.Services.AddScoped<IPasswordChangeService, SupabasePasswordChangeService>();
