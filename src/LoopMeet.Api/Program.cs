@@ -25,6 +25,12 @@ builder.Host.UseSerilog((context, services, configuration) =>
         .Enrich.FromLogContext()
         .WriteTo.Console());
 
+var isDevelopment = builder.Environment.IsDevelopment();
+if(isDevelopment)
+{
+    Log.Logger.Warning("Running in Development environment");
+}
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddHttpClient();
@@ -102,9 +108,38 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.Audience = jwtAudience;
+        options.Authority = jwtIssuer;
+        options.RequireHttpsMetadata = !isDevelopment;
+        options.TokenValidationParameters = new()
+        {
+            IncludeTokenOnFailedValidation = true,
+            
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.FromSeconds(30)
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                // PUT A BREAKPOINT HERE
+                Console.WriteLine("Auth failed: " + context.Exception.Message);
+                return Task.CompletedTask;
+            },
+            OnTokenValidated = context =>
+            {
+                Console.WriteLine("Token validated!");
+                return Task.CompletedTask;
+            }
+        };
         JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
     });
 builder.Services.AddAuthorization();
+Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+
 
 var app = builder.Build();
 
