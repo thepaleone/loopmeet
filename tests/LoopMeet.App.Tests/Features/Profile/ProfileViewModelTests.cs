@@ -32,7 +32,7 @@ public sealed class ProfileViewModelTests
         var xaml = File.ReadAllText(path);
 
         Assert.Contains("Ellipse", xaml, StringComparison.Ordinal);
-        Assert.Contains("tab_profile_fallback.png", xaml, StringComparison.Ordinal);
+        Assert.Contains("UserInitial", xaml, StringComparison.Ordinal);
         Assert.Contains("HasAvatar", xaml, StringComparison.Ordinal);
     }
 
