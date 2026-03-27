@@ -8,6 +8,7 @@
     xmlns:groups="clr-namespace:LoopMeet.App.Features.Groups.Views"
     xmlns:inv="clr-namespace:LoopMeet.App.Features.Invitations.Views"
     xmlns:profile="clr-namespace:LoopMeet.App.Features.Profile.Views"
+    xmlns:devtools="clr-namespace:LoopMeet.App.Features.DevTools.Views"
     Title="LoopMeet"
     FlyoutBehavior="Disabled">
 
@@ -55,6 +56,17 @@
                 Icon="tab_profile_fallback.png"
                 ContentTemplate="{DataTemplate profile:ProfilePage}"
                 Route="profile" />
+        </Tab>
+
+        <Tab
+            Title="Dev Tools"
+            x:Name="DevToolsTab"
+            Icon="tab_devtools_fallback.png">
+            <ShellContent
+                Title="Dev Tools"
+                Icon="tab_devtools_fallback.png"
+                ContentTemplate="{DataTemplate devtools:DevInfoPage}"
+                Route="devtools" />
         </Tab>
     </TabBar>
 

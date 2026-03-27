@@ -50,8 +50,6 @@ builder.Services.AddSingleton<ICacheService>(provider =>
     new CacheService(provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
         provider.GetService<IDistributedCache>()));
 
-// var supabaseUrl = builder.Configuration["Supabase:Url"] ?? string.Empty;
-// var supabaseAnonKey = builder.Configuration["Supabase:AnonKey"] ?? string.Empty;
 builder.Services.AddScoped(provider =>
 {
     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
@@ -65,14 +63,14 @@ builder.Services.AddScoped(provider =>
         throw new InvalidOperationException("Missing bearer token for Supabase request.");
     }
 
-    var options = provider.GetRequiredService<IOptions<SupabaseConfigOptions>>().Value;
-    return new Client(options.Url, options.AnonOrPublishableKey, new SupabaseOptions
+    var sbOptions = provider.GetRequiredService<IOptions<SupabaseConfigOptions>>().Value;
+    return new Client(sbOptions.Url, sbOptions.AnonOrPublishableKey, new SupabaseOptions
     {
         AutoConnectRealtime = false,
         Headers = new Dictionary<string, string>
         {
             ["Authorization"] = $"Bearer {bearerToken}",
-            ["apikey"] = options.AnonOrPublishableKey
+            ["apikey"] = sbOptions.AnonOrPublishableKey
         }
     });
 });
@@ -117,7 +115,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new()
         {
             IncludeTokenOnFailedValidation = true,
-            
             ValidateIssuer = true,
             ValidIssuer = jwtIssuer,
             ValidateAudience = true,
@@ -139,7 +136,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 return Task.CompletedTask;
             }
         };
-        JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
+        // JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
     });
 builder.Services.AddAuthorization();
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
@@ -171,6 +168,16 @@ app.MapUserEndpoints();
 app.MapGroupsEndpoints();
 app.MapInvitationEndpoints();
 app.MapGet("/", () => Results.Ok(new { Status = "LoopMeet API" }));
+
+// #if DEBUG
+var sbOptions = app.Services.GetRequiredService<IOptions<SupabaseConfigOptions>>().Value;
+Log.Information("Supabase Config - Url: {Url}, AnonOrPublishableKey: {AnonOrPublishableKey}, JwtIssuer: {JwtIssuer}, JwtAudience: {JwtAudience}, AvatarBucketName: {AvatarBucketName}",
+    sbOptions.Url,
+    sbOptions.AnonOrPublishableKey,
+    sbOptions.JwtIssuer,
+    sbOptions.JwtAudience,
+    sbOptions.AvatarBucketName);
+// #endif
 
 app.Run();
 

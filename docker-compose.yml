@@ -10,13 +10,12 @@ services:
     environment:  
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:${API_PORT:-5001}
-      SUPABASE__URL: http://dev.loopmeet.io:54321
-      SUPABASE__ANONORPUBLISHABLEKEY: ${SUPABASE_ANON_OR_PUBLISHABLE_KEY:?Supabase Anon or Publishable Key is required}
-      SUPABASE__SERVICEORSECRETKEY: ${SUPABASE_SERVICE_OR_SECRET_KEY:?Supabase Service or Secret Key is required}
-      SUPABASE__JWTISSUER: ${SUPABASE_JWTISSUER:?Supabase JWT Issuer is required}
-      SUPABASE__JWTAUDIENCE: ${SUPABASE_JWTAUDIENCE:-loopmeet-api}
-      # SUPABASE__JWTKEY: ${SUPABASE_JWTKEY:?Supabase JWT Key is required}
-      SUPABASE__AVATARBUCKETNAME: supabucket
+      SUPABASE__URL: ${SUPABASE__URL:?Supabase URL is required}
+      SUPABASE__ANONORPUBLISHABLEKEY: ${SUPABASE__ANONORPUBLISHABLEKEY:?Supabase Anon or Publishable Key is required}
+      SUPABASE__SERVICEORSECRETKEY: ${SUPABASE__SERVICEORSECRETKEY:?Supabase Service or Secret Key is required}
+      SUPABASE__JWTISSUER: ${SUPABASE__JWTISSUER:?Supabase JWT Issuer is required}
+      SUPABASE__JWTAUDIENCE: ${SUPABASE__JWTAUDIENCE:-authenticated}
+      SUPABASE__AVATARBUCKETNAME: ${SUPABASE__AVATARBUCKETNAME:-supabucket}
     volumes:
       - ~/.microsoft/usersecrets/${API_ID:?Project ID is required}/secrets.json:/root/.microsoft/usersecrets/${API_ID}/secrets.json:ro
       - type: volume

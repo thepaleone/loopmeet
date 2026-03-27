@@ -9,6 +9,8 @@ using LoopMeet.App.Features.Invitations.ViewModels;
 using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Features.Profile.ViewModels;
 using LoopMeet.App.Features.Profile.Views;
+using LoopMeet.App.Features.DevTools.ViewModels;
+using LoopMeet.App.Features.DevTools.Views;
 using LoopMeet.App.Services;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
@@ -31,38 +33,33 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-#if DEBUG
+#if DEBUG || STAGING
 		builder.Logging.AddDebug();
 #endif
 
+		var isStaging = false;
+#if STAGING
+		isStaging = true;
+#endif
 		var isDebug = false;
 #if DEBUG
 		isDebug = true;
 #endif
 
-		var apiBaseUrl = "https://api.loopmeet.example.com";
-		var supabaseUrl = "https://cswfsnikasaorexwhsas.supabase.co";
-		var supabaseAnonOrPublishableKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzd2ZzbmlrYXNhb3JleHdoc2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE4OTA2NzMsImV4cCI6MjA4NzQ2NjY3M30.ENWIbaz-dQ-qaCag53EHlHQVdY9Tm7ZpfmVhqjTNIf8";
-		if (isDebug)
-		{
-			// supabaseAnonOrPublishableKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
-			supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-			supabaseUrl = "http://dev.loopmeet.io:54321";
-			if (DeviceInfo.Platform == DevicePlatform.Android)
-			{
-				apiBaseUrl = DeviceInfo.DeviceType == DeviceType.Physical
-					? "http://192.168.1.24:8080"
-					: "http://10.0.2.2:8080";
-				// supabaseUrl = DeviceInfo.DeviceType == DeviceType.Physical
-				//     ? "http://192.168.1.24:54321"
-				//     : "http://10.0.2.2:54321";
-			}
-			else
-			{
-				apiBaseUrl = "http://localhost:8080";
-				// supabaseUrl = "http://localhost:54321";
-			}
-		}
+		var apiBaseUrl = 
+			isDebug ?  "http://dev.loopmeet.io:8080" :
+			isStaging ? "https://api-staging.loopmeet.io" :
+			throw new InvalidOperationException("Production not yet implemented.");
+
+		var supabaseUrl =
+			isDebug || // ? "http://dev.loopmeet.io:54321" :
+			isStaging ? "https://cswfsnikasaorexwhsas.supabase.co" :
+			"https://cswfsnikasaorexwhsas.supabase.co";
+		
+		var supabaseAnonOrPublishableKey = 
+			isDebug || // ? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH" :
+			isStaging ? "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8" :
+			"sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
 
 		var config = new AppConfig
 		{
@@ -112,6 +109,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<PendingInvitationsPage>();
 		builder.Services.AddTransient<ProfilePage>();
 		builder.Services.AddTransient<ChangePasswordPage>();
+		builder.Services.AddTransient<DevInfoViewModel>();
+		builder.Services.AddTransient<DevInfoPage>();
 
 		return builder.Build();
 	}
