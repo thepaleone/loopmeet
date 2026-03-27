@@ -14,6 +14,12 @@ public partial class AppShell : Shell
 {
 	private bool _authInitialized;
 
+#if DEBUG || STAGING
+	public bool ShowDevTools => true;
+#else
+	public bool ShowDevTools => false;
+#endif
+
 	public AppShell()
 	{
 		InitializeComponent();
@@ -43,6 +49,8 @@ public partial class AppShell : Shell
 		{
 			return;
 		}
+
+		this.DevToolsTab.IsVisible = ShowDevTools;
 
 		try
 		{

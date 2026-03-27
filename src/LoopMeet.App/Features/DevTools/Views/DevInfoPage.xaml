@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.DevTools.Views.DevInfoPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    Title="Dev Info">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="16">
+            <Label Text="App Configuration" FontSize="20" FontAttributes="Bold" />
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Build Configuration" FontAttributes="Bold" />
+                <Label Text="{Binding BuildConfiguration}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="API Base URL" FontAttributes="Bold" />
+                <Label Text="{Binding ApiBaseUrl}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Supabase URL" FontAttributes="Bold" />
+                <Label Text="{Binding SupabaseUrl}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Supabase Anon Key" FontAttributes="Bold" />
+                <Label Text="{Binding SupabaseAnonKey}" FontSize="12" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
