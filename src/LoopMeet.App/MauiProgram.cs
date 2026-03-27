@@ -52,12 +52,12 @@ public static class MauiProgram
 			throw new InvalidOperationException("Production not yet implemented.");
 
 		var supabaseUrl =
-			isDebug || // ? "http://dev.loopmeet.io:54321" :
+			isDebug ? "http://dev.loopmeet.io:54321" :
 			isStaging ? "https://cswfsnikasaorexwhsas.supabase.co" :
 			"https://cswfsnikasaorexwhsas.supabase.co";
 		
 		var supabaseAnonOrPublishableKey = 
-			isDebug || // ? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH" :
+			isDebug ? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH" :
 			isStaging ? "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8" :
 			"sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
 
