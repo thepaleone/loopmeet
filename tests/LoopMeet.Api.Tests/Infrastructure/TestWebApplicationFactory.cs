@@ -38,6 +38,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IUserRepository>();
             services.RemoveAll<IGroupRepository>();
             services.RemoveAll<IMembershipRepository>();
+            services.RemoveAll<IMeetupRepository>();
             services.RemoveAll<IInvitationRepository>();
             services.RemoveAll<IAuthIdentityRepository>();
             services.RemoveAll<IPasswordChangeService>();
@@ -46,6 +47,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IUserRepository, InMemoryUserRepository>();
             services.AddScoped<IGroupRepository, InMemoryGroupRepository>();
             services.AddScoped<IMembershipRepository, InMemoryMembershipRepository>();
+            services.AddScoped<IMeetupRepository, InMemoryMeetupRepository>();
             services.AddScoped<IInvitationRepository, InMemoryInvitationRepository>();
             services.AddScoped<IAuthIdentityRepository, InMemoryAuthIdentityRepository>();
             services.AddScoped<IPasswordChangeService, InMemoryPasswordChangeService>();

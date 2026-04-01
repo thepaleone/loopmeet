@@ -139,7 +139,7 @@ A group owner decides to cancel or remove an upcoming meetup. From the group det
 - **FR-011**: System MUST display an add meetup action on the group detail screen, positioned alongside the existing invite action, visible only to the group owner.
 - **FR-012**: System MUST replace the home screen placeholder card with a list of upcoming meetup cards across all of the user's groups, sorted by date ascending.
 - **FR-013**: System MUST display a "no upcoming meetings" card on the home screen when the user has no upcoming meetups across any of their groups.
-- **FR-014**: System MUST prevent creation of meetups with a date/time in the past.
+- **FR-014**: System MUST prevent creation of meetups with a date/time in the past, and MUST prevent updating a meetup's date/time to the past.
 - **FR-015**: Each meetup card (on both group detail and home screens) MUST display the meetup title, date/time, and location (or "TBD").
 - **FR-016**: Meetup cards on the home screen MUST also display the group name so users can distinguish which group the meetup belongs to.
 - **FR-017**: System MUST allow group owners to delete upcoming meetups via a swipe gesture on the group detail screen only (home page is view-only), using the same swipe interaction pattern as invitation accept/decline.

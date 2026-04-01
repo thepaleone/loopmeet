@@ -3,6 +3,7 @@ using LoopMeet.App.Features.Auth.Views;
 using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.Views;
+using LoopMeet.App.Features.Meetups.Views;
 using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Services;
 using Microsoft.Maui.ApplicationModel;
@@ -31,6 +32,8 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("invite-member", typeof(InviteMemberPage));
 		Routing.RegisterRoute("invitation-detail", typeof(InvitationDetailPage));
 		Routing.RegisterRoute("change-password", typeof(ChangePasswordPage));
+		Routing.RegisterRoute("create-meetup", typeof(CreateMeetupPage));
+		Routing.RegisterRoute("edit-meetup", typeof(EditMeetupPage));
 	}
 
 	protected override async void OnAppearing()
