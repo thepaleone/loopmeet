@@ -16,6 +16,7 @@ services:
       SUPABASE__JWTISSUER: ${SUPABASE__JWTISSUER:?Supabase JWT Issuer is required}
       SUPABASE__JWTAUDIENCE: ${SUPABASE__JWTAUDIENCE:-authenticated}
       SUPABASE__AVATARBUCKETNAME: ${SUPABASE__AVATARBUCKETNAME:-supabucket}
+      GOOGLE__PLACESAPIKEY: ${GOOGLE__PLACESAPIKEY:?Google Places API Key is required}
     volumes:
       - ~/.microsoft/usersecrets/${API_ID:?Project ID is required}/secrets.json:/root/.microsoft/usersecrets/${API_ID}/secrets.json:ro
       - type: volume

@@ -1,3 +1,4 @@
+using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services;
 using LoopMeet.Api.Services.Auth;
 using LoopMeet.Api.Services.Cache;
@@ -5,6 +6,8 @@ using LoopMeet.Api.Services.Configuration;
 using LoopMeet.Api.Endpoints;
 using LoopMeet.Api.Services.Groups;
 using LoopMeet.Api.Services.Invitations;
+using LoopMeet.Api.Services.Meetups;
+using LoopMeet.Api.Services.Places;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -102,12 +105,22 @@ builder.Services.AddScoped<GroupQueryService>();
 builder.Services.AddScoped<GroupCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();
 builder.Services.AddScoped<InvitationCommandService>();
+builder.Services.AddScoped<MeetupQueryService>();
+builder.Services.AddScoped<MeetupCommandService>();
+
+builder.Services.Configure<PlacesOptions>(options =>
+{
+    options.ApiKey = builder.Configuration["Google:PlacesApiKey"] ?? string.Empty;
+});
+builder.Services.AddHttpClient<PlacesProxyService>();
+builder.Services.AddScoped<PlacesProxyService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IAuthIdentityRepository, AuthIdentityRepository>();
+builder.Services.AddScoped<IMeetupRepository, MeetupRepository>();
 
 var jwtIssuer = builder.Configuration["Supabase:JwtIssuer"] ?? string.Empty;
 var jwtAudience = builder.Configuration["Supabase:JwtAudience"] ?? "loopmeet-api";
@@ -141,12 +154,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             OnAuthenticationFailed = context =>
             {
                 // PUT A BREAKPOINT HERE
-                Console.WriteLine("Auth failed: " + context.Exception.Message);
+                Log.Error("Auth failed: " + context.Exception.Message);
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>
             {
-                Console.WriteLine("Token validated!");
+                Log.Information("Token validated!");
                 return Task.CompletedTask;
             }
         };
@@ -181,6 +194,8 @@ app.UseHttpsRedirection();
 app.MapUserEndpoints();
 app.MapGroupsEndpoints();
 app.MapInvitationEndpoints();
+app.MapMeetupsEndpoints();
+app.MapPlacesEndpoints();
 app.MapGet("/", () => Results.Ok(new { Status = "LoopMeet API" }));
 
 // #if DEBUG
