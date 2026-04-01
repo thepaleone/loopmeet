@@ -97,12 +97,19 @@ public sealed partial class CreateMeetupViewModel : ObservableObject
             if (token.IsCancellationRequested) return;
             var result = await _placesApi.AutocompleteAsync(query);
             if (token.IsCancellationRequested) return;
-            Predictions.Clear();
-            foreach (var p in result.Predictions) Predictions.Add(p);
-            ShowPredictions = Predictions.Count > 0;
+
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                Predictions.Clear();
+                foreach (var p in result.Predictions) Predictions.Add(p);
+                ShowPredictions = Predictions.Count > 0;
+            });
         }
         catch (TaskCanceledException) { }
-        catch { ShowPredictions = false; }
+        catch
+        {
+            MainThread.BeginInvokeOnMainThread(() => ShowPredictions = false);
+        }
     }
 
     [RelayCommand]

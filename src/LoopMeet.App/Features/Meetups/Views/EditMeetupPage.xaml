@@ -25,22 +25,30 @@
                     <Label Text="{Binding LocationDisplay}" FontSize="13"
                         TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray300}}" />
                     <Entry Placeholder="Search for a location..." Text="{Binding LocationSearchText}" />
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Predictions}" Spacing="4" IsVisible="{Binding ShowPredictions}">
-                        <BindableLayout.ItemTemplate>
+                    <CollectionView
+                        ItemsSource="{Binding Predictions}"
+                        IsVisible="{Binding ShowPredictions}"
+                        SelectionMode="None"
+                        HeightRequest="200">
+                        <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Border Padding="8,6" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
+                                <Border Padding="8,6" Margin="0,2"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray800}}">
                                     <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
                                     <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding BindingContext.SelectPredictionCommand, Source={x:Reference EditMeetupPageRoot}}" CommandParameter="{Binding .}" />
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.SelectPredictionCommand, Source={x:Reference EditMeetupPageRoot}}"
+                                            CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
                                     <VerticalStackLayout>
                                         <Label Text="{Binding MainText}" FontSize="14" FontAttributes="Bold" />
-                                        <Label Text="{Binding SecondaryText}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                        <Label Text="{Binding SecondaryText}" FontSize="12"
+                                            TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
                                     </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
                     <Button Text="Clear Location" Command="{Binding ClearLocationCommand}" IsVisible="{Binding HasSelectedLocation}"
                         BackgroundColor="Transparent" TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" FontSize="12" Padding="0" />
                 </VerticalStackLayout>
