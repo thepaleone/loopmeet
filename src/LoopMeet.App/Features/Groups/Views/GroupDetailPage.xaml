@@ -139,9 +139,7 @@
             WidthRequest="56"
             HeightRequest="56"
             CornerRadius="28"
-            Text="+"
-            FontSize="24"
-            TextColor="White"
+            ImageSource="ic_add_meetup.png"
             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
             Command="{Binding AddMeetupCommand}"
             IsVisible="{Binding IsOwner}" />
