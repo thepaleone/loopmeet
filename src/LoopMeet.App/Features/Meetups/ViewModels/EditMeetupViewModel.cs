@@ -27,6 +27,16 @@ public sealed partial class EditMeetupViewModel : ObservableObject
     private bool _hasSelectedLocation;
 
     [ObservableProperty]
+    private bool _isLocationSearchActive;
+
+    partial void OnIsLocationSearchActiveChanged(bool value)
+    {
+        OnPropertyChanged(nameof(ShowFormFields));
+    }
+
+    public bool ShowFormFields => !IsLocationSearchActive;
+
+    [ObservableProperty]
     private Guid _groupId;
 
     [ObservableProperty]
@@ -83,7 +93,10 @@ public sealed partial class EditMeetupViewModel : ObservableObject
         _searchCts?.Cancel();
         _searchCts = new CancellationTokenSource();
         var token = _searchCts.Token;
-        if (string.IsNullOrWhiteSpace(value) || value.Length < 2)
+
+        IsLocationSearchActive = !string.IsNullOrWhiteSpace(value) && value.Length >= 2;
+
+        if (!IsLocationSearchActive)
         {
             Predictions.Clear();
             ShowPredictions = false;
@@ -132,6 +145,7 @@ public sealed partial class EditMeetupViewModel : ObservableObject
             LocationSearchText = string.Empty;
             Predictions.Clear();
             ShowPredictions = false;
+            IsLocationSearchActive = false;
         }
         catch { }
     }
@@ -149,6 +163,7 @@ public sealed partial class EditMeetupViewModel : ObservableObject
         LocationSearchText = string.Empty;
         Predictions.Clear();
         ShowPredictions = false;
+        IsLocationSearchActive = false;
     }
 
     public void ApplyParameters(Guid groupId, Guid meetupId)
