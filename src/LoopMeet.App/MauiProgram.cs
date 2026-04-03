@@ -39,29 +39,21 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-		var isStaging = false;
-#if STAGING
-		isStaging = true;
-#endif
-		var isDebug = false;
 #if DEBUG
-		isDebug = true;
+		var apiBaseUrl = "http://dev.loopmeet.io:8080";
+		var supabaseUrl = "http://dev.loopmeet.io:54321";
+		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+#elif STAGING
+// #if DEBUG || STAGING
+		var apiBaseUrl = "https://api-staging.loopmeet.io";
+		var supabaseUrl ="https://cswfsnikasaorexwhsas.supabase.co";
+		var supabaseAnonOrPublishableKey = "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
+#else
+		throw new InvalidOperationException("Production not yet implemented.");
+		var apiBaseUrl = string.Empty;
+		var supabaseUrl = string.Empty;
+		var supabaseAnonOrPublishableKey = string.Empty;
 #endif
-
-		var apiBaseUrl = 
-			isDebug ?  "http://dev.loopmeet.io:8080" :
-			isStaging ? "https://api-staging.loopmeet.io" :
-			throw new InvalidOperationException("Production not yet implemented.");
-
-		var supabaseUrl =
-			isDebug ? "http://dev.loopmeet.io:54321" :
-			isStaging ? "https://cswfsnikasaorexwhsas.supabase.co" :
-			"https://cswfsnikasaorexwhsas.supabase.co";
-		
-		var supabaseAnonOrPublishableKey = 
-			isDebug ? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH" :
-			isStaging ? "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8" :
-			"sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
 
 		var config = new AppConfig
 		{
