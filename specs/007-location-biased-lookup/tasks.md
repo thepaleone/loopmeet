@@ -17,9 +17,9 @@
 
 **Purpose**: Align extension points and shared contracts before feature work
 
-- [ ] T001 Add optional location-bias query parameters to app places API contract in `src/LoopMeet.App/Services/PlacesApi.cs`
-- [ ] T002 Add location-bias query parameters to API endpoint signature in `src/LoopMeet.Api/Endpoints/PlacesEndpoints.cs`
-- [ ] T003 [P] Add shared test doubles for places autocomplete request capture in `tests/LoopMeet.App.Tests/TestDoubles/FakePlacesApi.cs`
+- [X] T001 Add optional location-bias query parameters to app places API contract in `src/LoopMeet.App/Services/PlacesApi.cs`
+- [X] T002 Add location-bias query parameters to API endpoint signature in `src/LoopMeet.Api/Endpoints/PlacesEndpoints.cs`
+- [X] T003 [P] Add shared test doubles for places autocomplete request capture in `tests/LoopMeet.App.Tests/TestDoubles/FakePlacesApi.cs`
 
 ---
 
@@ -29,10 +29,10 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T004 Implement optional `latitude`/`longitude`/`radiusMeters` pass-through in `src/LoopMeet.App/Services/PlacesApi.cs`
-- [ ] T005 Implement optional location-bias request body shaping for Google Places in `src/LoopMeet.Api/Services/Places/PlacesProxyService.cs`
-- [ ] T006 [P] Add API tests for query-only compatibility and optional bias parameters in `tests/LoopMeet.Api.Tests/Endpoints/PlacesEndpointsTests.cs`
-- [ ] T007 Add resilient fallback behavior when bias coordinates are missing/invalid in `src/LoopMeet.Api/Services/Places/PlacesProxyService.cs`
+- [X] T004 Implement optional `latitude`/`longitude`/`radiusMeters` pass-through in `src/LoopMeet.App/Services/PlacesApi.cs`
+- [X] T005 Implement optional location-bias request body shaping for Google Places in `src/LoopMeet.Api/Services/Places/PlacesProxyService.cs`
+- [X] T006 [P] Add API tests for query-only compatibility and optional bias parameters in `tests/LoopMeet.Api.Tests/Endpoints/PlacesEndpointsTests.cs`
+- [X] T007 Add resilient fallback behavior when bias coordinates are missing/invalid in `src/LoopMeet.Api/Services/Places/PlacesProxyService.cs`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -46,15 +46,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T008 [P] [US1] Add create-flow autocomplete bias request test in `tests/LoopMeet.App.Tests/Features/Meetups/CreateMeetupViewModelTests.cs`
-- [ ] T009 [P] [US1] Add edit-flow autocomplete bias request test in `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs`
+- [X] T008 [P] [US1] Add create-flow autocomplete bias request test in `tests/LoopMeet.App.Tests/Features/Meetups/CreateMeetupViewModelTests.cs`
+- [X] T009 [P] [US1] Add edit-flow autocomplete bias request test in `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs`
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] Implement location acquisition and bias-enabled autocomplete in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
-- [ ] T011 [US1] Implement location acquisition and bias-enabled autocomplete in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
-- [ ] T012 [US1] Ensure selected place hydration remains intact with biased suggestions in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
-- [ ] T013 [US1] Ensure selected place hydration remains intact with biased suggestions in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
+- [X] T010 [US1] Implement location acquisition and bias-enabled autocomplete in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
+- [X] T011 [US1] Implement location acquisition and bias-enabled autocomplete in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
+- [X] T012 [US1] Ensure selected place hydration remains intact with biased suggestions in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
+- [X] T013 [US1] Ensure selected place hydration remains intact with biased suggestions in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
 
 **Checkpoint**: User Story 1 is functional and independently testable
 
@@ -68,16 +68,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Add permission-denied fallback autocomplete test for create flow in `tests/LoopMeet.App.Tests/Features/Meetups/CreateMeetupViewModelTests.cs`
-- [ ] T015 [P] [US2] Add permission-denied fallback autocomplete test for edit flow in `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs`
+- [X] T014 [P] [US2] Add permission-denied fallback autocomplete test for create flow in `tests/LoopMeet.App.Tests/Features/Meetups/CreateMeetupViewModelTests.cs`
+- [X] T015 [P] [US2] Add permission-denied fallback autocomplete test for edit flow in `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs`
 - [ ] T016 [P] [US2] Add revoked/unavailable location fallback test in `tests/LoopMeet.App.Tests/Features/Meetups/CreateMeetupViewModelTests.cs`
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Implement permission-state aware search fallback and no-repeat prompt behavior in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
-- [ ] T018 [US2] Implement permission-state aware search fallback and no-repeat prompt behavior in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
-- [ ] T019 [US2] Add user-facing fallback messaging for non-biased mode in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
-- [ ] T020 [US2] Add user-facing fallback messaging for non-biased mode in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
+- [X] T017 [US2] Implement permission-state aware search fallback and no-repeat prompt behavior in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
+- [X] T018 [US2] Implement permission-state aware search fallback and no-repeat prompt behavior in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
+- [X] T019 [US2] Add user-facing fallback messaging for non-biased mode in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
+- [X] T020 [US2] Add user-facing fallback messaging for non-biased mode in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
 
 **Checkpoint**: User Stories 1 and 2 work independently
 
@@ -91,13 +91,13 @@
 
 ### Tests for User Story 3
 
-- [ ] T021 [P] [US3] Add parity test for create/edit lookup behavior in `tests/LoopMeet.App.Tests/Features/Meetups/MeetupLocationLookupParityTests.cs`
+- [X] T021 [P] [US3] Add parity test for create/edit lookup behavior in `tests/LoopMeet.App.Tests/Features/Meetups/MeetupLocationLookupParityTests.cs`
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Extract shared lookup workflow helper to remove create/edit divergence in `src/LoopMeet.App/Features/Meetups/ViewModels/MeetupLocationLookupBehavior.cs`
-- [ ] T023 [US3] Wire create view model to shared lookup workflow in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
-- [ ] T024 [US3] Wire edit view model to shared lookup workflow in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
+- [X] T022 [US3] Extract shared lookup workflow helper to remove create/edit divergence in `src/LoopMeet.App/Features/Meetups/ViewModels/MeetupLocationLookupBehavior.cs`
+- [X] T023 [US3] Wire create view model to shared lookup workflow in `src/LoopMeet.App/Features/Meetups/ViewModels/CreateMeetupViewModel.cs`
+- [X] T024 [US3] Wire edit view model to shared lookup workflow in `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`
 
 **Checkpoint**: All user stories are independently functional
 
@@ -110,7 +110,7 @@
 - [ ] T025 [P] Add autocomplete bias/fallback logging assertions in `tests/LoopMeet.Api.Tests/Endpoints/PlacesEndpointsTests.cs`
 - [ ] T026 Add API/service error handling cleanup for autocomplete failures in `src/LoopMeet.Api/Services/Places/PlacesProxyService.cs`
 - [ ] T027 [P] Update feature quick validation notes in `specs/007-location-biased-lookup/quickstart.md`
-- [ ] T028 Run full automated regression for affected suites in `tests/LoopMeet.App.Tests/` and `tests/LoopMeet.Api.Tests/`
+- [X] T028 Run full automated regression for affected suites in `tests/LoopMeet.App.Tests/` and `tests/LoopMeet.Api.Tests/`
 
 ---
 
