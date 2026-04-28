@@ -27,7 +27,11 @@ public sealed class PlaceDetail
 public interface IPlacesApi
 {
     [Get("/places/autocomplete")]
-    Task<PlaceAutocompleteResponse> AutocompleteAsync([Query] string query);
+    Task<PlaceAutocompleteResponse> AutocompleteAsync(
+        [Query] string query,
+        [Query] double? latitude = null,
+        [Query] double? longitude = null,
+        [Query] int? radiusMeters = null);
 
     [Get("/places/{placeId}")]
     Task<PlaceDetail> GetPlaceDetailAsync(string placeId);
@@ -37,6 +41,10 @@ public sealed class PlacesApi
 {
     private readonly IPlacesApi _api;
     public PlacesApi(IPlacesApi api) { _api = api; }
-    public Task<PlaceAutocompleteResponse> AutocompleteAsync(string query) => _api.AutocompleteAsync(query);
+    public Task<PlaceAutocompleteResponse> AutocompleteAsync(
+        string query,
+        double? latitude = null,
+        double? longitude = null,
+        int? radiusMeters = null) => _api.AutocompleteAsync(query, latitude, longitude, radiusMeters);
     public Task<PlaceDetail> GetPlaceDetailAsync(string placeId) => _api.GetPlaceDetailAsync(placeId);
 }

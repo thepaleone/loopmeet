@@ -8,12 +8,15 @@ public static class PlacesEndpoints
     {
         app.MapGet("/places/autocomplete", async (
                 string query,
+                double? latitude,
+                double? longitude,
+                int? radiusMeters,
                 PlacesProxyService placesService,
                 CancellationToken cancellationToken) =>
             {
                 if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
                     return Results.BadRequest(new { message = "Query must be at least 2 characters." });
-                var result = await placesService.AutocompleteAsync(query, cancellationToken);
+                var result = await placesService.AutocompleteAsync(query, latitude, longitude, radiusMeters, cancellationToken);
                 return Results.Ok(result);
             })
             .RequireAuthorization();
