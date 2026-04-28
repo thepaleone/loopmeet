@@ -32,4 +32,5 @@ C# / .NET 10: Follow standard conventions
 - 001-auth-groups-mvp: Added C# / .NET 10 + .NET MAUI, ASP.NET Core Web API, EF Core + Npgsql, Supabase.Client, CommunityToolkit.Mvvm, CommunityToolkit.Maui, Refit, Polly, Serilog
 
 <!-- MANUAL ADDITIONS START -->
+- Canonical merged agent memory and directives: `OPENCODE.md`
 <!-- MANUAL ADDITIONS END -->
