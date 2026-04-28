@@ -33,6 +33,14 @@ Purpose: central, repository-local memory for OpenCode and other coding agents s
 - For `002-split-home-tabbar`, no new persistence/schema changes were required.
 - For `003-profile-settings-tab`, Supabase Postgres uses `user_profiles` and `memberships` with RLS; avatar override/source metadata required additive migration.
 
+## Response and Analysis Depth
+- Current mode: deep
+- Preferred levels:
+  - quick: concise answer and minimal exploration
+  - medium: standard engineering pass with focused validation
+  - deep: broad codebase exploration, alternatives, tradeoffs, and explicit rationale
+- Default for this repository: use deep mode for planning, debugging, architecture, and cross-file changes unless user requests otherwise.
+
 ## Recent Feature Memory
 - `006-group-meetups`
 - `005-profile-avatar`
