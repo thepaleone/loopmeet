@@ -1,4 +1,14 @@
 <Solution>
+  <Folder Name="/docker/">
+    <File Path=".dockerignore" />
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Folder Name="/docker/src/">
+    <File Path="src/.dockerignore" />
+  </Folder>
+  <Folder Name="/docker/src/LoopMeet.Api/">
+    <File Path="src/LoopMeet.Api/Dockerfile" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/LoopMeet.Api/LoopMeet.Api.csproj" />
     <Project Path="src/LoopMeet.App/LoopMeet.App.csproj" />
