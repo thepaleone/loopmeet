@@ -41,6 +41,8 @@
 		<string>LoopMeet needs camera access to let you take a new profile photo.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>LoopMeet needs photo library access to let you choose a profile photo.</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>LoopMeet uses your location while searching meetup places to prioritize nearby results.</string>
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSExceptionDomains</key>
