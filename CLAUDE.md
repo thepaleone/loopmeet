@@ -32,4 +32,5 @@ C# 13 / .NET 10: Follow standard conventions
 - 004-ui-polish: Added C# 13 / .NET 10 + Microsoft.Maui.Controls 10.0.30, CommunityToolkit.Maui 14.0.0, CommunityToolkit.Mvvm 8.4.0
 
 <!-- MANUAL ADDITIONS START -->
+- Canonical merged agent memory and directives: `OPENCODE.md`
 <!-- MANUAL ADDITIONS END -->

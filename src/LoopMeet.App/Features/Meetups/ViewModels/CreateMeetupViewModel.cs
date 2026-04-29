@@ -10,6 +10,7 @@ public sealed partial class CreateMeetupViewModel : ObservableObject
 {
     private readonly MeetupsApi _meetupsApi;
     private readonly PlacesApi _placesApi;
+    private readonly MeetupLocationLookupBehavior _locationLookupBehavior;
     private CancellationTokenSource? _searchCts;
 
     public ObservableCollection<PlacePrediction> Predictions { get; } = new();
@@ -19,6 +20,9 @@ public sealed partial class CreateMeetupViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _showPredictions;
+
+    [ObservableProperty]
+    private string _locationSearchStatusMessage = string.Empty;
 
     [ObservableProperty]
     private string _locationDisplay = "TBD";
@@ -75,9 +79,15 @@ public sealed partial class CreateMeetupViewModel : ObservableObject
     private bool _hasError;
 
     public CreateMeetupViewModel(MeetupsApi meetupsApi, PlacesApi placesApi)
+        : this(meetupsApi, placesApi, new MeetupLocationLookupBehavior())
+    {
+    }
+
+    public CreateMeetupViewModel(MeetupsApi meetupsApi, PlacesApi placesApi, MeetupLocationLookupBehavior locationLookupBehavior)
     {
         _meetupsApi = meetupsApi;
         _placesApi = placesApi;
+        _locationLookupBehavior = locationLookupBehavior;
     }
 
     partial void OnErrorMessageChanged(string value)
@@ -108,7 +118,8 @@ public sealed partial class CreateMeetupViewModel : ObservableObject
         {
             await Task.Delay(300, token);
             if (token.IsCancellationRequested) return;
-            var result = await _placesApi.AutocompleteAsync(query);
+            var lookupContext = await _locationLookupBehavior.GetLookupContextAsync(token);
+            var result = await _placesApi.AutocompleteAsync(query, lookupContext.Latitude, lookupContext.Longitude, lookupContext.RadiusMeters);
             if (token.IsCancellationRequested) return;
 
             await MainThread.InvokeOnMainThreadAsync(() =>
@@ -116,6 +127,7 @@ public sealed partial class CreateMeetupViewModel : ObservableObject
                 Predictions.Clear();
                 foreach (var p in result.Predictions) Predictions.Add(p);
                 ShowPredictions = Predictions.Count > 0;
+                LocationSearchStatusMessage = lookupContext.FallbackMessage;
             });
         }
         catch (TaskCanceledException) { }

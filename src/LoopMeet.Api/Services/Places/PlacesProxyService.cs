@@ -20,12 +20,38 @@ public sealed class PlacesProxyService
         _logger = logger;
     }
 
-    public async Task<PlaceAutocompleteResponse> AutocompleteAsync(string query, CancellationToken cancellationToken = default)
+    public async Task<PlaceAutocompleteResponse> AutocompleteAsync(
+        string query,
+        double? latitude = null,
+        double? longitude = null,
+        int? radiusMeters = null,
+        CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Places autocomplete query={Query}", query);
+        _logger.LogInformation("Places autocomplete query={Query} hasBias={HasBias}", query, latitude.HasValue && longitude.HasValue);
+        object requestPayload;
+        if (latitude.HasValue && longitude.HasValue && IsValidCoordinates(latitude.Value, longitude.Value))
+        {
+            requestPayload = new
+            {
+                input = query,
+                locationBias = new
+                {
+                    circle = new
+                    {
+                        center = new { latitude, longitude },
+                        radius = radiusMeters.GetValueOrDefault(50_000)
+                    }
+                }
+            };
+        }
+        else
+        {
+            requestPayload = new { input = query };
+        }
+
         var request = new HttpRequestMessage(HttpMethod.Post, "https://places.googleapis.com/v1/places:autocomplete")
         {
-            Content = JsonContent.Create(new { input = query }, options: JsonOptions)
+            Content = JsonContent.Create(requestPayload, options: JsonOptions)
         };
         request.Headers.Add("X-Goog-Api-Key", _options.ApiKey);
 
@@ -57,6 +83,11 @@ public sealed class PlacesProxyService
             _logger.LogError(ex, "Places autocomplete error");
             return new PlaceAutocompleteResponse();
         }
+    }
+
+    private static bool IsValidCoordinates(double latitude, double longitude)
+    {
+        return latitude is >= -90 and <= 90 && longitude is >= -180 and <= 180;
     }
 
     public async Task<PlaceDetailResponse?> GetPlaceDetailAsync(string placeId, CancellationToken cancellationToken = default)
