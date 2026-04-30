@@ -54,17 +54,17 @@
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Implement Supabase webhook dispatcher entrypoint for invitations and meetups in `supabase/functions/notifications-dispatch/index.ts`
-- [ ] T014 [P] [US1] Implement recipient resolution queries for invitation and group membership targeting in `supabase/functions/notifications-dispatch/recipient-resolver.ts`
-- [ ] T015 [P] [US1] Implement centralized notification destination mapping in `supabase/functions/notifications-dispatch/destination-map.ts`
-- [ ] T016 [US1] Implement payload builder using canonical contract keys in `supabase/functions/notifications-dispatch/payload-builder.ts`
-- [ ] T017 [US1] Implement send orchestration with idempotency guard and OneSignal dispatch in `supabase/functions/notifications-dispatch/dispatch-service.ts`
-- [ ] T018 [US1] Configure webhook handlers for `public.invitations` and `public.meetups` events in `supabase/functions/notifications-dispatch/webhook-router.ts`
-- [ ] T019 [US1] Add reminder scheduler query and queue logic for `meetup.today_reminder` in `supabase/functions/reminders-scheduler/index.ts`
-- [ ] T020 [US1] Implement MAUI `NotificationService` notification-open parser and route handoff in `src/LoopMeet.App/Services/Notifications/NotificationService.cs`
-- [ ] T021 [US1] Implement MAUI destination navigator for Pending Invitations, Group Detail, and Home routes in `src/LoopMeet.App/Services/Notifications/NotificationNavigator.cs`
+- [X] T013 [US1] Implement Supabase webhook dispatcher entrypoint for invitations and meetups in `supabase/functions/notifications-dispatch/index.ts`
+- [X] T014 [P] [US1] Implement recipient resolution queries for invitation and group membership targeting in `supabase/functions/notifications-dispatch/recipient-resolver.ts`
+- [X] T015 [P] [US1] Implement centralized notification destination mapping in `supabase/functions/notifications-dispatch/destination-map.ts`
+- [X] T016 [US1] Implement payload builder using canonical contract keys in `supabase/functions/notifications-dispatch/payload-builder.ts`
+- [X] T017 [US1] Implement send orchestration with idempotency guard and OneSignal dispatch in `supabase/functions/notifications-dispatch/dispatch-service.ts`
+- [X] T018 [US1] Configure webhook handlers for `public.invitations` and `public.meetups` events in `supabase/functions/notifications-dispatch/webhook-router.ts`
+- [X] T019 [US1] Add reminder scheduler query and queue logic for `meetup.today_reminder` in `supabase/functions/reminders-scheduler/index.ts`
+- [X] T020 [US1] Implement MAUI `NotificationService` notification-open parser and route handoff in `src/LoopMeet.App/Services/Notifications/NotificationService.cs`
+- [X] T021 [US1] Implement MAUI destination navigator for Pending Invitations, Group Detail, and Home routes in `src/LoopMeet.App/Services/Notifications/NotificationNavigator.cs`
 - [ ] T022 [US1] Wire OneSignal opened callback registration and service initialization in `src/LoopMeet.App/MauiProgram.cs`
-- [ ] T023 [US1] Add invalid destination fallback message flow in `src/LoopMeet.App/Services/Notifications/NotificationService.cs`
+- [X] T023 [US1] Add invalid destination fallback message flow in `src/LoopMeet.App/Services/Notifications/NotificationService.cs`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
 

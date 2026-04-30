@@ -14,6 +14,7 @@ using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Features.DevTools.ViewModels;
 using LoopMeet.App.Features.DevTools.Views;
 using LoopMeet.App.Services;
+using LoopMeet.App.Services.Notifications;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Devices;
@@ -43,23 +44,31 @@ public static class MauiProgram
 		var apiBaseUrl = "http://dev.loopmeet.io:8080";
 		var supabaseUrl = "http://dev.loopmeet.io:54321";
 		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+		var oneSignalAppId = string.Empty;
+		var oneSignalRestApiKey = string.Empty;
 #elif STAGING
 // #if DEBUG || STAGING
 		var apiBaseUrl = "https://api-staging.loopmeet.io";
 		var supabaseUrl ="https://cswfsnikasaorexwhsas.supabase.co";
 		var supabaseAnonOrPublishableKey = "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
+		var oneSignalAppId = string.Empty;
+		var oneSignalRestApiKey = string.Empty;
 #else
 		throw new InvalidOperationException("Production not yet implemented.");
 		var apiBaseUrl = string.Empty;
 		var supabaseUrl = string.Empty;
 		var supabaseAnonOrPublishableKey = string.Empty;
+		var oneSignalAppId = string.Empty;
+		var oneSignalRestApiKey = string.Empty;
 #endif
 
 		var config = new AppConfig
 		{
 			ApiBaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_API_BASE_URL") ?? apiBaseUrl,
 			SupabaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_URL") ?? supabaseUrl,
-			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey
+			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey,
+			OneSignalAppId = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_APP_ID") ?? oneSignalAppId,
+			OneSignalRestApiKey = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_REST_API_KEY") ?? oneSignalRestApiKey
 		};
 
 		builder.Services.AddSingleton(config);
@@ -83,6 +92,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton<UsersApi>();
 		builder.Services.AddSingleton<MeetupsApi>();
 		builder.Services.AddSingleton<PlacesApi>();
+		builder.Services.AddSingleton<PendingNotificationIntentStore>();
+		builder.Services.AddSingleton<NotificationNavigator>();
+		builder.Services.AddSingleton<NotificationService>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();
 		builder.Services.AddTransient<HomeViewModel>();
