@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "Feature number 8 will add push notifications the LoopMeet. This encompasses several aspects including orchestration of the sending of the notifications and the handling of notification clicks in the mobile app. The notification system will start with a few basic types but should be structured in a way to be extensible as more notifications are added in later features. For this feature branch we will need to invoke and handle the following notification types. 1: A new invitation to a group. 2: Creation of a new meetup in a group the user belongs to. 3: Update to an existing meetup the user belongs to. 4: Cancelling (deleting) a meeting in a group the user belongs to. 5: Reminder that a meetup in a group the user belongs to is scheduled for today. For each of these notification types, when the user taps the notification on their device it should go into the app to the appropriate location. 1: Pending Invitations page. 2: Group detail page. 3: Group detail page. 4: Group detail page. 5: Home page. It should also be kept in mind that these locations may change based on further features as they are added so they should be easy to modify when necessary. This is also the first time notifications have been introduced and therefore the user permissions need to be configured and handled appropriately."
 
+## Clarifications
+
+### Session 2026-04-30
+
+- Q: Which centralized deep-link payload schema should be required for notifications? → A: Canonical `additional_data` keys are `notification_type`, `target_kind`, `target_id`, `fallback_route`, `event_id`, and `sent_at`.
+- Q: When should the first notification permission prompt occur, and what happens after denial? → A: Prompt after first successful sign-in or first relevant action; if denied, show an in-app "Enable notifications" settings link.
+- Q: How should "scheduled today" reminders interpret local morning timing? → A: Deliver in a fixed 8:00-10:00 AM local-time window based on recipient timezone.
+- Q: What should happen when a notification is tapped while signed out? → A: Preserve notification intent and execute post-login redirect after authentication completes.
+- Q: How should multi-device notification registration be handled? → A: Allow multiple active devices per user, relying on provider token lifecycle and periodic stale-token cleanup.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Receive and Open Actionable Notifications (Priority: P1)
@@ -36,7 +46,7 @@ As a first-time user, I am asked for notification permission at an appropriate m
 **Acceptance Scenarios**:
 
 1. **Given** a user has not yet responded to notification permission, **When** the app reaches the permission request moment, **Then** the user is prompted once and their response is recorded.
-2. **Given** a user declines notification permission, **When** they continue using the app, **Then** core app flows remain available and the app shows clear in-app status that notifications are disabled.
+2. **Given** a user declines notification permission, **When** they continue using the app, **Then** core app flows remain available, the app shows clear in-app status that notifications are disabled, and offers an in-app path to OS settings to re-enable notifications.
 3. **Given** a user previously granted permission, **When** they reopen the app, **Then** they are not prompted again unless system-level permission state changes.
 
 ---
@@ -57,6 +67,7 @@ As a product team, we can add new notification types and change destination rout
 ### Edge Cases
 
 - Notification is tapped while user is signed out; app routes to sign-in first, then to the target page after successful sign-in.
+- Notification is tapped while user is signed out; app must preserve the tapped notification intent through sign-in and route to the intended destination immediately after successful authentication.
 - Notification references a group or meetup that no longer exists or is no longer accessible; app opens a safe fallback page and shows a clear message.
 - Duplicate delivery of the same notification does not create duplicate user-visible records or duplicate navigations.
 - Notification is received while app is already open on a different page; user can open it without losing unsaved changes unexpectedly.
@@ -73,18 +84,25 @@ As a product team, we can add new notification types and change destination rout
 - **FR-004**: Tapping meetup created, meetup updated, or meetup canceled notifications MUST open the related Group Detail page.
 - **FR-005**: Tapping a scheduled-for-today reminder notification MUST open the Home page.
 - **FR-006**: The system MUST maintain a centralized notification type-to-destination mapping that can be updated without redefining existing notification payload contracts.
+- **FR-013**: All notifications MUST use a canonical deep-link payload schema with these required keys: `notification_type`, `target_kind`, `target_id`, `fallback_route`, `event_id`, and `sent_at`.
 - **FR-007**: If a notification tap cannot resolve its original destination, the app MUST route to a safe fallback page and show a user-understandable message.
 - **FR-008**: The app MUST request notification permission from the user before attempting notification delivery and MUST record the user's permission state.
 - **FR-009**: If notification permission is denied, the app MUST continue core app operation and indicate that notifications are disabled.
+- **FR-014**: The first notification permission prompt MUST be shown after first successful sign-in or first notification-relevant user action, not immediately on initial app launch.
+- **FR-015**: If permission is denied, the app MUST provide an in-app path to OS settings to re-enable notifications.
 - **FR-010**: The system MUST avoid sending the same notification event more than once to the same user unless a duplicate is explicitly intended.
 - **FR-011**: The system MUST log notification send attempts, delivery outcomes (when available), and notification-tap navigation outcomes for support and auditing.
 - **FR-012**: Notification processing MUST apply only to users who are eligible recipients for the triggering group or meetup context.
+- **FR-016**: Scheduled-for-today reminders MUST be delivered in the recipient's local 8:00-10:00 AM window.
+- **FR-017**: If a notification is tapped while signed out, the app MUST preserve the tapped notification intent through authentication and perform post-login redirect to the intended destination.
+- **FR-018**: Users MAY have multiple active device registrations; notification delivery MUST target all active eligible devices for that user.
+- **FR-019**: The system MUST support periodic cleanup of stale or invalid device registrations based on provider feedback or inactivity rules.
 
 ### Assumptions
 
 - The feature applies to authenticated LoopMeet members who already have access to groups and meetups.
-- The initial release supports one device registration per user account at minimum; multi-device parity can be added in a later feature.
-- Notification reminders for "scheduled today" are sent during the morning in the user's local day unless a future feature defines a different timing policy.
+- The initial release supports multiple active device registrations per user account.
+- Notification reminders for "scheduled today" are delivered in a fixed 8:00-10:00 AM window in the recipient's local timezone.
 - Existing app pages (Home, Group Detail, Pending Invitations) remain valid destinations for this release.
 - Standard platform-level notification controls (allow/deny) are used; no custom legal consent flow is required in this feature.
 
@@ -92,6 +110,7 @@ As a product team, we can add new notification types and change destination rout
 
 - **Notification Type**: Defines a supported business event that triggers a notification and links to routing behavior.
 - **Notification Event**: A concrete occurrence of a notification type for a recipient, including event timestamp, recipient identity, and related group/meetup references.
+- **Notification Payload**: Standardized metadata included with each notification containing `notification_type`, `target_kind`, `target_id`, `fallback_route`, `event_id`, and `sent_at`.
 - **Notification Destination Mapping**: Central rule set that maps each notification type to a tap destination and fallback destination.
 - **Notification Permission State**: User-level state indicating whether notifications are allowed, denied, or not yet decided.
 - **Notification Interaction Record**: Captures whether a notification was sent, delivered (if known), opened, and where navigation resolved.
