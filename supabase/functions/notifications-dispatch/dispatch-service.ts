@@ -16,6 +16,16 @@ export interface DispatchInput {
 export const dispatchNotification = async (input: DispatchInput) => {
   const payload = buildPayload(input.notificationType, input.targetId, input.eventId);
   const appId = Deno.env.get("ONESIGNAL_APP_ID") ?? "";
+  const correlationId = crypto.randomUUID();
+
+  console.log(JSON.stringify({
+    level: "info",
+    message: "notification_dispatch_start",
+    correlation_id: correlationId,
+    event_id: input.eventId,
+    notification_type: input.notificationType,
+    recipient_count: input.recipients.length,
+  }));
 
   const response = await oneSignalClient.send({
     app_id: appId,
@@ -27,6 +37,7 @@ export const dispatchNotification = async (input: DispatchInput) => {
 
   return {
     event_id: input.eventId,
+    correlation_id: correlationId,
     notification_type: input.notificationType,
     recipient_count: input.recipients.length,
     send_attempts: input.recipients.length,

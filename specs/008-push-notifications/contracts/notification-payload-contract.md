@@ -24,3 +24,9 @@ Rules:
 Compatibility:
 - New notification types must preserve these keys.
 - New optional keys are additive only.
+
+Adding a new notification type:
+1. Add new type literal to `supabase/functions/_shared/notification-contract.ts`.
+2. Add registry entry to `supabase/functions/_shared/notification-mapping-registry.ts` with `targetKind`, `fallbackRoute`, and `routeId`.
+3. Update MAUI route resolution in `src/LoopMeet.App/Services/Notifications/NotificationRouteMap.cs`.
+4. Extend parity/regression tests in `tests/LoopMeet.Api.Tests/Contract/NotificationMappingParityTests.cs` and `tests/LoopMeet.App.Tests/Services/Notifications/NotificationTypeRegressionTests.cs`.

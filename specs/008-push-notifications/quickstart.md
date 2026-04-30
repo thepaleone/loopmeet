@@ -125,3 +125,15 @@ Permission UX:
    - Signed-out notification tap -> post-login redirect
    - Invalid/missing target -> fallback route + user message
 4. Reminder window verification across at least 3 timezones.
+
+## End-to-End Validation Matrix
+
+| Scenario | Expected Result | Status |
+|---|---|---|
+| Invitation notification tap | Opens Pending Invitations page | Pending |
+| Meetup created notification tap | Opens Group Detail page | Pending |
+| Meetup updated notification tap | Opens Group Detail page | Pending |
+| Meetup canceled notification tap | Opens Group Detail page | Pending |
+| Today reminder notification tap | Opens Home page | Pending |
+| Signed-out tap then login | Intent preserved and redirected post-login | Pending |
+| Invalid target in payload | Fallback route + user-safe handling | Pending |

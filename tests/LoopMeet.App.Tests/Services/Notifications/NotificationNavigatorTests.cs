@@ -6,7 +6,7 @@ public sealed class NotificationNavigatorTests
     public void NotificationNavigator_ContainsAllRequiredDestinationRoutes()
     {
         var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
-            "../../../../../src/LoopMeet.App/Services/Notifications/NotificationNavigator.cs"));
+            "../../../../../src/LoopMeet.App/Services/Notifications/NotificationRouteMap.cs"));
         var source = File.ReadAllText(path);
 
         Assert.Contains("//Invitations/Pending", source, StringComparison.Ordinal);

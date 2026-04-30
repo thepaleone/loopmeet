@@ -94,11 +94,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<MeetupsApi>();
 		builder.Services.AddSingleton<PlacesApi>();
 		builder.Services.AddSingleton<PendingNotificationIntentStore>();
+		builder.Services.AddSingleton<NotificationRouteMap>();
 		builder.Services.AddSingleton<NotificationNavigator>();
 		builder.Services.AddSingleton<NotificationService>();
 		builder.Services.AddSingleton<NotificationPermissionService>();
 		builder.Services.AddSingleton<NotificationSettingsLauncher>();
 		builder.Services.AddSingleton<DeviceRegistrationService>();
+		builder.Services.AddSingleton<PostLoginNotificationRedirectService>();
 		builder.Services.AddSingleton<AuthSessionService>();
 		builder.Services.AddSingleton<INotificationTapSource, NoOpNotificationTapSource>();
 		builder.Services.AddSingleton<NotificationLifecycleRegistrar>();

@@ -44,3 +44,10 @@
 - Decision: Add idempotency key (`event_id` + recipient), delivery attempt records, provider-response capture, and stale-token cleanup workflow.
 - Rationale: Supports FR-010/FR-011/FR-019 and reduces duplicate sends.
 - Alternatives considered: Best-effort fire-and-forget (rejected: poor supportability).
+
+## Validation log
+- Invitation tap route validation: Pending manual device run.
+- Meetup created tap route validation: Pending manual device run.
+- Meetup updated tap route validation: Pending manual device run.
+- Meetup canceled tap route validation: Pending manual device run.
+- Today reminder tap route validation: Pending manual device run.

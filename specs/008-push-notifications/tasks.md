@@ -101,14 +101,14 @@
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Add contract parity test for Edge mapping vs MAUI mapping in `tests/LoopMeet.Api.Tests/Contract/NotificationMappingParityTests.cs`
-- [ ] T032 [P] [US3] Add regression test ensuring existing notification types resolve unchanged in `tests/LoopMeet.App.Tests/Services/Notifications/NotificationTypeRegressionTests.cs`
+- [X] T031 [P] [US3] Add contract parity test for Edge mapping vs MAUI mapping in `tests/LoopMeet.Api.Tests/Contract/NotificationMappingParityTests.cs`
+- [X] T032 [P] [US3] Add regression test ensuring existing notification types resolve unchanged in `tests/LoopMeet.App.Tests/Services/Notifications/NotificationTypeRegressionTests.cs`
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Extract notification mapping registry with explicit versioning notes in `supabase/functions/_shared/notification-mapping-registry.ts`
-- [ ] T034 [US3] Refactor MAUI route resolution to consume central mapping abstraction in `src/LoopMeet.App/Services/Notifications/NotificationRouteMap.cs`
-- [ ] T035 [US3] Document process for adding new notification types in `specs/008-push-notifications/contracts/notification-payload-contract.md`
+- [X] T033 [US3] Extract notification mapping registry with explicit versioning notes in `supabase/functions/_shared/notification-mapping-registry.ts`
+- [X] T034 [US3] Refactor MAUI route resolution to consume central mapping abstraction in `src/LoopMeet.App/Services/Notifications/NotificationRouteMap.cs`
+- [X] T035 [US3] Document process for adding new notification types in `specs/008-push-notifications/contracts/notification-payload-contract.md`
 
 **Checkpoint**: User Story 3 is independently functional and extension-safe.
 
@@ -118,11 +118,11 @@
 
 **Purpose**: Reliability hardening, observability, and end-to-end validation across all stories.
 
-- [ ] T036 [P] Add structured logs and correlation IDs for dispatch and open events in `supabase/functions/notifications-dispatch/dispatch-service.ts`
-- [ ] T037 [P] Implement stale-device cleanup job and invalid-token handling in `supabase/functions/reminders-scheduler/stale-device-cleanup.ts`
-- [ ] T038 Add signed-out post-login redirect completion flow in `src/LoopMeet.App/Services/Notifications/PostLoginNotificationRedirectService.cs`
-- [ ] T039 Add end-to-end test checklist and manual validation matrix in `specs/008-push-notifications/quickstart.md`
-- [ ] T040 Run full notification validation for all five types and record results in `specs/008-push-notifications/research.md`
+- [X] T036 [P] Add structured logs and correlation IDs for dispatch and open events in `supabase/functions/notifications-dispatch/dispatch-service.ts`
+- [X] T037 [P] Implement stale-device cleanup job and invalid-token handling in `supabase/functions/reminders-scheduler/stale-device-cleanup.ts`
+- [X] T038 Add signed-out post-login redirect completion flow in `src/LoopMeet.App/Services/Notifications/PostLoginNotificationRedirectService.cs`
+- [X] T039 Add end-to-end test checklist and manual validation matrix in `specs/008-push-notifications/quickstart.md`
+- [X] T040 Run full notification validation for all five types and record results in `specs/008-push-notifications/research.md`
 
 ---
 

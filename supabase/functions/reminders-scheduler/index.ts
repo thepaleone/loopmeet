@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { cleanupStaleDevices } from "./stale-device-cleanup.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -14,6 +15,8 @@ const isWithinLocalMorningWindow = () => {
 };
 
 Deno.serve(async () => {
+  await cleanupStaleDevices();
+
   if (!isWithinLocalMorningWindow()) {
     return Response.json({ skipped: true, reason: "outside_window" });
   }
