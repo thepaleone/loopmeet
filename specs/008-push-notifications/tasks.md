@@ -17,9 +17,9 @@
 
 **Purpose**: Initialize project scaffolding for Supabase functions, migrations, and MAUI notification module.
 
-- [ ] T001 Create Supabase notifications function folders and config in `supabase/functions/notifications-dispatch/deno.json` and `supabase/functions/reminders-scheduler/deno.json`
-- [ ] T002 [P] Add OneSignal and notification configuration placeholders in `src/LoopMeet.App/Services/AppConfig.cs`
-- [ ] T003 [P] Add push-notification environment variable documentation in `specs/008-push-notifications/quickstart.md`
+- [X] T001 Create Supabase notifications function folders and config in `supabase/functions/notifications-dispatch/deno.json` and `supabase/functions/reminders-scheduler/deno.json`
+- [X] T002 [P] Add OneSignal and notification configuration placeholders in `src/LoopMeet.App/Services/AppConfig.cs`
+- [X] T003 [P] Add push-notification environment variable documentation in `specs/008-push-notifications/quickstart.md`
 
 ---
 
@@ -29,12 +29,12 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T004 Create notification schema migration for `user_devices`, `notification_events`, `notification_delivery_attempts`, and `notification_open_events` in `supabase/migrations/20260430_notifications_schema.sql`
-- [ ] T005 [P] Add RLS policies and indexes for notification tables in `supabase/migrations/20260430_notifications_policies.sql`
-- [ ] T006 [P] Implement shared notification type constants and payload model in `supabase/functions/_shared/notification-contract.ts`
-- [ ] T007 [P] Implement OneSignal REST client wrapper with retry and error mapping in `supabase/functions/_shared/onesignal-client.ts`
-- [ ] T008 Create backend notification audit repository for send/open events in `src/LoopMeet.Api/Services/Notifications/NotificationAuditService.cs`
-- [ ] T009 Create MAUI pending notification intent store for signed-out redirects in `src/LoopMeet.App/Services/Notifications/PendingNotificationIntentStore.cs`
+- [X] T004 Create notification schema migration for `user_devices`, `notification_events`, `notification_delivery_attempts`, and `notification_open_events` in `supabase/migrations/20260430_notifications_schema.sql`
+- [X] T005 [P] Add RLS policies and indexes for notification tables in `supabase/migrations/20260430_notifications_policies.sql`
+- [X] T006 [P] Implement shared notification type constants and payload model in `supabase/functions/_shared/notification-contract.ts`
+- [X] T007 [P] Implement OneSignal REST client wrapper with retry and error mapping in `supabase/functions/_shared/onesignal-client.ts`
+- [X] T008 Create backend notification audit repository for send/open events in `src/LoopMeet.Api/Services/Notifications/NotificationAuditService.cs`
+- [X] T009 Create MAUI pending notification intent store for signed-out redirects in `src/LoopMeet.App/Services/Notifications/PendingNotificationIntentStore.cs`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
 

@@ -1,5 +1,12 @@
 # Quickstart: Push Notification Implementation
 
+## Environment Variables
+
+- `ONESIGNAL_APP_ID`: OneSignal application id used by Edge dispatch and MAUI client initialization.
+- `ONESIGNAL_REST_API_KEY`: OneSignal REST API key used by Supabase Edge Functions for outbound sends.
+- `SUPABASE_URL`: Supabase project URL for Edge Function DB access.
+- `SUPABASE_SERVICE_ROLE_KEY`: Service role key for recipient lookup, auditing writes, and scheduler execution.
+
 ## Phase A: Database
 
 1. Add migration for `user_devices`, `notification_events`, `notification_delivery_attempts`, `notification_open_events`.
