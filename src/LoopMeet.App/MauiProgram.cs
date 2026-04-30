@@ -14,6 +14,7 @@ using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Features.DevTools.ViewModels;
 using LoopMeet.App.Features.DevTools.Views;
 using LoopMeet.App.Services;
+using LoopMeet.App.Services.Auth;
 using LoopMeet.App.Services.Notifications;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
@@ -95,6 +96,10 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PendingNotificationIntentStore>();
 		builder.Services.AddSingleton<NotificationNavigator>();
 		builder.Services.AddSingleton<NotificationService>();
+		builder.Services.AddSingleton<NotificationPermissionService>();
+		builder.Services.AddSingleton<NotificationSettingsLauncher>();
+		builder.Services.AddSingleton<DeviceRegistrationService>();
+		builder.Services.AddSingleton<AuthSessionService>();
 		builder.Services.AddSingleton<INotificationTapSource, NoOpNotificationTapSource>();
 		builder.Services.AddSingleton<NotificationLifecycleRegistrar>();
 		builder.Services.AddTransient<LoginViewModel>();
@@ -124,6 +129,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<InvitationDetailPage>();
 		builder.Services.AddTransient<PendingInvitationsPage>();
 		builder.Services.AddTransient<ProfilePage>();
+		builder.Services.AddTransient<SettingsPage>();
 		builder.Services.AddTransient<ChangePasswordPage>();
 		builder.Services.AddTransient<DevInfoViewModel>();
 		builder.Services.AddTransient<DevInfoPage>();

@@ -78,16 +78,16 @@
 
 ### Tests for User Story 2
 
-- [ ] T024 [P] [US2] Add permission workflow tests for prompt timing and re-prompt prevention in `tests/LoopMeet.App.Tests/Services/Notifications/NotificationPermissionServiceTests.cs`
-- [ ] T025 [P] [US2] Add integration test for denied-permission settings recovery CTA in `tests/LoopMeet.App.Tests/Features/Settings/NotificationSettingsCtaTests.cs`
+- [X] T024 [P] [US2] Add permission workflow tests for prompt timing and re-prompt prevention in `tests/LoopMeet.App.Tests/Services/Notifications/NotificationPermissionServiceTests.cs`
+- [X] T025 [P] [US2] Add integration test for denied-permission settings recovery CTA in `tests/LoopMeet.App.Tests/Features/Settings/NotificationSettingsCtaTests.cs`
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Implement MAUI permission-state manager (`unknown/granted/denied`) in `src/LoopMeet.App/Services/Notifications/NotificationPermissionService.cs`
-- [ ] T027 [US2] Trigger first permission request after sign-in or first notification-relevant action in `src/LoopMeet.App/Services/Auth/AuthSessionService.cs`
-- [ ] T028 [US2] Add in-app disabled-notifications status and settings deep link in `src/LoopMeet.App/Features/Profile/Views/SettingsPage.xaml`
-- [ ] T029 [US2] Implement OS settings launcher for notification recovery CTA in `src/LoopMeet.App/Services/Notifications/NotificationSettingsLauncher.cs`
-- [ ] T030 [US2] Persist permission state updates to `user_devices` sync endpoint in `src/LoopMeet.App/Services/Notifications/DeviceRegistrationService.cs`
+- [X] T026 [US2] Implement MAUI permission-state manager (`unknown/granted/denied`) in `src/LoopMeet.App/Services/Notifications/NotificationPermissionService.cs`
+- [X] T027 [US2] Trigger first permission request after sign-in or first notification-relevant action in `src/LoopMeet.App/Services/Auth/AuthSessionService.cs`
+- [X] T028 [US2] Add in-app disabled-notifications status and settings deep link in `src/LoopMeet.App/Features/Profile/Views/SettingsPage.xaml`
+- [X] T029 [US2] Implement OS settings launcher for notification recovery CTA in `src/LoopMeet.App/Services/Notifications/NotificationSettingsLauncher.cs`
+- [X] T030 [US2] Persist permission state updates to `user_devices` sync endpoint in `src/LoopMeet.App/Services/Notifications/DeviceRegistrationService.cs`
 
 **Checkpoint**: User Story 2 works independently and does not block core app flows.
 
