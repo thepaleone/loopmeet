@@ -3,40 +3,46 @@ alter table public.notification_events enable row level security;
 alter table public.notification_delivery_attempts enable row level security;
 alter table public.notification_open_events enable row level security;
 
-create policy if not exists "user_devices_select_own"
+drop policy if exists "user_devices_select_own" on public.user_devices;
+create policy "user_devices_select_own"
 on public.user_devices
 for select
 to authenticated
 using (auth.uid() = user_id);
 
-create policy if not exists "user_devices_update_own"
+drop policy if exists "user_devices_update_own" on public.user_devices;
+create policy "user_devices_update_own"
 on public.user_devices
 for update
 to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
 
-create policy if not exists "user_devices_insert_own"
+drop policy if exists "user_devices_insert_own" on public.user_devices;
+create policy "user_devices_insert_own"
 on public.user_devices
 for insert
 to authenticated
 with check (auth.uid() = user_id);
 
-create policy if not exists "notification_events_service_role"
+drop policy if exists "notification_events_service_role" on public.notification_events;
+create policy "notification_events_service_role"
 on public.notification_events
 for all
 to service_role
 using (true)
 with check (true);
 
-create policy if not exists "notification_delivery_attempts_service_role"
+drop policy if exists "notification_delivery_attempts_service_role" on public.notification_delivery_attempts;
+create policy "notification_delivery_attempts_service_role"
 on public.notification_delivery_attempts
 for all
 to service_role
 using (true)
 with check (true);
 
-create policy if not exists "notification_open_events_service_role"
+drop policy if exists "notification_open_events_service_role" on public.notification_open_events;
+create policy "notification_open_events_service_role"
 on public.notification_open_events
 for all
 to service_role
