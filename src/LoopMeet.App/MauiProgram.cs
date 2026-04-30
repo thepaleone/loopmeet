@@ -95,6 +95,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PendingNotificationIntentStore>();
 		builder.Services.AddSingleton<NotificationNavigator>();
 		builder.Services.AddSingleton<NotificationService>();
+		builder.Services.AddSingleton<INotificationTapSource, NoOpNotificationTapSource>();
+		builder.Services.AddSingleton<NotificationLifecycleRegistrar>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();
 		builder.Services.AddTransient<HomeViewModel>();

@@ -48,9 +48,9 @@
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Add contract test for canonical `additional_data` keys in `tests/LoopMeet.Api.Tests/Contract/NotificationPayloadContractTests.cs`
-- [ ] T011 [P] [US1] Add integration tests for webhook event-to-notification-type mapping in `tests/LoopMeet.Api.Tests/Integration/WebhookNotificationMappingTests.cs`
-- [ ] T012 [P] [US1] Add MAUI navigation resolver tests for notification type destinations in `tests/LoopMeet.App.Tests/Services/Notifications/NotificationNavigatorTests.cs`
+- [X] T010 [P] [US1] Add contract test for canonical `additional_data` keys in `tests/LoopMeet.Api.Tests/Contract/NotificationPayloadContractTests.cs`
+- [X] T011 [P] [US1] Add integration tests for webhook event-to-notification-type mapping in `tests/LoopMeet.Api.Tests/Integration/WebhookNotificationMappingTests.cs`
+- [X] T012 [P] [US1] Add MAUI navigation resolver tests for notification type destinations in `tests/LoopMeet.App.Tests/Services/Notifications/NotificationNavigatorTests.cs`
 
 ### Implementation for User Story 1
 
@@ -63,7 +63,7 @@
 - [X] T019 [US1] Add reminder scheduler query and queue logic for `meetup.today_reminder` in `supabase/functions/reminders-scheduler/index.ts`
 - [X] T020 [US1] Implement MAUI `NotificationService` notification-open parser and route handoff in `src/LoopMeet.App/Services/Notifications/NotificationService.cs`
 - [X] T021 [US1] Implement MAUI destination navigator for Pending Invitations, Group Detail, and Home routes in `src/LoopMeet.App/Services/Notifications/NotificationNavigator.cs`
-- [ ] T022 [US1] Wire OneSignal opened callback registration and service initialization in `src/LoopMeet.App/MauiProgram.cs`
+- [X] T022 [US1] Wire OneSignal opened callback registration and service initialization in `src/LoopMeet.App/MauiProgram.cs`
 - [X] T023 [US1] Add invalid destination fallback message flow in `src/LoopMeet.App/Services/Notifications/NotificationService.cs`
 
 **Checkpoint**: User Story 1 is independently functional and testable.
