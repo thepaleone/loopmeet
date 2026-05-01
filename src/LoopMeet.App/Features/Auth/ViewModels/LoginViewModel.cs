@@ -6,6 +6,7 @@ using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
 using Refit;
+using LoopMeet.App.Services.Auth;
 
 namespace LoopMeet.App.Features.Auth.ViewModels;
 
@@ -15,6 +16,7 @@ public sealed partial class LoginViewModel : ObservableObject
     private readonly AuthCoordinator _authCoordinator;
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
+    private readonly AuthSessionService _authSessionService;
     private readonly ILogger<LoginViewModel> _logger;
 
     [ObservableProperty]
@@ -37,12 +39,14 @@ public sealed partial class LoginViewModel : ObservableObject
         AuthCoordinator authCoordinator,
         UsersApi usersApi,
         UserProfileCache userProfileCache,
+        AuthSessionService authSessionService,
         ILogger<LoginViewModel> logger)
     {
         _authService = authService;
         _authCoordinator = authCoordinator;
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
+        _authSessionService = authSessionService;
         _logger = logger;
     }
 
@@ -64,6 +68,7 @@ public sealed partial class LoginViewModel : ObservableObject
             if (!string.IsNullOrWhiteSpace(session.AccessToken))
             {
                 await CacheProfileSummaryAsync();
+                await _authSessionService.HandleSuccessfulSignInAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
@@ -146,12 +151,14 @@ public sealed partial class LoginViewModel : ObservableObject
                 }
 
                 await CacheProfileSummaryAsync();
+                await _authSessionService.HandleSuccessfulSignInAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
 
             await TryCreateProfileFromOAuthAsync(authResult);
             await CacheProfileSummaryAsync();
+            await _authSessionService.HandleSuccessfulSignInAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
         catch (Exception ex)

@@ -5,9 +5,12 @@ namespace LoopMeet.App;
 
 public partial class App : Application
 {
-	public App(NotificationLifecycleRegistrar notificationLifecycleRegistrar)
+	public App(
+		NotificationLifecycleRegistrar notificationLifecycleRegistrar,
+		OneSignalBootstrapService oneSignalBootstrapService)
 	{
 		InitializeComponent();
+		_ = oneSignalBootstrapService.InitializeAsync();
 		_ = notificationLifecycleRegistrar.RegisterAsync();
 	}
 

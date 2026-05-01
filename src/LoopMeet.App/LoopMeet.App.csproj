@@ -61,10 +61,8 @@
 
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#fcdcb5" BaseSize="565,565"
-			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'" />
-		<MauiSplashScreen Include="Resources\Splash\splash_ios.png" Color="#fcdcb5" BaseSize="261,370"
-			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#fcdcb5" BaseSize="565,565" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'ios'" />
+		<MauiSplashScreen Include="Resources\Splash\splash_ios.png" Color="#fcdcb5" BaseSize="261,370" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\*" />
@@ -81,6 +79,7 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.30" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference Include="OneSignalSDK.DotNet" Version="6.1.6" />
 		<PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="10.0.1" />
 		<PackageReference Include="Supabase" Version="1.1.1" />

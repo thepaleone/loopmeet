@@ -45,23 +45,19 @@ public static class MauiProgram
 		var apiBaseUrl = "http://dev.loopmeet.io:8080";
 		var supabaseUrl = "http://dev.loopmeet.io:54321";
 		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-		var oneSignalAppId = string.Empty;
-		var oneSignalRestApiKey = string.Empty;
 #elif STAGING
 // #if DEBUG || STAGING
 		var apiBaseUrl = "https://api-staging.loopmeet.io";
 		var supabaseUrl ="https://cswfsnikasaorexwhsas.supabase.co";
 		var supabaseAnonOrPublishableKey = "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
-		var oneSignalAppId = string.Empty;
-		var oneSignalRestApiKey = string.Empty;
 #else
 		throw new InvalidOperationException("Production not yet implemented.");
 		var apiBaseUrl = string.Empty;
 		var supabaseUrl = string.Empty;
 		var supabaseAnonOrPublishableKey = string.Empty;
+#endif
 		var oneSignalAppId = string.Empty;
 		var oneSignalRestApiKey = string.Empty;
-#endif
 
 		var config = new AppConfig
 		{
@@ -100,6 +96,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<NotificationPermissionService>();
 		builder.Services.AddSingleton<NotificationSettingsLauncher>();
 		builder.Services.AddSingleton<DeviceRegistrationService>();
+		builder.Services.AddSingleton<OneSignalBootstrapService>();
+		builder.Services.AddSingleton<OneSignalIdentityService>();
 		builder.Services.AddSingleton<PostLoginNotificationRedirectService>();
 		builder.Services.AddSingleton<AuthSessionService>();
 		builder.Services.AddSingleton<INotificationTapSource, NoOpNotificationTapSource>();
