@@ -23,7 +23,10 @@ public sealed class OneSignalBootstrapService
         }
 
         OneSignal.Initialize(_config.OneSignalAppId);
-        _logger.LogInformation("OneSignal initialized.");
+        var appIdPreview = _config.OneSignalAppId.Length >= 8
+            ? _config.OneSignalAppId[..8]
+            : _config.OneSignalAppId;
+        _logger.LogInformation("OneSignal initialized. AppIdPrefix={AppIdPrefix}", appIdPreview);
         return Task.CompletedTask;
     }
 }

@@ -41,12 +41,12 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-#if DEBUG
-		var apiBaseUrl = "http://dev.loopmeet.io:8080";
-		var supabaseUrl = "http://dev.loopmeet.io:54321";
-		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-#elif STAGING
-// #if DEBUG || STAGING
+// #if DEBUG
+// 		var apiBaseUrl = "http://dev.loopmeet.io:8080";
+// 		var supabaseUrl = "http://dev.loopmeet.io:54321";
+// 		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+// #elif STAGING
+#if DEBUG || STAGING
 		var apiBaseUrl = "https://api-staging.loopmeet.io";
 		var supabaseUrl ="https://cswfsnikasaorexwhsas.supabase.co";
 		var supabaseAnonOrPublishableKey = "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
@@ -64,8 +64,12 @@ public static class MauiProgram
 			ApiBaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_API_BASE_URL") ?? apiBaseUrl,
 			SupabaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_URL") ?? supabaseUrl,
 			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey,
-			OneSignalAppId = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_APP_ID") ?? oneSignalAppId,
-			OneSignalRestApiKey = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_REST_API_KEY") ?? oneSignalRestApiKey
+			OneSignalAppId = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_APP_ID")
+				?? Environment.GetEnvironmentVariable("ONESIGNAL_APP_ID")
+				?? oneSignalAppId,
+			OneSignalRestApiKey = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_REST_API_KEY")
+				?? Environment.GetEnvironmentVariable("ONESIGNAL_REST_API_KEY")
+				?? oneSignalRestApiKey
 		};
 
 		builder.Services.AddSingleton(config);
