@@ -100,7 +100,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<OneSignalIdentityService>();
 		builder.Services.AddSingleton<PostLoginNotificationRedirectService>();
 		builder.Services.AddSingleton<AuthSessionService>();
-		builder.Services.AddSingleton<INotificationTapSource, NoOpNotificationTapSource>();
+		builder.Services.AddSingleton<INotificationTapSource, OneSignalNotificationTapSource>();
 		builder.Services.AddSingleton<NotificationLifecycleRegistrar>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();

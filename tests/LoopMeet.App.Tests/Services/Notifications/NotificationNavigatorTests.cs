@@ -9,8 +9,8 @@ public sealed class NotificationNavigatorTests
             "../../../../../src/LoopMeet.App/Services/Notifications/NotificationRouteMap.cs"));
         var source = File.ReadAllText(path);
 
-        Assert.Contains("//Invitations/Pending", source, StringComparison.Ordinal);
-        Assert.Contains("//Groups/Detail?groupId=", source, StringComparison.Ordinal);
-        Assert.Contains("//Home", source, StringComparison.Ordinal);
+        Assert.Contains("SignedInTabs.InvitationsShellPath", source, StringComparison.Ordinal);
+        Assert.Contains("/group-detail?groupId=", source, StringComparison.Ordinal);
+        Assert.Contains("SignedInTabs.HomeShellPath", source, StringComparison.Ordinal);
     }
 }
