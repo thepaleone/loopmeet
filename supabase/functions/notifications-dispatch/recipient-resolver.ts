@@ -24,7 +24,7 @@ export const resolveRecipients = async ({ table, record }: RecipientResolverInpu
 
     const { data, error } = await supabase
       .from("memberships")
-      .select("user_id")
+      .select("member_user_id")
       .eq("group_id", groupId);
 
     if (error) {
@@ -32,7 +32,7 @@ export const resolveRecipients = async ({ table, record }: RecipientResolverInpu
     }
 
     return (data ?? [])
-      .map((row) => row.user_id)
+      .map((row) => row.member_user_id)
       .filter((value): value is string => typeof value === "string");
   }
 
