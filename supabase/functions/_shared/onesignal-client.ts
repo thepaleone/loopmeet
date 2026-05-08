@@ -22,7 +22,7 @@ export class OneSignalClient {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Key ${this.restApiKey}`,
+        "Authorization": `Key ${this.restApiKey}`,
       },
       body: JSON.stringify(payload),
     });
