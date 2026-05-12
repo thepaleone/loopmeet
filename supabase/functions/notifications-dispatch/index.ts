@@ -57,17 +57,30 @@ const buildNotificationCopy = async (
   notificationType: NotificationType,
   record: Record<string, unknown>,
 ): Promise<NotificationCopy> => {
+  const groupId = typeof record.group_id === "string" ? record.group_id : null;
+  let groupName = "one of your groups";
+  if (groupId) {
+    const { data } = await supabase
+      .from("groups")
+      .select("name")
+      .eq("id", groupId)
+      .maybeSingle();
+    if (typeof data?.name === "string" && data.name.trim().length > 0) {
+      groupName = data.name.trim();
+    }
+  }
+
   switch (notificationType) {
     case "invitation.new":
       return invitationCopy(record);
     case "meetup.created":
-      return { title: "LoopMeet - New Meetup", body: "A new meetup has been scheduled in one of your groups." };
+      return { title: "LoopMeet - New Meetup", body: `A new meetup has been scheduled in ${groupName}.` };
     case "meetup.updated":
-      return { title: "LoopMeet - Meetup Updated", body: "A meetup in one of your groups has new details." };
+      return { title: "LoopMeet - Meetup Updated", body: `A meetup in ${groupName} has new details.` };
     case "meetup.canceled":
-      return { title: "LoopMeet - Meetup Canceled", body: "A meetup in one of your groups was canceled." };
+      return { title: "LoopMeet - Meetup Canceled", body: `A meetup in ${groupName} was canceled.` };
     case "meetup.today_reminder":
-      return { title: "LoopMeet - Reminder", body: "You have a meetup happening today." };
+      return { title: "LoopMeet - Reminder", body: `You have a meetup happening today in ${groupName}.` };
   }
 };
 
