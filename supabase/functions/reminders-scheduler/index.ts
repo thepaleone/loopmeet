@@ -25,8 +25,8 @@ Deno.serve(async () => {
   const { data, error } = await supabase
     .from("meetups")
     .select("id,group_id")
-    .gte("starts_at", `${today}T00:00:00Z`)
-    .lt("starts_at", `${today}T23:59:59Z`);
+    .gte("scheduled_at", `${today}T00:00:00Z`)
+    .lt("scheduled_at", `${today}T23:59:59Z`);
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
