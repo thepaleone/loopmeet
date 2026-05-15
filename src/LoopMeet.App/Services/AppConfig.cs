@@ -6,5 +6,4 @@ public sealed class AppConfig
     public string SupabaseUrl { get; init; } = "";
     public string SupabaseAnonOrPublisableKey { get; init; } = "";
     public string OneSignalAppId { get; init; } = "";
-    public string OneSignalRestApiKey { get; init; } = "";
 }

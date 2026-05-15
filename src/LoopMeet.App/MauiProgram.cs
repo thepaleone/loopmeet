@@ -56,8 +56,10 @@ public static class MauiProgram
 // 		var supabaseUrl = string.Empty;
 // 		var supabaseAnonOrPublishableKey = string.Empty;
 // #endif
-		var oneSignalAppId = string.Empty;
-		var oneSignalRestApiKey = string.Empty;
+		// OneSignal App ID is a public identifier; safe to ship in the client.
+		// The REST API key is a server secret and MUST NOT be embedded here —
+		// it lives in Supabase Edge Function secrets only.
+		var oneSignalAppId = "61f3dd20-0b73-4f3a-8692-3dc734cfbdc4";
 
 		var config = new AppConfig
 		{
@@ -66,10 +68,7 @@ public static class MauiProgram
 			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey,
 			OneSignalAppId = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_APP_ID")
 				?? Environment.GetEnvironmentVariable("ONESIGNAL_APP_ID")
-				?? oneSignalAppId,
-			OneSignalRestApiKey = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_REST_API_KEY")
-				?? Environment.GetEnvironmentVariable("ONESIGNAL_REST_API_KEY")
-				?? oneSignalRestApiKey
+				?? oneSignalAppId
 		};
 
 		builder.Services.AddSingleton(config);
