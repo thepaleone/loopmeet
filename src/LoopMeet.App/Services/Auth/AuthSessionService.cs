@@ -26,14 +26,16 @@ public sealed class AuthSessionService
     public async Task HandleSuccessfulSignInAsync()
     {
         var permissionState = _permissionService.CurrentState;
+
         if (_permissionService.ShouldPromptAfterSignIn())
         {
             var granted = await RequestNotificationPermissionAsync();
             permissionState = granted
                 ? NotificationPermissionState.Granted
                 : NotificationPermissionState.Denied;
-            await _permissionService.SetStateAsync(permissionState);
         }
+
+        await _permissionService.SetStateAsync(permissionState);
 
         var userId = _authService.GetCurrentUserId();
         if (userId.HasValue)
@@ -46,6 +48,15 @@ public sealed class AuthSessionService
             catch
             {
                 // Intentionally non-fatal to avoid blocking sign-in flow.
+            }
+
+            try
+            {
+                await _deviceRegistrationService.SyncUserProfileTimezoneAsync(userId.Value);
+            }
+            catch
+            {
+                // Non-fatal; reminders fall back to America/Los_Angeles.
             }
         }
     }

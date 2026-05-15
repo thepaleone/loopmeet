@@ -1,6 +1,5 @@
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
--- create extension if not exists vault;
 
 do $$
 declare
@@ -29,9 +28,13 @@ begin
         perform cron.unschedule('reminders-scheduler-every-15-minutes');
     end if;
 
+    if exists (select 1 from cron.job where jobname = 'reminders-scheduler-every-5-minutes') then
+        perform cron.unschedule('reminders-scheduler-every-5-minutes');
+    end if;
+
     perform cron.schedule(
-        'reminders-scheduler-every-15-minutes',
-        '*/15 * * * *',
+        'reminders-scheduler-every-5-minutes',
+        '*/5 * * * *',
         $cron$
         select
             net.http_post(
@@ -42,7 +45,7 @@ begin
                 ),
                 body := '{}'::jsonb
             ) as request_id;
-        $$
+        $cron$
     );
 end
 $$;

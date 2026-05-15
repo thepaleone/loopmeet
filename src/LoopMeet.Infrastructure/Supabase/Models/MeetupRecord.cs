@@ -36,6 +36,9 @@ public sealed class MeetupRecord : BaseModel
     [Column("place_id")]
     public string? PlaceId { get; set; }
 
+    [Column("timezone")]
+    public string? Timezone { get; set; }
+
     [Column("created_at")]
     public DateTimeOffset CreatedAt { get; set; }
 

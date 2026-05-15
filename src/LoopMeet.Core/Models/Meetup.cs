@@ -12,6 +12,7 @@ public sealed class Meetup
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? PlaceId { get; set; }
+    public string? Timezone { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
 }

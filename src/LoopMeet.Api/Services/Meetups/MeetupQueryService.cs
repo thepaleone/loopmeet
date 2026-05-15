@@ -40,6 +40,7 @@ public sealed class MeetupQueryService
                     Latitude = m.Latitude,
                     Longitude = m.Longitude,
                     PlaceId = m.PlaceId,
+                    Timezone = m.Timezone,
                     CreatedByUserId = m.CreatedByUserId
                 })
                 .ToList();
@@ -68,6 +69,7 @@ public sealed class MeetupQueryService
                     Latitude = m.Meetup.Latitude,
                     Longitude = m.Meetup.Longitude,
                     PlaceId = m.Meetup.PlaceId,
+                    Timezone = m.Meetup.Timezone,
                     CreatedByUserId = m.Meetup.CreatedByUserId,
                     GroupName = m.GroupName
                 })
