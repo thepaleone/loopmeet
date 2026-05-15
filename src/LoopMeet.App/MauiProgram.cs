@@ -46,16 +46,16 @@ public static class MauiProgram
 // 		var supabaseUrl = "http://dev.loopmeet.io:54321";
 // 		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
 // #elif STAGING
-#if DEBUG || STAGING
+// #if DEBUG || STAGING
 		var apiBaseUrl = "https://api-staging.loopmeet.io";
 		var supabaseUrl ="https://cswfsnikasaorexwhsas.supabase.co";
 		var supabaseAnonOrPublishableKey = "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
-#else
-		throw new InvalidOperationException("Production not yet implemented.");
-		var apiBaseUrl = string.Empty;
-		var supabaseUrl = string.Empty;
-		var supabaseAnonOrPublishableKey = string.Empty;
-#endif
+// #else
+// 		throw new InvalidOperationException("Production not yet implemented.");
+// 		var apiBaseUrl = string.Empty;
+// 		var supabaseUrl = string.Empty;
+// 		var supabaseAnonOrPublishableKey = string.Empty;
+// #endif
 		var oneSignalAppId = string.Empty;
 		var oneSignalRestApiKey = string.Empty;
 
