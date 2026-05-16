@@ -4,6 +4,7 @@ export interface OneSignalRequest {
   headings: Record<string, string>;
   contents: Record<string, string>;
   data: Record<string, unknown>;
+  android_channel_id?: string;
 }
 
 export interface OneSignalResponse {

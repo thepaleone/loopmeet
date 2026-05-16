@@ -1,4 +1,5 @@
 import { OneSignalClient } from "../_shared/onesignal-client.ts";
+import { resolveAndroidChannelId } from "../_shared/notification-channels.ts";
 import type { NotificationType } from "../_shared/notification-contract.ts";
 import { buildPayload } from "./payload-builder.ts";
 
@@ -27,12 +28,14 @@ export const dispatchNotification = async (input: DispatchInput) => {
     recipient_count: input.recipients.length,
   }));
 
+  const androidChannelId = resolveAndroidChannelId(input.notificationType);
   const response = await oneSignalClient.send({
     app_id: appId,
     include_external_user_ids: input.recipients,
     headings: { en: input.title },
     contents: { en: input.body },
-    data: payload,
+    data: payload as unknown as Record<string, unknown>,
+    ...(androidChannelId ? { android_channel_id: androidChannelId } : {}),
   });
 
   return {

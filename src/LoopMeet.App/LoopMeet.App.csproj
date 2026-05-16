@@ -8,6 +8,19 @@
 		<UseAppSandbox>true</UseAppSandbox>
 	</PropertyGroup>
 
+	<!--
+	  Android Release crash workaround: the trimmer + AOT pipeline can strip
+	  IL bodies that are only reached via JNI (e.g. MauiApplication.n_onCreate),
+	  producing an UnsatisfiedLinkError at first launch on a physical device
+	  while emulator/Debug works fine. Keep IL after AOT, and skip LLVM which
+	  has been observed to drop the same exports. Re-evaluate when the .NET
+	  for Android trimmer respects [Register]/JNI-reachable methods reliably.
+	-->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' And $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidStripILAfterAOT>false</AndroidStripILAfterAOT>
+		<EnableLLVM>false</EnableLLVM>
+	</PropertyGroup>
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>

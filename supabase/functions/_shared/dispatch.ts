@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { OneSignalClient } from "./onesignal-client.ts";
 import { notificationMappingRegistry } from "./notification-mapping-registry.ts";
+import { resolveAndroidChannelId } from "./notification-channels.ts";
 import type { NotificationPayload, NotificationType } from "./notification-contract.ts";
 
 const destinationMap = notificationMappingRegistry;
@@ -105,12 +106,14 @@ export class NotificationDispatcher {
     }));
 
     try {
+      const androidChannelId = resolveAndroidChannelId(options.notificationType);
       const response = await this.oneSignal.send({
         app_id: this.appId,
         include_external_user_ids: [options.externalUserId],
         headings: { en: options.title },
         contents: { en: options.body },
-        data: payload,
+        data: payload as unknown as Record<string, unknown>,
+        ...(androidChannelId ? { android_channel_id: androidChannelId } : {}),
       });
 
       await this.supabase.from("notification_delivery_attempts").insert({
