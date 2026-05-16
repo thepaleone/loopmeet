@@ -3,8 +3,8 @@
 # device or emulator.
 #
 # Usage:
-#   ./deploy/deploy-android.sh                 # uses the only connected device
-#   DEVICE=adb-XYZ ./deploy/deploy-android.sh  # targets a specific adb serial
+#   ./deploy/deploy-android.sh                # uses the default physical device
+#   ./deploy/deploy-android.sh emulator-5554  # targets an explicit adb serial
 #
 # Run `adb devices -l` to list connected devices and copy the serial.
 #
@@ -15,10 +15,10 @@
 
 set -euo pipefail
 
-DEVICE_ARG=()
-if [[ -n "${DEVICE:-}" ]]; then
-  DEVICE_ARG=("-p:Device=${DEVICE}")
-fi
+# First positional argument overrides the default; falls back to the physical
+# device serial when no arg is given. Use `emulator-5554` (or similar) to
+# target a running emulator.
+DEVICE="${1:-adb-4A301FDAS002ED-5gZyL4._adb-tls-connect._tcp}"
 
 dotnet build -c Release \
   -t:Run -f net10.0-android \
@@ -26,5 +26,5 @@ dotnet build -c Release \
   -p:AndroidLinkMode=none \
   -p:RunAOTCompilation=false \
   -p:AndroidPackageFormat=apk \
-  "${DEVICE_ARG[@]}" \
+  -p:Device="$DEVICE" \
   src/LoopMeet.App
