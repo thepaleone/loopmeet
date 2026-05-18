@@ -48,6 +48,7 @@ public sealed class AuthSessionService
         }
 
         await TryLinkOneSignalIdentityAsync(userId.Value);
+        await TryEnsurePushSubscriptionAsync(permissionState);
         await TrySyncDevicePermissionAsync(userId.Value, permissionState);
         await TrySyncUserProfileTimezoneAsync(userId.Value);
     }
@@ -107,6 +108,23 @@ public sealed class AuthSessionService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "OneSignal identity login failed for {UserId}.", userId);
+        }
+    }
+
+    private async Task TryEnsurePushSubscriptionAsync(NotificationPermissionState state)
+    {
+        if (!_oneSignalBootstrap.IsInitialized || state != NotificationPermissionState.Granted)
+        {
+            return;
+        }
+
+        try
+        {
+            await _oneSignalIdentityService.EnsureOptedInAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "OneSignal push subscription opt-in failed.");
         }
     }
 

@@ -20,11 +20,13 @@ set -euo pipefail
 # target a running emulator.
 DEVICE="${1:-adb-4A301FDAS002ED-5gZyL4._adb-tls-connect._tcp}"
 
+dotnet clean src/LoopMeet.App
+
 dotnet build -c Release \
-  -t:Run -f net10.0-android \
-  -p:PublishTrimmed=false \
-  -p:AndroidLinkMode=none \
-  -p:RunAOTCompilation=false \
-  -p:AndroidPackageFormat=apk \
-  -p:Device="$DEVICE" \
-  src/LoopMeet.App
+-t:Run -f net10.0-android \
+-p:PublishTrimmed=false \
+-p:AndroidLinkMode=none \
+-p:RunAOTCompilation=false \
+-p:AndroidPackageFormat=apk \
+-p:Device="$DEVICE" \
+src/LoopMeet.App
