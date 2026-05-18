@@ -23,7 +23,14 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
-		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<!--
+		  iOS and MacCatalyst targets can be opted out via `-p:SkipMaciOSTargets=true`.
+		  Use this when running `dotnet test LoopMeet.slnx` on a workload version where
+		  Xamarin.MacDev.AppleSdkSettings..cctor() throws ArgumentNullException, which
+		  blocks the iOS/MacCatalyst DetectSdkLocations task even though tests don't
+		  need those targets.
+		-->
+		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux')) And '$(SkipMaciOSTargets)' != 'true'">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 
 		<!-- Note for MacCatalyst:
