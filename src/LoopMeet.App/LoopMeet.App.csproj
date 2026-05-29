@@ -8,12 +8,18 @@
 		<UseAppSandbox>true</UseAppSandbox>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+	<!--
+	  Entitlements are scoped to iOS *device* builds (RID does not contain
+	  "simulator"). Simulator builds don't get a real APNs token and don't
+	  go through Apple's signing/profile system, so applying entitlements
+	  on simulator only causes a "provisioning profile not found" failure.
+	-->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios')) And !$(RuntimeIdentifier.Contains('simulator'))">
 		<!--
-		  Debug builds expect aps-environment=development to match an iOS App
-		  Development provisioning profile + Apple Development signing cert.
-		  Release builds expect aps-environment=production to match an Ad Hoc
-		  or App Store provisioning profile + Apple Distribution cert. The
+		  Debug device builds expect aps-environment=development to match an
+		  iOS App Development provisioning profile + Apple Development cert.
+		  Release device builds expect aps-environment=production to match
+		  an Ad Hoc or App Store profile + Apple Distribution cert. The
 		  entitlement value, cert type, and provisioning profile must agree
 		  or the install will fail with a code-signing error.
 		-->
@@ -114,7 +120,7 @@
 	<ItemGroup>
 		<PackageReference Include="CommunityToolkit.Maui" Version="14.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.30" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.70" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 		<PackageReference Include="OneSignalSDK.DotNet" Version="6.1.6" />
 		<PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
