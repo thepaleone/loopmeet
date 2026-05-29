@@ -8,6 +8,19 @@
 		<UseAppSandbox>true</UseAppSandbox>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+		<!--
+		  Debug builds expect aps-environment=development to match an iOS App
+		  Development provisioning profile + Apple Development signing cert.
+		  Release builds expect aps-environment=production to match an Ad Hoc
+		  or App Store provisioning profile + Apple Distribution cert. The
+		  entitlement value, cert type, and provisioning profile must agree
+		  or the install will fail with a code-signing error.
+		-->
+		<CodesignEntitlements Condition="'$(Configuration)' == 'Debug'">Platforms/iOS/Entitlements.Debug.plist</CodesignEntitlements>
+		<CodesignEntitlements Condition="'$(Configuration)' != 'Debug'">Platforms/iOS/Entitlements.Release.plist</CodesignEntitlements>
+	</PropertyGroup>
+
 	<!--
 	  Android Release crash workaround: the trimmer + AOT pipeline can strip
 	  IL bodies that are only reached via JNI (e.g. MauiApplication.n_onCreate),

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Debug entitlements: aps-environment=development pairs with an
+	  iOS App Development provisioning profile + an Apple Development
+	  signing cert. Tokens route through OneSignal's sandbox APNs.
+	  Release builds use Entitlements.Release.plist with aps-environment=production.
+	-->
+	<key>aps-environment</key>
+	<string>development</string>
+</dict>
+</plist>

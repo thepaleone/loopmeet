@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Required for APNs registration. Must match the provisioning profile:
+	  use a distribution profile (App Store / Ad Hoc / TestFlight external)
+	  when this is set to "production". Switch to "development" temporarily
+	  if signing with a development profile during local debugging.
+	-->
+	<key>aps-environment</key>
+	<string>production</string>
+</dict>
+</plist>
