@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LoopMeet.App.Features.Profile.Views.SettingsPage"
+             Title="Settings">
+    <VerticalStackLayout Padding="24" Spacing="16">
+        <Label Text="Notifications are disabled" FontSize="16" />
+        <Button Text="Enable notifications"
+                AutomationId="EnableNotificationsButton"
+                Clicked="OnEnableNotificationsClicked" />
+    </VerticalStackLayout>
+</ContentPage>

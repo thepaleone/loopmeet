@@ -11,6 +11,7 @@ public sealed class MeetupResponse
     public double? Latitude { get; init; }
     public double? Longitude { get; init; }
     public string? PlaceId { get; init; }
+    public string? Timezone { get; init; }
     public Guid CreatedByUserId { get; init; }
 }
 
@@ -23,6 +24,7 @@ public sealed class CreateMeetupRequest
     public double? Latitude { get; init; }
     public double? Longitude { get; init; }
     public string? PlaceId { get; init; }
+    public string? Timezone { get; init; }
 }
 
 public sealed class UpdateMeetupRequest
@@ -34,6 +36,7 @@ public sealed class UpdateMeetupRequest
     public double? Latitude { get; init; }
     public double? Longitude { get; init; }
     public string? PlaceId { get; init; }
+    public string? Timezone { get; init; }
 }
 
 public sealed class MeetupsResponse
@@ -52,6 +55,7 @@ public sealed class UpcomingMeetupResponse
     public double? Latitude { get; init; }
     public double? Longitude { get; init; }
     public string? PlaceId { get; init; }
+    public string? Timezone { get; init; }
     public Guid CreatedByUserId { get; init; }
     public string GroupName { get; init; } = string.Empty;
 }

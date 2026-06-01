@@ -7,6 +7,12 @@
 bin/
 obj/
 
+# Roslyn/MSBuild local build cache
+*.lscache
+
+# Firebase client config (fetch per environment from Firebase Console)
+src/LoopMeet.App/Platforms/Android/google-services.json
+
 # Common node modules locations
 /node_modules
 /wwwroot/node_modules
@@ -77,3 +83,4 @@ Thumbs.db
 *.tmp
 *.swp
 .idea/
+loopmeet-production-firebase-adminsdk-fbsvc-e8d81bec57.json

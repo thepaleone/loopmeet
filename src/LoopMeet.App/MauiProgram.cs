@@ -14,6 +14,8 @@ using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Features.DevTools.ViewModels;
 using LoopMeet.App.Features.DevTools.Views;
 using LoopMeet.App.Services;
+using LoopMeet.App.Services.Auth;
+using LoopMeet.App.Services.Notifications;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Devices;
@@ -39,27 +41,34 @@ public static class MauiProgram
 		builder.Logging.AddDebug();
 #endif
 
-#if DEBUG
-		var apiBaseUrl = "http://dev.loopmeet.io:8080";
-		var supabaseUrl = "http://dev.loopmeet.io:54321";
-		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-#elif STAGING
+// #if DEBUG
+// 		var apiBaseUrl = "http://dev.loopmeet.io:8080";
+// 		var supabaseUrl = "http://dev.loopmeet.io:54321";
+// 		var supabaseAnonOrPublishableKey = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+// #elif STAGING
 // #if DEBUG || STAGING
 		var apiBaseUrl = "https://api-staging.loopmeet.io";
 		var supabaseUrl ="https://cswfsnikasaorexwhsas.supabase.co";
 		var supabaseAnonOrPublishableKey = "sb_publishable__0wAiCklh-5wV_AmK0GJdQ_VAC5dYE8";
-#else
-		throw new InvalidOperationException("Production not yet implemented.");
-		var apiBaseUrl = string.Empty;
-		var supabaseUrl = string.Empty;
-		var supabaseAnonOrPublishableKey = string.Empty;
-#endif
+// #else
+// 		throw new InvalidOperationException("Production not yet implemented.");
+// 		var apiBaseUrl = string.Empty;
+// 		var supabaseUrl = string.Empty;
+// 		var supabaseAnonOrPublishableKey = string.Empty;
+// #endif
+		// OneSignal App ID is a public identifier; safe to ship in the client.
+		// The REST API key is a server secret and MUST NOT be embedded here —
+		// it lives in Supabase Edge Function secrets only.
+		var oneSignalAppId = "61f3dd20-0b73-4f3a-8692-3dc734cfbdc4";
 
 		var config = new AppConfig
 		{
 			ApiBaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_API_BASE_URL") ?? apiBaseUrl,
 			SupabaseUrl = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_URL") ?? supabaseUrl,
-			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey
+			SupabaseAnonOrPublisableKey = Environment.GetEnvironmentVariable("LOOPMEET_SUPABASE_ANON_KEY") ?? supabaseAnonOrPublishableKey,
+			OneSignalAppId = Environment.GetEnvironmentVariable("LOOPMEET_ONESIGNAL_APP_ID")
+				?? Environment.GetEnvironmentVariable("ONESIGNAL_APP_ID")
+				?? oneSignalAppId
 		};
 
 		builder.Services.AddSingleton(config);
@@ -83,6 +92,19 @@ public static class MauiProgram
 		builder.Services.AddSingleton<UsersApi>();
 		builder.Services.AddSingleton<MeetupsApi>();
 		builder.Services.AddSingleton<PlacesApi>();
+		builder.Services.AddSingleton<PendingNotificationIntentStore>();
+		builder.Services.AddSingleton<NotificationRouteMap>();
+		builder.Services.AddSingleton<NotificationNavigator>();
+		builder.Services.AddSingleton<NotificationService>();
+		builder.Services.AddSingleton<NotificationPermissionService>();
+		builder.Services.AddSingleton<NotificationSettingsLauncher>();
+		builder.Services.AddSingleton<DeviceRegistrationService>();
+		builder.Services.AddSingleton<OneSignalBootstrapService>();
+		builder.Services.AddSingleton<OneSignalIdentityService>();
+		builder.Services.AddSingleton<PostLoginNotificationRedirectService>();
+		builder.Services.AddSingleton<AuthSessionService>();
+		builder.Services.AddSingleton<INotificationTapSource, OneSignalNotificationTapSource>();
+		builder.Services.AddSingleton<NotificationLifecycleRegistrar>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();
 		builder.Services.AddTransient<HomeViewModel>();
@@ -110,6 +132,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<InvitationDetailPage>();
 		builder.Services.AddTransient<PendingInvitationsPage>();
 		builder.Services.AddTransient<ProfilePage>();
+		builder.Services.AddTransient<SettingsPage>();
 		builder.Services.AddTransient<ChangePasswordPage>();
 		builder.Services.AddTransient<DevInfoViewModel>();
 		builder.Services.AddTransient<DevInfoPage>();

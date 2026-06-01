@@ -53,18 +53,28 @@
                     Command="{Binding SaveProfileCommand}" />
                 <Button
                     Text="Change Password"
+                    ImageSource="ic_change_pwd.png"
                     IsVisible="{Binding CanChangePassword}"
                     Command="{Binding OpenPasswordChangeCommand}" />
+                <Button
+                    Text="Log out"
+                    ImageSource="ic_logout.png"
+                    ContentLayout="Left,8"
+                    Command="{Binding LogoutCommand}" />
             </HorizontalStackLayout>
 
-            <Button
-                Text="Log out"
-                ImageSource="ic_logout.png"
-                ContentLayout="Left,8"
-                BackgroundColor="Transparent"
-                TextColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource Secondary}}"
-                Command="{Binding LogoutCommand}" />
-
+            <HorizontalStackLayout Spacing="8">
+                <Button
+                    Text="Delete account"
+                    ImageSource="ic_delete_account.png"
+                    ContentLayout="Left,8"
+                    Command="{Binding DeleteAccountCommand}" />
+                <Button
+                    Text="Notification settings"
+                    ImageSource="ic_notification_bell_fallback.png"
+                    ContentLayout="Left,8"
+                    Command="{Binding OpenNotificationSettingsCommand}" />
+            </HorizontalStackLayout>
             <Label Text="{Binding StatusMessage}" IsVisible="{Binding ShowStatus}" />
         </VerticalStackLayout>
     </ScrollView>

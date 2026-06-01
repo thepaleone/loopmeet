@@ -247,7 +247,8 @@ public sealed partial class EditMeetupViewModel : ObservableObject
                 PlaceAddress = PlaceAddress,
                 Latitude = Latitude,
                 Longitude = Longitude,
-                PlaceId = PlaceId
+                PlaceId = PlaceId,
+                Timezone = TimezoneHelper.GetCurrentDeviceTimezoneId()
             });
             await Shell.Current.GoToAsync("..");
         }

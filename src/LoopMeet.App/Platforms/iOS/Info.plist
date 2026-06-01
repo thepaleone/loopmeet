@@ -43,6 +43,10 @@
 		<string>LoopMeet needs photo library access to let you choose a profile photo.</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>LoopMeet uses your location while searching meetup places to prioritize nearby results.</string>
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>remote-notification</string>
+		</array>
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSExceptionDomains</key>

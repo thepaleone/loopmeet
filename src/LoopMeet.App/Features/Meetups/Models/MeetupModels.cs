@@ -11,6 +11,7 @@ public sealed class MeetupSummary
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? PlaceId { get; set; }
+    public string? Timezone { get; set; }
     public Guid CreatedByUserId { get; set; }
     public string? GroupName { get; set; }
 
@@ -40,6 +41,7 @@ public sealed class CreateMeetupRequest
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? PlaceId { get; set; }
+    public string? Timezone { get; set; }
 }
 
 public sealed class UpdateMeetupRequest
@@ -51,4 +53,5 @@ public sealed class UpdateMeetupRequest
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
     public string? PlaceId { get; set; }
+    public string? Timezone { get; set; }
 }

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
+using LoopMeet.App.Services.Notifications;
 using Microsoft.Extensions.Logging;
 using Refit;
 using Supabase.Gotrue;
@@ -14,6 +15,7 @@ public sealed partial class ProfileViewModel : ObservableObject
     private readonly AuthService _authService;
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
+    private readonly NotificationSettingsLauncher _notificationSettingsLauncher;
     private readonly ILogger<ProfileViewModel> _logger;
 
     [ObservableProperty]
@@ -51,12 +53,41 @@ public sealed partial class ProfileViewModel : ObservableObject
     [ObservableProperty]
     private string _userInitial = "";
 
-    public ProfileViewModel(AuthService authService, UsersApi usersApi, UserProfileCache userProfileCache, ILogger<ProfileViewModel> logger)
+    public ProfileViewModel(
+        AuthService authService,
+        UsersApi usersApi,
+        UserProfileCache userProfileCache,
+        NotificationSettingsLauncher notificationSettingsLauncher,
+        ILogger<ProfileViewModel> logger)
     {
         _authService = authService;
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
+        _notificationSettingsLauncher = notificationSettingsLauncher;
         _logger = logger;
+    }
+
+    [RelayCommand]
+    private Task DeleteAccountAsync()
+    {
+        ShowStatus = true;
+        StatusMessage = "Account deletion isn't available yet.";
+        return Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OpenNotificationSettingsAsync()
+    {
+        try
+        {
+            await _notificationSettingsLauncher.OpenAppNotificationSettingsAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to open OS notification settings.");
+            ShowStatus = true;
+            StatusMessage = "Unable to open notification settings.";
+        }
     }
 
     [RelayCommand]

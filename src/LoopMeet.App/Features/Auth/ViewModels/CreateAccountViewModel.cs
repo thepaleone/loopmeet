@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth.Models;
 using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Services;
+using LoopMeet.App.Services.Auth;
 
 namespace LoopMeet.App.Features.Auth.ViewModels;
 
@@ -11,6 +12,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     private readonly AuthService _authService;
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
+    private readonly AuthSessionService _authSessionService;
 
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -42,11 +44,16 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     [ObservableProperty]
     private bool _showError;
 
-    public CreateAccountViewModel(AuthService authService, UsersApi usersApi, UserProfileCache userProfileCache)
+    public CreateAccountViewModel(
+        AuthService authService,
+        UsersApi usersApi,
+        UserProfileCache userProfileCache,
+        AuthSessionService authSessionService)
     {
         _authService = authService;
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
+        _authSessionService = authSessionService;
     }
 
     [RelayCommand]
@@ -111,6 +118,7 @@ public sealed partial class CreateAccountViewModel : ObservableObject
                 RequiresEmailForPasswordSetup = profile.RequiresEmailForPasswordSetup
             });
 
+            await _authSessionService.HandleSuccessfulSignInAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
         finally

@@ -71,6 +71,7 @@ public sealed class MeetupCommandService
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             PlaceId = request.PlaceId,
+            Timezone = NormalizeTimezone(request.Timezone),
             CreatedAt = now,
             UpdatedAt = now
         };
@@ -128,6 +129,10 @@ public sealed class MeetupCommandService
         existing.Latitude = request.Latitude;
         existing.Longitude = request.Longitude;
         existing.PlaceId = request.PlaceId;
+        if (request.Timezone is not null)
+        {
+            existing.Timezone = NormalizeTimezone(request.Timezone);
+        }
         existing.UpdatedAt = DateTimeOffset.UtcNow;
 
         await _meetupRepository.UpdateAsync(existing, cancellationToken);
@@ -171,7 +176,15 @@ public sealed class MeetupCommandService
             Latitude = meetup.Latitude,
             Longitude = meetup.Longitude,
             PlaceId = meetup.PlaceId,
+            Timezone = meetup.Timezone,
             CreatedByUserId = meetup.CreatedByUserId
         };
+    }
+
+    private static string? NormalizeTimezone(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        var trimmed = value.Trim();
+        return trimmed.Length > 64 ? null : trimmed;
     }
 }

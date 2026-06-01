@@ -122,6 +122,7 @@ public sealed class MeetupRepository : IMeetupRepository
             Latitude = record.Latitude,
             Longitude = record.Longitude,
             PlaceId = record.PlaceId,
+            Timezone = record.Timezone,
             CreatedAt = record.CreatedAt,
             UpdatedAt = record.UpdatedAt
         };
@@ -141,6 +142,7 @@ public sealed class MeetupRepository : IMeetupRepository
             Latitude = meetup.Latitude,
             Longitude = meetup.Longitude,
             PlaceId = meetup.PlaceId,
+            Timezone = meetup.Timezone,
             CreatedAt = meetup.CreatedAt,
             UpdatedAt = meetup.UpdatedAt
         };

@@ -6,6 +6,7 @@ using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Features.Meetups.Views;
 using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Services;
+using LoopMeet.App.Services.Notifications;
 using Microsoft.Maui.ApplicationModel;
 using Refit;
 
@@ -48,6 +49,7 @@ public partial class AppShell : Shell
 		_authInitialized = true;
 		var services = Application.Current?.Handler?.MauiContext?.Services;
 		var authService = services?.GetService<AuthService>();
+		var postLoginRedirectService = services?.GetService<PostLoginNotificationRedirectService>();
 		if (authService is null)
 		{
 			return;
@@ -79,6 +81,10 @@ public partial class AppShell : Shell
 				}
 
 				await MainThread.InvokeOnMainThreadAsync(() => GoToAsync(SignedInTabs.HomeShellPath));
+				if (postLoginRedirectService is not null)
+				{
+					await postLoginRedirectService.ResumeAsync();
+				}
 			}
 		}
 		catch (Exception ex)

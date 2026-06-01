@@ -24,6 +24,9 @@ public sealed class UserRecord : BaseModel
     [Column("avatar_override_url")]
     public string? AvatarOverrideUrl { get; set; }
 
+    [Column("timezone")]
+    public string? Timezone { get; set; }
+
     [Column("created_at")]
     public DateTimeOffset CreatedAt { get; set; }
 

@@ -61,10 +61,10 @@
         <Tab
             Title="Dev Tools"
             x:Name="DevToolsTab"
-            Icon="tab_devtools_fallback.png">
+            Icon="tab_dev_tools_fallback.png">
             <ShellContent
                 Title="Dev Tools"
-                Icon="tab_devtools_fallback.png"
+                Icon="tab_dev_tools_fallback.png"
                 ContentTemplate="{DataTemplate devtools:DevInfoPage}"
                 Route="devtools" />
         </Tab>
