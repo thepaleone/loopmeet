@@ -22,7 +22,7 @@ Temporarily lower JWT expiry (Dashboard → Authentication → JWT expiry) to 30
 | --- | --- | --- | --- | --- |
 | 1 | US1 | Foreground refresh after backgrounding past expiry | Sign in → background the app for > 1 JWT lifetime → foreground | Data screens work immediately; no login bounce; log shows `Renewed` on `AppForegrounded` |
 | 2 | US1 | Multi-day usage | Use the app at least once daily for 3+ days (never signing out) | Never returned to login screen |
-| 3 | US1 | Mid-session API expiry | With app foregrounded, wait past JWT expiry without resuming (defeats trigger), then pull-to-refresh a list | Request transparently retried after refresh; no visible error, no login bounce |
+| 3 | US1 | Mid-session API expiry (401 retry path) | Foregrounded app: enable airplane mode at ~4/5 of the JWT lifetime (so Gotrue's timer refresh transient-fails and the stale token is kept), wait past expiry, disable airplane mode, then pull-to-refresh a list | Request gets 401 → transparently refresh-retried; no visible error, no login bounce; log shows `RenewalTransientFailure` then `Renewed` on `ApiUnauthorized` |
 | 4 | US1 | Rapid background/foreground cycling | Switch away/back 5× within 10 s | Exactly ≤ 1 renewal attempt in logs (debounce); no navigation glitches |
 | 5 | US2 | Immediate re-sign-in, all providers | Log out → sign in with email → log out → Google → log out → Apple | Each succeeds on first attempt, no force-quit needed (SC-002) |
 | 6 | US2 | Re-sign-in after *forced* sign-out | Revoke the session server-side (Dashboard → Authentication → Users → sign out user) → trigger an API call → land on login | Signing back in immediately succeeds with any provider |

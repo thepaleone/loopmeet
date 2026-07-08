@@ -74,7 +74,9 @@ src/LoopMeet.App/
 │   │   ├── SessionCoordinator.cs                # NEW: startup resolve, foreground renewal, full sign-out
 │   │   ├── SessionFailureClassifier.cs          # NEW: pure — GotrueException/HTTP → Definitive | Transient
 │   │   ├── SessionRenewalPolicy.cs              # NEW: pure — needs-refresh + debounce decisions
-│   │   └── SignOutReason.cs                     # NEW: enum + session-ended notice text mapping
+│   │   ├── SignOutReason.cs                     # NEW: enum + session-ended notice text mapping
+│   │   ├── SessionNoticeState.cs                # NEW: singleton consume-once notice hand-off (contract §6a)
+│   │   └── IHasUnsavedInput.cs                  # NEW: marker for unsaved-input notice selection
 │   └── Views/ (+ ViewModels/)
 │       ├── StartupGatePage.xaml(.cs)            # NEW: indicator + "Checking your session…" status text
 │       ├── StartupGateViewModel.cs              # NEW: drives ResolveStartupAsync, navigates once
