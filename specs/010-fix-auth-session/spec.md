@@ -5,6 +5,15 @@
 **Status**: Draft
 **Input**: User description: "Fix the authentication and session experience so users are not unexpectedly signed out during normal use and are never stuck unable to log back in. Today, users intermittently lose their signed-in status mid-session -- the app stops showing their data and eventually forces them back to the login screen -- and afterward they usually cannot sign back in (with email/password, Google, or Apple) without fully force-quitting and relaunching the app. There should be no fixed session timeout; if a hard limit is unavoidable, the session should last as long as technically possible and use a sliding expiration that renews automatically every time the user actively uses the app, including returning to the app after it was backgrounded, so an active user is never logged out. When a session does need to end (expired, revoked, or refresh failed), the app must consistently and fully sign the user out everywhere -- clearing all cached credentials and profile data, not just navigating away -- and must always let them sign back in immediately using any supported method, on the same screen, without needing to restart the app. Separately, on every app launch, instead of briefly flashing the login screen before deciding whether the user is actually signed in, the app should show a clear checking-your-session loading state (indicator plus status text) while it determines sign-in status in the background, then go directly to either the login screen or the signed-in home screen -- never both."
 
+## Clarifications
+
+### Session 2026-07-08
+
+- Q: When an automatic session renewal attempt fails, under what condition should the app actually sign the user out? → A: Only on definitive rejection by the auth server (refresh token invalid, expired, or revoked). Network/transient errors (timeout, offline, 5xx) keep the current session and retry silently on next active use or foregrounding.
+- Q: On app launch with a locally cached session but no way to reach the server (offline or repeated timeouts), where should the startup check resolve the user? → A: Home with the cached session; re-validate in the background once connectivity returns, forcing sign-out only on definitive rejection.
+- Q: What is the maximum time the startup checking-session state may wait for the server before falling back to the offline resolution path? → A: 5 seconds.
+- Q: When a forced sign-out occurs while the user has unsaved in-progress input, what should happen to that input? → A: Discard it, navigate to login, and show a brief notice that the session ended and unsaved input was lost.
+
 ## User Scenarios & Testing *(mandatory)*
 
 <!--
@@ -84,7 +93,7 @@ As a user opening the app, I want to see a clear "checking your session" indicat
 - The user has no network connectivity at launch or while backgrounded -- the app must not incorrectly treat "can't reach the network" the same as "session is invalid" and must not strand the user on the checking-session state indefinitely.
 - The device's clock is significantly wrong relative to the server -- session validity decisions must still behave sensibly.
 - The user rapidly switches the app to the background and back multiple times in quick succession -- this must not trigger repeated redundant renewal attempts or conflicting navigation.
-- The user has an unsaved action in progress (e.g., filling out a new meetup or group form) when their session ends -- the sign-out must not silently destroy their in-progress input without at least the same care given to other error conditions.
+- The user has an unsaved action in progress (e.g., filling out a new meetup or group form) when their session ends -- the in-progress input is discarded, the user is taken to the login screen, and a brief notice explains that the session ended and unsaved input was lost (no silent data loss, no draft preservation).
 - The user previously signed in with one method (e.g., Google) and later attempts to sign back in with a different method (e.g., Apple or email/password) using the same identity -- sign-back-in must not fail or create a duplicate/conflicting account.
 - A session-ending condition is detected while the user is offline -- the user should still end up in a clear, recoverable state once connectivity returns, rather than stuck.
 
@@ -95,7 +104,8 @@ As a user opening the app, I want to see a clear "checking your session" indicat
 - **FR-001**: The system MUST NOT sign out an actively-using user purely due to elapsed time; if a hard session ceiling is technically unavoidable, it MUST be set to the longest duration technically supported.
 - **FR-002**: The system MUST automatically renew/extend a signed-in user's session on active use, including each time the app returns to the foreground after being backgrounded, so continued use never results in expiration.
 - **FR-003**: The system MUST treat "session ended" the same way everywhere in the app -- every screen MUST use the same detection and response behavior rather than each screen deciding independently.
-- **FR-004**: When a session ends for any reason (expiration, revocation, failed renewal, or explicit sign-out), the system MUST fully clear all locally cached credentials and personal profile data as part of that sign-out.
+- **FR-004**: When a session ends for any reason (expiration, revocation, definitively rejected renewal, or explicit sign-out), the system MUST fully clear all locally cached credentials and personal profile data as part of that sign-out.
+- **FR-004a**: A session MUST be considered ended by a failed renewal only when the auth server definitively rejects it (refresh token invalid, expired, or revoked). Transient failures — timeouts, no connectivity, or server errors (5xx) — MUST NOT end the session; the system MUST keep the user signed in and silently retry renewal on the next active use or app foregrounding.
 - **FR-005**: The system MUST NOT mask a session-ending condition by silently showing an empty or "no data" state; a session ending MUST always result in the user being routed to the login screen.
 - **FR-006**: After any sign-out (user-initiated or forced), the system MUST allow the user to immediately attempt to sign back in again from the login screen, using any supported sign-in method, without restarting the app.
 - **FR-007**: An interrupted or abandoned sign-in attempt (with any provider) MUST NOT block or break a subsequent sign-in attempt.
@@ -103,6 +113,7 @@ As a user opening the app, I want to see a clear "checking your session" indicat
 - **FR-009**: The system MUST NOT display the login screen and the home screen in succession for the same app launch; only the correct destination, once determined, MUST be shown.
 - **FR-010**: The behaviors above (session persistence, renewal, consistent sign-out, immediate re-sign-in, and startup checking state) MUST apply uniformly across all supported sign-in methods: email/password, Google, and Apple.
 - **FR-011**: If the startup session check cannot complete promptly (e.g., due to connectivity issues), the system MUST keep the user informed via the loading state rather than appearing unresponsive, and MUST eventually resolve to a definite signed-in or signed-out destination.
+- **FR-011a**: When the startup session check cannot reach the auth server (offline or repeated timeouts) and a locally cached session exists, the system MUST resolve to the home screen using the cached session, then re-validate in the background once connectivity returns — forcing sign-out only on definitive rejection (per FR-004a). If no cached session exists, the system MUST resolve to the login screen. The startup check MUST wait no more than 5 seconds for the server before taking this fallback path.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -132,4 +143,4 @@ As a user opening the app, I want to see a clear "checking your session" indicat
 - **SC-002**: 100% of sign-out events (forced or voluntary) are immediately followed by a successful sign-in on the user's first subsequent attempt, with no app restart required.
 - **SC-003**: When a session ends, 100% of app screens reflect the signed-out state (redirect to login, no stale data) rather than a mix of behaviors across screens.
 - **SC-004**: 100% of app launches show exactly one continuous loading state that resolves directly to either the login screen or the home screen, with zero observed cases of one screen flashing before the other.
-- **SC-005**: The startup session check resolves to a definite screen within a few seconds under normal connectivity, and never leaves the user stuck on the checking-session state indefinitely even under poor connectivity.
+- **SC-005**: The startup session check resolves to a definite screen within 5 seconds in 100% of launches — via a server-confirmed answer under normal connectivity, or via the cached-session fallback path (FR-011a) under poor or no connectivity — and never leaves the user stuck on the checking-session state.
