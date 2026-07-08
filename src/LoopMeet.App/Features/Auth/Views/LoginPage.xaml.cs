@@ -12,4 +12,16 @@ public partial class LoginPage : ContentPage
         var services = Application.Current?.Handler?.MauiContext?.Services;
         BindingContext = services?.GetService<LoginViewModel>();
     }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        (BindingContext as LoginViewModel)?.RefreshSessionNotice();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        (BindingContext as LoginViewModel)?.CancelPendingProviderSignIn();
+    }
 }

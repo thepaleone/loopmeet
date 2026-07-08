@@ -1,15 +1,18 @@
 using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Invitations.Models;
 using LoopMeet.App.Services;
 using Refit;
 
 namespace LoopMeet.App.Features.Invitations.ViewModels;
 
-public sealed partial class InviteMemberViewModel : ObservableObject
+public sealed partial class InviteMemberViewModel : ObservableObject, IHasUnsavedInput
 {
     private readonly InvitationsApi _invitationsApi;
+
+    public bool HasUnsavedInput => !string.IsNullOrWhiteSpace(Email);
 
     [ObservableProperty]
     private Guid _groupId;

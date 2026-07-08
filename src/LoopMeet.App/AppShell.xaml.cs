@@ -1,21 +1,13 @@
-﻿using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Auth.Views;
-using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Features.Meetups.Views;
 using LoopMeet.App.Features.Profile.Views;
-using LoopMeet.App.Services;
-using LoopMeet.App.Services.Notifications;
-using Microsoft.Maui.ApplicationModel;
-using Refit;
 
 namespace LoopMeet.App;
 
 public partial class AppShell : Shell
 {
-	private bool _authInitialized;
-
 #if DEBUG || STAGING
 	public bool ShowDevTools => true;
 #else
@@ -35,61 +27,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("change-password", typeof(ChangePasswordPage));
 		Routing.RegisterRoute("create-meetup", typeof(CreateMeetupPage));
 		Routing.RegisterRoute("edit-meetup", typeof(EditMeetupPage));
-	}
-
-	protected override async void OnAppearing()
-	{
-		base.OnAppearing();
-
-		if (_authInitialized)
-		{
-			return;
-		}
-
-		_authInitialized = true;
-		var services = Application.Current?.Handler?.MauiContext?.Services;
-		var authService = services?.GetService<AuthService>();
-		var postLoginRedirectService = services?.GetService<PostLoginNotificationRedirectService>();
-		if (authService is null)
-		{
-			return;
-		}
 
 		this.DevToolsTab.IsVisible = ShowDevTools;
-
-		try
-		{
-			var session = await authService.RestoreSessionAsync();
-			if (session is not null && !string.IsNullOrWhiteSpace(session.AccessToken))
-			{
-				var usersApi = services?.GetService<UsersApi>();
-				var userProfileCache = services?.GetService<UserProfileCache>();
-				if (usersApi is not null && userProfileCache is not null)
-				{
-					try
-					{
-						var profile = await usersApi.GetProfileSummaryAsync();
-						userProfileCache.SetCachedProfile(profile);
-					}
-					catch (ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.NotFound)
-					{
-					}
-					catch (Exception ex)
-					{
-						System.Diagnostics.Debug.WriteLine($"Error loading cached profile from API: {ex}");
-					}
-				}
-
-				await MainThread.InvokeOnMainThreadAsync(() => GoToAsync(SignedInTabs.HomeShellPath));
-				if (postLoginRedirectService is not null)
-				{
-					await postLoginRedirectService.ResumeAsync();
-				}
-			}
-		}
-		catch (Exception ex)
-		{
-			System.Diagnostics.Debug.WriteLine($"Error restoring session: {ex}");
-		}
 	}
 }

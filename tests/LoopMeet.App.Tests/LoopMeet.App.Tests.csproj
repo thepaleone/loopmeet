@@ -12,8 +12,22 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Supabase.Gotrue" Version="6.0.3" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <!--
+    The MAUI app head cannot be referenced from a plain net10.0 test project,
+    so the MAUI-free session sources are compiled in directly. Anything listed
+    here must stay free of Microsoft.Maui.* dependencies.
+  -->
+  <ItemGroup>
+    <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\ISessionTokenSource.cs" Link="Included\ISessionTokenSource.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SessionFailureClassifier.cs" Link="Included\SessionFailureClassifier.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SessionRenewalPolicy.cs" Link="Included\SessionRenewalPolicy.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SignOutReason.cs" Link="Included\SignOutReason.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Services\ApiAuthHandler.cs" Link="Included\ApiAuthHandler.cs" />
   </ItemGroup>
 
   <ItemGroup>

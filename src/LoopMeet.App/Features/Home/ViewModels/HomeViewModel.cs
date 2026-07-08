@@ -3,11 +3,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Meetups.Models;
 using LoopMeet.App.Services;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 
 namespace LoopMeet.App.Features.Home.ViewModels;
 
-public sealed partial class HomeViewModel(UserProfileCache userProfileCache, MeetupsApi meetupsApi) : ObservableObject
+public sealed partial class HomeViewModel(
+    UserProfileCache userProfileCache,
+    MeetupsApi meetupsApi,
+    ILogger<HomeViewModel> logger) : ObservableObject
 {
     [ObservableProperty]
     private string _title = "Hello";
@@ -53,8 +57,16 @@ public sealed partial class HomeViewModel(UserProfileCache userProfileCache, Mee
             HasUpcomingMeetups = UpcomingMeetups.Count > 0;
             ShowEmptyState = !HasUpcomingMeetups;
         }
-        catch
+        catch (Refit.ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
+            // Session end is handled centrally (refresh-retry, then forced
+            // sign-out + routing by the SessionCoordinator) — never masked
+            // as an empty state (FR-005).
+            logger.LogInformation(apiEx, "Home load unauthorized; session handling owns the response.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to load upcoming meetups.");
             HasUpcomingMeetups = false;
             ShowEmptyState = true;
         }

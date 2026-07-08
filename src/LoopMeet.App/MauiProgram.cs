@@ -1,4 +1,5 @@
 ﻿using LoopMeet.App.Features.Auth;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Auth.ViewModels;
 using LoopMeet.App.Features.Auth.Views;
 using LoopMeet.App.Features.Home.ViewModels;
@@ -72,13 +73,17 @@ public static class MauiProgram
 		};
 
 		builder.Services.AddSingleton(config);
-		builder.Services.AddSingleton(_ => new Client(config.SupabaseUrl, config.SupabaseAnonOrPublisableKey, new SupabaseOptions
+		builder.Services.AddSingleton<MauiSessionPersistence>();
+		builder.Services.AddSingleton(sp => new Client(config.SupabaseUrl, config.SupabaseAnonOrPublisableKey, new SupabaseOptions
 		{
 			AutoConnectRealtime = false,
 			AutoRefreshToken = true,
-			SessionHandler = new MauiSessionPersistence()
+			SessionHandler = sp.GetRequiredService<MauiSessionPersistence>()
 		}));
 		builder.Services.AddSingleton<UserProfileCache>();
+		builder.Services.AddSingleton<SessionNoticeState>();
+		builder.Services.AddSingleton<SessionCoordinator>();
+		builder.Services.AddSingleton<ISessionTokenSource>(sp => sp.GetRequiredService<SessionCoordinator>());
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<AuthCoordinator>();
 		builder.Services.AddTransient<ApiAuthHandler>();
@@ -105,6 +110,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<AuthSessionService>();
 		builder.Services.AddSingleton<INotificationTapSource, OneSignalNotificationTapSource>();
 		builder.Services.AddSingleton<NotificationLifecycleRegistrar>();
+		builder.Services.AddTransient<StartupGateViewModel>();
+		builder.Services.AddTransient<StartupGatePage>();
 		builder.Services.AddTransient<LoginViewModel>();
 		builder.Services.AddTransient<CreateAccountViewModel>();
 		builder.Services.AddTransient<HomeViewModel>();

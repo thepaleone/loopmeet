@@ -72,8 +72,9 @@ public sealed partial class PendingInvitationsViewModel : ObservableObject
         }
         catch (ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            _logger.LogError(apiEx, "Failed to load pending invitations: unauthorized.");
-            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
+            // Session end is handled centrally (refresh-retry, then forced
+            // sign-out + routing by the SessionCoordinator) — no per-screen redirect.
+            _logger.LogInformation(apiEx, "Invitations load unauthorized; session handling owns the response.");
             ShowEmptyState = PendingInvitations.Count == 0;
         }
         catch (Exception ex)

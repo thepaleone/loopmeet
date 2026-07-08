@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
@@ -12,12 +13,19 @@ namespace LoopMeet.App.Features.Auth.ViewModels;
 
 public sealed partial class LoginViewModel : ObservableObject
 {
+    private static readonly TimeSpan PostSignInSetupTimeout = TimeSpan.FromSeconds(10);
+
     private readonly AuthService _authService;
     private readonly AuthCoordinator _authCoordinator;
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
     private readonly AuthSessionService _authSessionService;
+    private readonly SessionNoticeState _sessionNoticeState;
     private readonly ILogger<LoginViewModel> _logger;
+
+    // Cancels a provider sign-in whose native sheet was abandoned (FR-007):
+    // the awaited callback may never fire, and it must not hold IsBusy hostage.
+    private CancellationTokenSource? _providerSignInCts;
 
     [ObservableProperty]
     private string _email = string.Empty;
@@ -34,6 +42,12 @@ public sealed partial class LoginViewModel : ObservableObject
     [ObservableProperty]
     private bool _showError;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSessionEndedNotice))]
+    private string? _sessionEndedNotice;
+
+    public bool HasSessionEndedNotice => !string.IsNullOrEmpty(SessionEndedNotice);
+
     public bool ShowAppleSignIn =>
 #if IOS || MACCATALYST
         true;
@@ -47,6 +61,7 @@ public sealed partial class LoginViewModel : ObservableObject
         UsersApi usersApi,
         UserProfileCache userProfileCache,
         AuthSessionService authSessionService,
+        SessionNoticeState sessionNoticeState,
         ILogger<LoginViewModel> logger)
     {
         _authService = authService;
@@ -54,7 +69,56 @@ public sealed partial class LoginViewModel : ObservableObject
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
         _authSessionService = authSessionService;
+        _sessionNoticeState = sessionNoticeState;
         _logger = logger;
+    }
+
+    /// <summary>Consume-once read of the session-ended notice (contract §6a).</summary>
+    public void RefreshSessionNotice()
+    {
+        var notice = SignOutNotices.For(_sessionNoticeState.TakePending());
+        if (notice is not null)
+        {
+            SessionEndedNotice = notice;
+        }
+    }
+
+    /// <summary>Called from LoginPage.OnDisappearing so an abandoned provider sheet never wedges a later attempt.</summary>
+    public void CancelPendingProviderSignIn()
+    {
+        _providerSignInCts?.Cancel();
+    }
+
+    [RelayCommand]
+    private void DismissSessionNotice()
+    {
+        SessionEndedNotice = null;
+    }
+
+    /// <summary>
+    /// Post-sign-in setup (OneSignal, permissions, device sync) is bounded so it
+    /// can never hold the sign-in flow hostage; sign-in itself already succeeded.
+    /// </summary>
+    private async Task RunPostSignInSetupBoundedAsync()
+    {
+        var setup = _authSessionService.HandleSuccessfulSignInAsync();
+        try
+        {
+            if (await Task.WhenAny(setup, Task.Delay(PostSignInSetupTimeout)) != setup)
+            {
+                _logger.LogWarning("Post-sign-in setup exceeded {Timeout}s; navigating to home while it finishes in the background.", PostSignInSetupTimeout.TotalSeconds);
+                _ = setup.ContinueWith(
+                    t => _logger.LogWarning(t.Exception, "Background post-sign-in setup failed."),
+                    TaskContinuationOptions.OnlyOnFaulted);
+                return;
+            }
+
+            await setup;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Post-sign-in setup failed; continuing to home.");
+        }
     }
 
     [RelayCommand]
@@ -75,7 +139,7 @@ public sealed partial class LoginViewModel : ObservableObject
             if (!string.IsNullOrWhiteSpace(session.AccessToken))
             {
                 await CacheProfileSummaryAsync();
-                await _authSessionService.HandleSuccessfulSignInAsync();
+                await RunPostSignInSetupBoundedAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
@@ -134,10 +198,13 @@ public sealed partial class LoginViewModel : ObservableObject
         IsBusy = true;
         ShowError = false;
         ErrorMessage = string.Empty;
+        _providerSignInCts?.Cancel();
+        _providerSignInCts = new CancellationTokenSource();
+        var cancellation = _providerSignInCts.Token;
         try
         {
             _logger.LogInformation("Starting Google sign-in.");
-            var authResult = await _authService.SignInWithGoogleAsync();
+            var authResult = await _authService.SignInWithGoogleAsync().WaitAsync(cancellation);
             if (string.IsNullOrWhiteSpace(authResult.AccessToken))
             {
                 ShowError = true;
@@ -158,15 +225,21 @@ public sealed partial class LoginViewModel : ObservableObject
                 }
 
                 await CacheProfileSummaryAsync();
-                await _authSessionService.HandleSuccessfulSignInAsync();
+                await RunPostSignInSetupBoundedAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
 
             await TryCreateProfileFromOAuthAsync(authResult);
             await CacheProfileSummaryAsync();
-            await _authSessionService.HandleSuccessfulSignInAsync();
+            await RunPostSignInSetupBoundedAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
+        }
+        catch (OperationCanceledException)
+        {
+            // Abandoned mid-flow (backgrounded native sheet or a fresh attempt
+            // superseding this one): silent reset, matching the cancel convention.
+            _logger.LogInformation("Google sign-in attempt cancelled or abandoned.");
         }
         catch (Exception ex)
         {
@@ -192,10 +265,13 @@ public sealed partial class LoginViewModel : ObservableObject
         IsBusy = true;
         ShowError = false;
         ErrorMessage = string.Empty;
+        _providerSignInCts?.Cancel();
+        _providerSignInCts = new CancellationTokenSource();
+        var cancellation = _providerSignInCts.Token;
         try
         {
             _logger.LogInformation("Starting Apple sign-in.");
-            var authResult = await _authService.SignInWithAppleAsync();
+            var authResult = await _authService.SignInWithAppleAsync().WaitAsync(cancellation);
             if (string.IsNullOrWhiteSpace(authResult.AccessToken))
             {
                 ShowError = true;
@@ -216,15 +292,20 @@ public sealed partial class LoginViewModel : ObservableObject
                 }
 
                 await CacheProfileSummaryAsync();
-                await _authSessionService.HandleSuccessfulSignInAsync();
+                await RunPostSignInSetupBoundedAsync();
                 await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
                 return;
             }
 
             await TryCreateProfileFromOAuthAsync(authResult);
             await CacheProfileSummaryAsync();
-            await _authSessionService.HandleSuccessfulSignInAsync();
+            await RunPostSignInSetupBoundedAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
+        }
+        catch (OperationCanceledException)
+        {
+            // Abandoned mid-flow: silent reset, matching the cancel convention.
+            _logger.LogInformation("Apple sign-in attempt cancelled or abandoned.");
         }
         catch (Exception ex)
         {
