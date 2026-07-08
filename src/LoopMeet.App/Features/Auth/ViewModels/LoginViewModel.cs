@@ -34,6 +34,13 @@ public sealed partial class LoginViewModel : ObservableObject
     [ObservableProperty]
     private bool _showError;
 
+    public bool ShowAppleSignIn =>
+#if IOS || MACCATALYST
+        true;
+#else
+        false;
+#endif
+
     public LoginViewModel(
         AuthService authService,
         AuthCoordinator authCoordinator,
@@ -172,6 +179,65 @@ public sealed partial class LoginViewModel : ObservableObject
             IsBusy = false;
         }
     }
+
+#if IOS || MACCATALYST
+    [RelayCommand]
+    private async Task SignInWithAppleAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+        ShowError = false;
+        ErrorMessage = string.Empty;
+        try
+        {
+            _logger.LogInformation("Starting Apple sign-in.");
+            var authResult = await _authService.SignInWithAppleAsync();
+            if (string.IsNullOrWhiteSpace(authResult.AccessToken))
+            {
+                ShowError = true;
+                ErrorMessage = "Apple sign-in did not complete. Please try again.";
+                return;
+            }
+
+            var profile = await TryGetProfileAsync();
+            if (profile is not null)
+            {
+                if (!string.IsNullOrWhiteSpace(authResult.AvatarUrl) && string.IsNullOrWhiteSpace(profile.AvatarUrl))
+                {
+                    _ = _usersApi.UpdateProfileAsync(new UserProfileUpdateRequest
+                    {
+                        DisplayName = profile.DisplayName,
+                        SocialAvatarUrl = authResult.AvatarUrl
+                    });
+                }
+
+                await CacheProfileSummaryAsync();
+                await _authSessionService.HandleSuccessfulSignInAsync();
+                await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
+                return;
+            }
+
+            await TryCreateProfileFromOAuthAsync(authResult);
+            await CacheProfileSummaryAsync();
+            await _authSessionService.HandleSuccessfulSignInAsync();
+            await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Apple sign-in failed.");
+            ShowError = true;
+            ErrorMessage = "Apple sign-in failed. Please try again.";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+#endif
 
     private async Task<bool> TryCreateProfileFromOAuthAsync(OAuthSignInResult authResult)
     {

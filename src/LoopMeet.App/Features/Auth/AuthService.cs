@@ -84,6 +84,59 @@ public sealed class AuthService
         };
     }
 
+    public async Task<OAuthSignInResult> SignInWithAppleAsync()
+    {
+#if IOS || MACCATALYST
+        var (rawNonce, hashedNonce) = AppleAuthNonce.Generate();
+        var credential = await Platforms.Apple.AppleAuthCredentialProvider.RequestCredentialAsync(hashedNonce);
+
+        if (credential is null)
+        {
+            return new OAuthSignInResult();
+        }
+
+        var idTokenBytes = credential.IdentityToken;
+        if (idTokenBytes is null)
+        {
+            return new OAuthSignInResult();
+        }
+
+        var idToken = System.Text.Encoding.UTF8.GetString(idTokenBytes.ToArray());
+
+        var session = await _client.Auth.SignInWithIdToken(Constants.Provider.Apple, idToken, rawNonce);
+        _accessToken = session?.AccessToken;
+        SaveAccessToken(_accessToken);
+
+        var user = session?.User;
+        var fullName = BuildAppleDisplayName(credential);
+        return new OAuthSignInResult
+        {
+            AccessToken = _accessToken ?? string.Empty,
+            DisplayName = fullName ?? GetUserDisplayName(user),
+            Email = credential.Email ?? user?.Email ?? TryGetJwtClaim(_accessToken, "email"),
+            Phone = null,
+            AvatarUrl = null
+        };
+#else
+        await Task.CompletedTask;
+        throw new PlatformNotSupportedException("Sign in with Apple is only available on iOS and MacCatalyst.");
+#endif
+    }
+
+#if IOS || MACCATALYST
+    private static string? BuildAppleDisplayName(AuthenticationServices.ASAuthorizationAppleIdCredential credential)
+    {
+        var given = credential.FullName?.GivenName;
+        var family = credential.FullName?.FamilyName;
+        if (string.IsNullOrWhiteSpace(given) && string.IsNullOrWhiteSpace(family))
+        {
+            return null;
+        }
+
+        return $"{given} {family}".Trim();
+    }
+#endif
+
     public Task<AuthSession?> GetCurrentSessionAsync()
     {
         var session = _client.Auth.CurrentSession;
