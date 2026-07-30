@@ -111,7 +111,7 @@
                                             <Label Text="{Binding LocationDisplay}" FontSize="13"
                                                 VerticalOptions="Center"
                                                 TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                            <Label Grid.Column="1" Text="🗺" FontSize="16"
+                                            <Label Grid.Column="1" Text="📍" FontSize="16"
                                                 VerticalOptions="Center"
                                                 IsVisible="{Binding CanOpenLocation}"
                                                 SemanticProperties.Description="Open location in maps">

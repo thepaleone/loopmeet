@@ -19,15 +19,16 @@
                 FontSize="24"
                 FontAttributes="Bold"
                 VerticalOptions="Center" />
-            <ImageButton
+            <Label
                 Grid.Column="1"
-                Source="ic_save.png"
-                Command="{Binding SaveCommand}"
-                HeightRequest="32"
-                WidthRequest="32"
-                BackgroundColor="Transparent"
+                Text="💾"
+                FontSize="24"
                 VerticalOptions="Center"
-                SemanticProperties.Description="Save meetup" />
+                SemanticProperties.Description="Save meetup">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
         </Grid>
 
         <ScrollView Grid.Row="1">

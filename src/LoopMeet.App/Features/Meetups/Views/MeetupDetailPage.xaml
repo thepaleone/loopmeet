@@ -20,7 +20,7 @@
             <!-- Owner-only: absent for everyone else, not disabled (FR-017). -->
             <Label
                 Grid.Column="1"
-                Text="✏"
+                Text="✏️"
                 FontSize="22"
                 VerticalOptions="Center"
                 IsVisible="{Binding IsOwner}"
@@ -61,7 +61,7 @@
                                     TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
                                 <Label
                                     Grid.Column="1"
-                                    Text="🗺"
+                                    Text="📍"
                                     FontSize="20"
                                     VerticalOptions="Center"
                                     IsVisible="{Binding CanOpenLocation}"
