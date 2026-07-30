@@ -1,0 +1,49 @@
+name: Deploy Staging
+
+# App Platform only builds from a branch (there's no way to point its git
+# source at a tag), so this workflow force-pushes the tagged commit onto a
+# dedicated "shadow" branch and then triggers a deployment. The DO app
+# "loopmeet-api-staging" must have its source branch set to DEPLOY_BRANCH
+# below, with autodeploy-on-push turned OFF for every branch on that app —
+# this workflow is the only thing that should trigger deployments.
+on:
+  push:
+    tags:
+      - "staging/**"
+
+concurrency:
+  group: deploy-staging-${{ github.workflow }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  DO_APP_ID: ${{ vars.DO_APP_ID }}
+  DEPLOY_BRANCH: ${{ vars.DEPLOY_BRANCH }}
+
+jobs:
+  deploy:
+    name: Trigger DigitalOcean App Platform deployment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Point deploy branch at ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "Force-pushing ${GITHUB_SHA} (tag ${GITHUB_REF_NAME}) to ${DEPLOY_BRANCH}"
+          git push origin "${GITHUB_SHA}:refs/heads/${DEPLOY_BRANCH}" --force
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DO_DEPLOY_TOKEN }}
+
+      - name: Trigger deployment for tag ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          echo "Deploying ${DEPLOY_BRANCH} (tag ${GITHUB_REF_NAME}) to DO app ${DO_APP_ID}"
+          doctl apps create-deployment "$DO_APP_ID" --wait
