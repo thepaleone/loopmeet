@@ -18,8 +18,10 @@ public sealed class MeetupInteractionSurfaceTests
     {
         var source = ReadSource(path);
 
-        Assert.Contains("ic_save.png", source, StringComparison.Ordinal);
-        Assert.Contains("SemanticProperties.Description", source, StringComparison.Ordinal);
+        // FR-005: the control carries no visible text, so its purpose has to be
+        // announced. Asserted on the description rather than a particular glyph
+        // or asset so the visual can change without breaking the requirement.
+        Assert.Contains("SemanticProperties.Description=\"Save", source, StringComparison.Ordinal);
     }
 
     [Theory]
@@ -44,7 +46,7 @@ public sealed class MeetupInteractionSurfaceTests
 
         // FR-002: if the save control were inside the ScrollView it could be
         // scrolled away or covered by the keyboard — the whole point of US1.
-        var saveIndex = source.IndexOf("ic_save.png", StringComparison.Ordinal);
+        var saveIndex = source.IndexOf("{Binding SaveCommand}", StringComparison.Ordinal);
         var scrollIndex = source.IndexOf("<ScrollView", StringComparison.Ordinal);
         Assert.True(saveIndex >= 0 && scrollIndex >= 0, "Both the save control and a ScrollView should exist.");
         Assert.True(saveIndex < scrollIndex, "The save control must appear before (outside) the ScrollView.");
