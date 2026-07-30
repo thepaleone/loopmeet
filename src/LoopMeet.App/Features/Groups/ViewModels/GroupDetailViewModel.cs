@@ -84,17 +84,37 @@ public sealed partial class GroupDetailViewModel : ObservableObject
         });
     }
 
+    /// <summary>
+    /// Opens the read-only details screen. Deliberately not owner-gated: every
+    /// group member gets a response from tapping a meetup (FR-008), and editing
+    /// is offered on the details screen only to the group's owner.
+    /// </summary>
+    [RelayCommand]
+    private Task OpenMeetupDetailAsync(MeetupSummary? meetup)
+    {
+        if (meetup is null || GroupId == Guid.Empty)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Shell.Current.GoToAsync("meetup-detail", new Dictionary<string, object>
+        {
+            ["groupId"] = GroupId,
+            ["meetupId"] = meetup.Id
+        });
+    }
+
     [RelayCommand]
     private async Task OpenLocationAsync(MeetupSummary? meetup)
     {
-        if (meetup is null || !meetup.HasLocation || meetup.Latitude is null || meetup.Longitude is null)
+        if (meetup is not { CanOpenLocation: true })
         {
             return;
         }
 
         try
         {
-            await Map.Default.OpenAsync(meetup.Latitude.Value, meetup.Longitude.Value,
+            await Map.Default.OpenAsync(meetup.Latitude!.Value, meetup.Longitude!.Value,
                 new MapLaunchOptions { Name = meetup.PlaceName ?? string.Empty });
         }
         catch

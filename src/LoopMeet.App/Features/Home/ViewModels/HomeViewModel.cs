@@ -73,16 +73,31 @@ public sealed partial class HomeViewModel(
     }
 
     [RelayCommand]
+    private Task OpenMeetupDetailAsync(MeetupSummary? meetup)
+    {
+        if (meetup is null || meetup.GroupId == Guid.Empty)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Shell.Current.GoToAsync("meetup-detail", new Dictionary<string, object>
+        {
+            ["groupId"] = meetup.GroupId,
+            ["meetupId"] = meetup.Id
+        });
+    }
+
+    [RelayCommand]
     private async Task OpenLocationAsync(MeetupSummary? meetup)
     {
-        if (meetup is null || !meetup.HasLocation || meetup.Latitude is null || meetup.Longitude is null)
+        if (meetup is not { CanOpenLocation: true })
         {
             return;
         }
 
         try
         {
-            await Map.Default.OpenAsync(meetup.Latitude.Value, meetup.Longitude.Value,
+            await Map.Default.OpenAsync(meetup.Latitude!.Value, meetup.Longitude!.Value,
                 new MapLaunchOptions { Name = meetup.PlaceName ?? string.Empty });
         }
         catch

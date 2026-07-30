@@ -28,6 +28,7 @@
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SessionRenewalPolicy.cs" Link="Included\SessionRenewalPolicy.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SignOutReason.cs" Link="Included\SignOutReason.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Services\ApiAuthHandler.cs" Link="Included\ApiAuthHandler.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Meetups\MeetupOrganizerText.cs" Link="Included\MeetupOrganizerText.cs" />
   </ItemGroup>
 
   <ItemGroup>

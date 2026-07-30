@@ -121,6 +121,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<EditGroupViewModel>();
 		builder.Services.AddTransient<CreateMeetupViewModel>();
 		builder.Services.AddTransient<EditMeetupViewModel>();
+		builder.Services.AddTransient<MeetupDetailViewModel>();
 		builder.Services.AddTransient<InviteMemberViewModel>();
 		builder.Services.AddTransient<InvitationDetailViewModel>();
 		builder.Services.AddTransient<PendingInvitationsViewModel>();
@@ -135,6 +136,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<EditGroupPage>();
 		builder.Services.AddTransient<CreateMeetupPage>();
 		builder.Services.AddTransient<EditMeetupPage>();
+		builder.Services.AddTransient<MeetupDetailPage>();
 		builder.Services.AddTransient<InviteMemberPage>();
 		builder.Services.AddTransient<InvitationDetailPage>();
 		builder.Services.AddTransient<PendingInvitationsPage>();

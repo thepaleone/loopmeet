@@ -6,10 +6,32 @@
     x:Name="EditMeetupPageRoot"
     Title="Edit Meetup">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="12">
-            <Label Text="Edit Meetup" FontSize="24" FontAttributes="Bold" />
+    <!-- Header row lives outside the ScrollView so the save control cannot be
+         scrolled away or covered by the on-screen keyboard (FR-002). -->
+    <Grid RowDefinitions="Auto,*">
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="*,Auto"
+            Padding="24,24,24,0"
+            ColumnSpacing="12">
+            <Label
+                Text="Edit Meetup"
+                FontSize="24"
+                FontAttributes="Bold"
+                VerticalOptions="Center" />
+            <ImageButton
+                Grid.Column="1"
+                Source="ic_save.png"
+                Command="{Binding SaveCommand}"
+                HeightRequest="32"
+                WidthRequest="32"
+                BackgroundColor="Transparent"
+                VerticalOptions="Center"
+                SemanticProperties.Description="Save changes" />
+        </Grid>
 
+        <ScrollView Grid.Row="1">
+        <VerticalStackLayout Padding="24" Spacing="12">
             <Border Padding="16" Style="{StaticResource BubbleCardBorderStyle}">
                 <VerticalStackLayout Spacing="12">
                     <VerticalStackLayout Spacing="12" IsVisible="{Binding ShowFormFields}">
@@ -55,8 +77,7 @@
             </Border>
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
-
-            <Button Text="Save Changes" Command="{Binding SaveCommand}" />
         </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+    </Grid>
 </ContentPage>

@@ -42,18 +42,32 @@
                         <Border
                             Padding="16"
                             Style="{StaticResource BubbleCardBorderStyle}">
+                            <!-- Whole card opens the details screen; the map glyph
+                                 below is the only element with another destination. -->
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding BindingContext.OpenMeetupDetailCommand, Source={x:Reference HomePageRoot}}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="15" LineBreakMode="TailTruncation" />
                                 <Label Text="{Binding DateTimeDisplay}" FontSize="13"
                                     TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
-                                <Label Text="{Binding LocationDisplay}" FontSize="13"
-                                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding BindingContext.OpenLocationCommand, Source={x:Reference HomePageRoot}}"
-                                            CommandParameter="{Binding .}" />
-                                    </Label.GestureRecognizers>
-                                </Label>
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                    <Label Text="{Binding LocationDisplay}" FontSize="13"
+                                        VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                                    <Label Grid.Column="1" Text="🗺" FontSize="16"
+                                        VerticalOptions="Center"
+                                        IsVisible="{Binding CanOpenLocation}"
+                                        SemanticProperties.Description="Open location in maps">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding BindingContext.OpenLocationCommand, Source={x:Reference HomePageRoot}}"
+                                                CommandParameter="{Binding .}" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
                                 <Label Text="{Binding GroupName}" FontSize="12"
                                     TextColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}" />
                             </VerticalStackLayout>

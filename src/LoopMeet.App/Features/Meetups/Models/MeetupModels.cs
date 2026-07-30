@@ -14,8 +14,22 @@ public sealed class MeetupSummary
     public string? Timezone { get; set; }
     public Guid CreatedByUserId { get; set; }
     public string? GroupName { get; set; }
+    public string? CreatedByDisplayName { get; set; }
+
+    /// <summary>Owner of this meetup's group — the sole input to edit gating.</summary>
+    public Guid GroupOwnerUserId { get; set; }
 
     public bool HasLocation => !string.IsNullOrWhiteSpace(PlaceName);
+
+    /// <summary>
+    /// Whether the location can actually be handed to a maps app. A place name
+    /// without coordinates is displayable but not openable.
+    /// </summary>
+    public bool CanOpenLocation => Latitude is not null && Longitude is not null;
+
+    /// <summary>Organizer with the FR-011 placeholder already applied.</summary>
+    public string OrganizerDisplay => MeetupOrganizerText.Format(CreatedByDisplayName);
+
     public string LocationDisplay => HasLocation ? PlaceName! : "TBD";
     public string DateDisplay => ScheduledAt.LocalDateTime.ToString("ddd, MMM d");
     public string TimeDisplay => ScheduledAt.LocalDateTime.ToString("h:mm tt");
