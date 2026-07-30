@@ -138,7 +138,7 @@ Feature lives entirely in the .NET MAUI client:
 - [ ] T040 Verify INV-4 observability: every coordinator transition logs a structured event (`SessionRestored`, `SessionRenewed`, `RenewalTransientFailure`, `RenewalRejected`, `SignedOut {reason}`) — walk quickstart.md §"Log verification" against a device run; add any missing events in `SessionCoordinator.cs`.
 - [ ] T041 Device validation, edge cases: quickstart.md rows **15–16** (offline→online definitive rejection recovers; clock skew +2 h causes no sign-out).
 - [ ] T042 Android parity spot-check: quickstart.md row **17** (repeat rows 1, 5, 11, 12 on Android) per FR-010.
-- [ ] T043 Open a pull request titled "fix(auth): reliable sessions, uniform sign-out, startup session gate", body summarizing root causes A1–C2 and fixes, the 17-row quickstart matrix as a checklist, and explicit confirmation that T017/T029/T037 suites and all device validations passed.
+- [X] T043 Open a pull request titled "fix(auth): reliable sessions, uniform sign-out, startup session gate", body summarizing root causes A1–C2 and fixes, the 17-row quickstart matrix as a checklist, and explicit confirmation that T017/T029/T037 suites and all device validations passed.
 
 ---
 
