@@ -124,7 +124,9 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.8" />
 		<PackageReference Include="OneSignalSDK.DotNet" Version="6.1.8" />
 		<PackageReference Include="Polly.Extensions.Http" Version="3.0.0" />
-		<PackageReference Include="Refit.HttpClientFactory" Version="10.1.6" />
+		<!-- 10.2.0 is the official re-release of 10.1.6, whose author signing
+		     certificate was revoked on 2026-06-02 (reactiveui/refit#2114). -->
+		<PackageReference Include="Refit.HttpClientFactory" Version="10.2.0" />
 		<PackageReference Include="Supabase" Version="1.1.1" />
 	</ItemGroup>
 
