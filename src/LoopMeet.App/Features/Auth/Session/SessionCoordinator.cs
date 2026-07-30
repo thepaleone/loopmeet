@@ -110,6 +110,11 @@ public sealed class SessionCoordinator : ISessionTokenSource
         // Gotrue's own restore must not cost us the persisted refresh token.
         var snapshot = _sessionPersistence.LoadSession();
 
+        // Supabase.Client.InitializeAsync only calls RetrieveSessionAsync, which
+        // no-ops when CurrentSession is null — the persisted session is adopted
+        // only by this explicit call. Without it every cold start runs tokenless.
+        _client.Auth.LoadSession();
+
         Exception? initializeFailure = null;
         try
         {
@@ -136,45 +141,40 @@ public sealed class SessionCoordinator : ISessionTokenSource
             return new StartupResolution(SignedInTabs.HomeShellPath, null);
         }
 
-        if (!string.IsNullOrWhiteSpace(session?.RefreshToken))
+        if (snapshot is null)
         {
-            var remaining = StartupBudget - (DateTimeOffset.UtcNow - startedUtc);
-            var outcome = await RenewWithinAsync(remaining, cancellationToken);
-            switch (outcome)
-            {
-                case RenewalOutcome.Renewed:
-                    return new StartupResolution(SignedInTabs.HomeShellPath, null);
-                case RenewalOutcome.DefinitivelyRejectedSignedOut:
-                    return new StartupResolution(LoginRoute, SignOutReason.SessionRejected);
-                default:
-                    // Transient: cached session, server unreachable → home (FR-011a).
-                    _logger.LogWarning("Startup renewal failed transiently; resolving to home on the cached session.");
-                    return new StartupResolution(SignedInTabs.HomeShellPath, null);
-            }
+            _logger.LogInformation("Startup resolved to login: no persisted session.");
+            return new StartupResolution(LoginRoute, null);
         }
 
-        if (snapshot is not null)
+        if (initializeFailure is not null
+            && SessionFailureClassifier.Classify(initializeFailure) == SessionFailureKind.Definitive)
         {
-            if (initializeFailure is not null
-                && SessionFailureClassifier.Classify(initializeFailure) == SessionFailureKind.Definitive)
-            {
-                _logger.LogInformation("RenewalRejected: startup restore definitively rejected.");
-                await SignOutCoreAsync(SignOutReason.SessionRejected);
+            _logger.LogInformation("RenewalRejected: startup restore definitively rejected.");
+            await SignOutCoreAsync(SignOutReason.SessionRejected);
+            return new StartupResolution(LoginRoute, SignOutReason.SessionRejected);
+        }
+
+        // Gotrue's RetrieveSessionAsync destroys expired or unrefreshable
+        // sessions (swallowing the error), so restore the snapshot and make one
+        // bounded, authoritative renewal attempt of our own.
+        _sessionPersistence.SaveSession(snapshot);
+        _offlineFallbackSession = snapshot;
+
+        var remaining = StartupBudget - (DateTimeOffset.UtcNow - startedUtc);
+        var outcome = await RenewWithinAsync(remaining, cancellationToken);
+        switch (outcome)
+        {
+            case RenewalOutcome.Renewed:
+                return new StartupResolution(SignedInTabs.HomeShellPath, null);
+            case RenewalOutcome.DefinitivelyRejectedSignedOut:
                 return new StartupResolution(LoginRoute, SignOutReason.SessionRejected);
-            }
-
-            // The client lost the session but the failure was not a definitive
-            // rejection (or Gotrue swallowed it). Fail-safe per FR-004a: keep the
-            // credentials, go home optimistically; the first renewal attempt is
-            // the authoritative test and will force sign-out if truly revoked.
-            _sessionPersistence.SaveSession(snapshot);
-            _offlineFallbackSession = snapshot;
-            _logger.LogWarning("Startup could not validate the cached session; resolving to home unvalidated (FR-011a).");
-            return new StartupResolution(SignedInTabs.HomeShellPath, null);
+            default:
+                // Transient: cached session, server unreachable → home (FR-011a);
+                // the first successful renewal re-adopts it into the client.
+                _logger.LogWarning("Startup could not validate the cached session; resolving to home unvalidated (FR-011a).");
+                return new StartupResolution(SignedInTabs.HomeShellPath, null);
         }
-
-        _logger.LogInformation("Startup resolved to login: no persisted session.");
-        return new StartupResolution(LoginRoute, null);
     }
 
     private async Task<RenewalOutcome> RenewWithinAsync(TimeSpan budget, CancellationToken cancellationToken)
@@ -193,24 +193,21 @@ public sealed class SessionCoordinator : ISessionTokenSource
 
     private async Task<RenewalOutcome> RenewSessionAsync(RenewalTrigger trigger)
     {
+        // Captured up front: SetSession destroys the persisted session before it
+        // refreshes, so a failure would otherwise lose the stored refresh token.
+        var session = _client.Auth.CurrentSession ?? _offlineFallbackSession;
         try
         {
-            var fallback = _offlineFallbackSession;
-            if (!string.IsNullOrWhiteSpace(_client.Auth.CurrentSession?.RefreshToken))
-            {
-                await _client.Auth.RefreshToken();
-            }
-            else if (fallback is { AccessToken: not null, RefreshToken: not null })
-            {
-                // Re-adopt the offline-launch session; SetSession refreshes an
-                // expired access token server-side and rewires auto-refresh.
-                await _client.Auth.SetSession(fallback.AccessToken, fallback.RefreshToken, forceAccessTokenRefresh: false);
-            }
-            else
+            if (session is not { AccessToken: not null, RefreshToken: not null })
             {
                 _logger.LogInformation("Renewal skipped ({Trigger}): session disappeared before the attempt.", trigger);
                 return RenewalOutcome.Skipped;
             }
+
+            // The forced SetSession is the one renewal that works regardless of
+            // access-token expiry; Gotrue's parameterless RefreshToken() throws a
+            // false-definitive ExpiredRefreshToken for an expired access token.
+            await _client.Auth.SetSession(session.AccessToken, session.RefreshToken, forceAccessTokenRefresh: true);
 
             _offlineFallbackSession = null;
             _lastSuccessfulCheckUtc = DateTimeOffset.UtcNow;
@@ -221,6 +218,10 @@ public sealed class SessionCoordinator : ISessionTokenSource
         {
             if (SessionFailureClassifier.Classify(ex) == SessionFailureKind.Transient)
             {
+                // Undo SetSession's eager local destroy: keep the credentials
+                // durable and in reach of the next attempt (FR-004a).
+                _sessionPersistence.SaveSession(session!);
+                _offlineFallbackSession = session;
                 _logger.LogWarning(ex, "RenewalTransientFailure ({Trigger}): session kept.", trigger);
                 return RenewalOutcome.TransientFailureKeptSession;
             }

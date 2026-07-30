@@ -1,5 +1,6 @@
 using System.Text.Json;
 using LoopMeet.App.Features.Auth.Models;
+using LoopMeet.App.Features.Auth.Session;
 using Microsoft.Maui.Authentication;
 using Supabase.Gotrue;
 using SupabaseClient = Supabase.Client;
@@ -10,10 +11,12 @@ public sealed class AuthService
 {
     private const string OAuthRedirectUri = "loopmeet://auth-callback";
     private readonly SupabaseClient _client;
+    private readonly ISessionTokenSource _tokenSource;
 
-    public AuthService(SupabaseClient client)
+    public AuthService(SupabaseClient client, ISessionTokenSource tokenSource)
     {
         _client = client;
+        _tokenSource = tokenSource;
     }
 
     public async Task<AuthSession> SignInWithEmailAsync(string email, string password)
@@ -115,9 +118,11 @@ public sealed class AuthService
     }
 #endif
 
+    // Identity reads (GetCurrentUserId → IsOwner checks) must always agree with
+    // the token the ApiAuthHandler sends — both flow through the coordinator.
     public string? GetAccessToken()
     {
-        return _client.Auth.CurrentSession?.AccessToken;
+        return _tokenSource.GetAccessToken();
     }
 
     public Guid? GetCurrentUserId()

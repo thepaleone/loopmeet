@@ -34,9 +34,45 @@ public sealed class SessionSurfaceTests
     {
         var source = ReadSource("src/LoopMeet.App/Features/Auth/Session/SessionCoordinator.cs");
 
-        Assert.Contains("RefreshToken()", source, StringComparison.Ordinal);
         Assert.Contains("SessionFailureClassifier.Classify", source, StringComparison.Ordinal);
         Assert.Contains("loopmeet.auth.access_token", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SessionCoordinator_LoadsThePersistedSessionAtStartup()
+    {
+        var source = ReadSource("src/LoopMeet.App/Features/Auth/Session/SessionCoordinator.cs");
+
+        // Supabase.Client.InitializeAsync only calls RetrieveSessionAsync, which
+        // no-ops on a null CurrentSession — the persisted session is adopted only
+        // by an explicit Auth.LoadSession() call. Without it, every cold start
+        // runs on the fallback token and identity reads (GetCurrentUserId →
+        // IsOwner) see no session.
+        Assert.Contains("Auth.LoadSession()", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SessionCoordinator_RenewsViaForcedSetSession_NeverParameterlessRefreshToken()
+    {
+        var source = ReadSource("src/LoopMeet.App/Features/Auth/Session/SessionCoordinator.cs");
+
+        // Gotrue's parameterless RefreshToken() throws ExpiredRefreshToken when
+        // the ACCESS token is expired — a false definitive rejection for the
+        // routine backgrounded-past-expiry renewal. SetSession with a forced
+        // refresh is the only overload that renews regardless of expiry.
+        Assert.Contains("forceAccessTokenRefresh: true", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("Auth.RefreshToken()", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AuthService_ReadsIdentityFromTheSameTokenSourceAsTheApiHandler()
+    {
+        var source = ReadSource("src/LoopMeet.App/Features/Auth/AuthService.cs");
+
+        // GetCurrentUserId (→ IsOwner) must never disagree with the token the
+        // ApiAuthHandler sends — both go through ISessionTokenSource.
+        Assert.Contains("ISessionTokenSource", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("CurrentSession?.AccessToken", source, StringComparison.Ordinal);
     }
 
     [Fact]
