@@ -41,7 +41,7 @@ Per list request, regardless of how many meetups are returned — three lookups,
 | Member | Kind | Purpose |
 | --- | --- | --- |
 | `CreatedByDisplayName` | data | Raw resolved name; may be empty. |
-| `GroupOwnerUserId` | data | Compared against the current user id to gate the edit affordance. |
+| `GroupOwnerUserId` | data | Compared against the current user id to gate the edit control. |
 | `OrganizerDisplay` | computed | `MeetupOrganizerText.Format(CreatedByDisplayName)` — the FR-011 placeholder when empty. Bound by the UI; the raw field is not. |
 
 Existing computed members (`HasLocation`, `LocationDisplay` → "TBD", `DateTimeDisplay`) are reused as-is by the details screen, so card and details presentation cannot drift apart.

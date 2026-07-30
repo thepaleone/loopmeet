@@ -31,6 +31,16 @@
 
 ## Notes
 
+**Cross-artifact analysis remediation (2026-07-30, post-`/speckit.tasks`)** — 7 findings applied to `tasks.md` / `quickstart.md` (+ terminology in `spec.md`, `plan.md`, `data-model.md`); no requirement text changed in substance:
+
+- **C1 (HIGH)** FR-004's duplicate-submit clause and US1 acceptance scenario 4 had no verification anywhere. Added quickstart row **1a** (rapid double-tap → exactly one meetup/update, now in T016's set) and a T014 assertion that both `SaveAsync` bodies retain their `if (IsBusy)` guard. The risk is real: a small corner icon is easier to double-tap than the full-width button it replaces.
+- **I1 (MEDIUM)** tasks.md claimed US1 runs parallel "with its own test assertions", but T022/T029 extend the test file T014 creates. Dependency now stated in T022, T029, the Phase 4/5 dependency lines, and the parallelism note.
+- **I2 (MEDIUM)** quickstart row 23 tested "pull to refresh", which no task builds. Row reworded to re-entry (the specified INV-5 mechanism) and T018 now says explicitly that no pull-to-refresh is added.
+- **C2 (MEDIUM)** SC-007 (details within one second) had zero coverage. Folded a timing observation into quickstart row 7.
+- **C3 (LOW)** The Constitution VII log fields were verified only manually (T033); T008 now asserts them by source inspection as a standing check.
+- **U1 (LOW)** Contract §4 showed `{ get; init; }` for new `MeetupSummary` members while the class uses `{ get; set; }` throughout; T011 now specifies `set` to avoid mixed accessors.
+- **A1 (LOW)** Terminology normalized to "map control" / "edit control" in requirement and task text; "glyph" retained only where the rendering technique is the point (FR-021, T034, quickstart row 27) and in the verbatim user input.
+
 **Validation iteration 2 (2026-07-30)** — all items pass. 21 functional requirements, 10 success criteria, no outstanding markers.
 
 - **FR-019 clarification resolved**: the source description said the map affordance "replaces/complements" the current location-text tap — two different outcomes. Answered by the requester: the card gains an explicit map control on the location row, the location text stops being a tap target, and everything else on the card opens the details screen (FR-019, FR-020, plus SC-010 and the rationale recorded in Assumptions).

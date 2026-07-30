@@ -27,18 +27,18 @@ A group owner filling in a new meetup (or editing an existing one) types into th
 
 ### User Story 2 - See Everything About a Meetup (Priority: P2)
 
-Any member of a group wants to know the full story of a meetup: what it is, when it is, where it is, which group it belongs to, and who organized it. Today that information is scattered and partly unavailable — the Home page's Upcoming Meetups cards show a summary and cannot be tapped at all, and nowhere in the app shows who created a meetup. This story adds a read-only meetup details screen, reached by tapping a meetup card on the Home page, that presents all of a meetup's information on one screen, with a map affordance to open the location in the device's native maps app when a usable location is set.
+Any member of a group wants to know the full story of a meetup: what it is, when it is, where it is, which group it belongs to, and who organized it. Today that information is scattered and partly unavailable — the Home page's Upcoming Meetups cards show a summary and cannot be tapped at all, and nowhere in the app shows who created a meetup. This story adds a read-only meetup details screen, reached by tapping a meetup card on the Home page, that presents all of a meetup's information on one screen, with a map control to open the location in the device's native maps app when a usable location is set.
 
 **Why this priority**: This is the feature's main information gain and it stands alone: Home page cards do nothing when tapped today, so adding navigation there cannot regress any existing behavior. It is deliverable without touching the Group Detail page at all.
 
-**Independent Test**: From the Home page, tap an Upcoming Meetups card and confirm the details screen opens showing title, date/time, location (or "TBD"), group name, and organizer display name. Tap the map affordance on a meetup with a location and confirm the native maps app opens at the right place. Confirm a meetup with no location shows "TBD" and offers no map affordance.
+**Independent Test**: From the Home page, tap an Upcoming Meetups card and confirm the details screen opens showing title, date/time, location (or "TBD"), group name, and organizer display name. Tap the map control on a meetup with a location and confirm the native maps app opens at the right place. Confirm a meetup with no location shows "TBD" and offers no map control.
 
 **Acceptance Scenarios**:
 
 1. **Given** a signed-in user on the Home page with at least one upcoming meetup, **When** they tap a meetup card, **Then** the meetup details screen opens for that meetup.
 2. **Given** the details screen is open for a meetup with a location, **When** the user reads the screen, **Then** they see the meetup's title, date and time, location, owning group, and the display name of the member who organized it.
-3. **Given** the details screen is open for a meetup whose location was never set, **When** the user reads the location, **Then** it shows "TBD" and no map affordance is offered.
-4. **Given** the details screen is open for a meetup with a location that can be opened in maps, **When** the user taps the map affordance, **Then** the device's native maps app opens at that location.
+3. **Given** the details screen is open for a meetup whose location was never set, **When** the user reads the location, **Then** it shows "TBD" and no map control is offered.
+4. **Given** the details screen is open for a meetup with a location that can be opened in maps, **When** the user taps the map control, **Then** the device's native maps app opens at that location.
 5. **Given** the user is on the details screen, **When** they navigate back, **Then** they return to the screen they came from.
 6. **Given** a Home page meetup card for a meetup with an openable location, **When** the user taps the card's map control, **Then** the native maps app opens at that location and the details screen is not opened.
 7. **Given** a Home page meetup card, **When** the user taps the location text itself, **Then** the details screen opens — the text is not a separate tap target.
@@ -47,17 +47,17 @@ Any member of a group wants to know the full story of a meetup: what it is, when
 
 ### User Story 3 - Owners Reach the Edit Form From Details; Members Reach the Details (Priority: P3)
 
-On the Group Detail page, tapping a meetup currently jumps a group owner straight into the edit form, and does nothing at all for a non-owner. This story makes the tap open the meetup details screen for everyone, and puts an edit (pencil) affordance on that details screen visible only to owners of the group the meetup belongs to. Owners keep a path to editing (one extra tap), and non-owners gain a working tap where they previously got no response. Swipe-to-delete on the Group Detail meetup list stays exactly as it is: owner-only.
+On the Group Detail page, tapping a meetup currently jumps a group owner straight into the edit form, and does nothing at all for a non-owner. This story makes the tap open the meetup details screen for everyone, and puts an edit (pencil) control on that details screen visible only to owners of the group the meetup belongs to. Owners keep a path to editing (one extra tap), and non-owners gain a working tap where they previously got no response. Swipe-to-delete on the Group Detail meetup list stays exactly as it is: owner-only.
 
-**Why this priority**: This depends on the details screen from User Story 2 existing. The Group Detail tap re-route and the owner-only edit affordance must ship together — re-routing the tap without the edit affordance would remove owners' only route to editing a meetup, so they are one slice, not two.
+**Why this priority**: This depends on the details screen from User Story 2 existing. The Group Detail tap re-route and the owner-only edit control must ship together — re-routing the tap without the edit control would remove owners' only route to editing a meetup, so they are one slice, not two.
 
-**Independent Test**: As a group owner, tap a meetup on the Group Detail page, confirm the details screen opens, confirm an edit affordance is present, tap it and confirm the existing Edit Meetup form opens for that meetup. Repeat as a non-owner member of the same group: the details screen opens, and no edit affordance is present or reachable. Confirm swipe-to-delete still works for the owner and remains unavailable to the non-owner.
+**Independent Test**: As a group owner, tap a meetup on the Group Detail page, confirm the details screen opens, confirm an edit control is present, tap it and confirm the existing Edit Meetup form opens for that meetup. Repeat as a non-owner member of the same group: the details screen opens, and no edit control is present or reachable. Confirm swipe-to-delete still works for the owner and remains unavailable to the non-owner.
 
 **Acceptance Scenarios**:
 
 1. **Given** a group owner on the Group Detail page, **When** they tap a meetup card, **Then** the meetup details screen opens (not the edit form).
-2. **Given** a group owner viewing a meetup's details, **When** they tap the edit affordance, **Then** the existing Edit Meetup form opens for that meetup.
-3. **Given** a non-owner member of the group viewing the same meetup's details, **When** they look for an edit control, **Then** no edit affordance is shown and no path to the edit form exists from that screen.
+2. **Given** a group owner viewing a meetup's details, **When** they tap the edit control, **Then** the existing Edit Meetup form opens for that meetup.
+3. **Given** a non-owner member of the group viewing the same meetup's details, **When** they look for an edit control, **Then** no edit control is shown and no path to the edit form exists from that screen.
 4. **Given** a non-owner member on the Group Detail page, **When** they tap a meetup card, **Then** the details screen opens — where previously nothing happened.
 5. **Given** a group owner on the Group Detail page, **When** they swipe a meetup card, **Then** the delete action behaves exactly as it does today.
 6. **Given** a non-owner member on the Group Detail page, **When** they swipe a meetup card, **Then** no delete action is offered, exactly as today.
@@ -68,10 +68,10 @@ On the Group Detail page, tapping a meetup currently jumps a group owner straigh
 
 ### Edge Cases
 
-- **Location name but no map coordinates**: A meetup whose location has a name but no usable coordinates shows the location name and offers no map affordance — on the card or the details screen — so a tap can never open an empty or incorrect map.
+- **Location name but no map coordinates**: A meetup whose location has a name but no usable coordinates shows the location name and offers no map control — on the card or the details screen — so a tap can never open an empty or incorrect map.
 - **Card with no location**: The card shows "TBD" with no map control, and every part of it opens the details screen.
 - **Organizer no longer in the group, or name unresolvable**: The details screen shows a neutral fallback in the organizer field rather than a blank space, an error, or a raw internal identifier.
-- **Organizer is not the group owner**: A meetup created by a non-owner member (permitted at the data layer today) shows that member as organizer, while the edit affordance still appears only for the group's owner — organizing a meetup grants no edit access.
+- **Organizer is not the group owner**: A meetup created by a non-owner member (permitted at the data layer today) shows that member as organizer, while the edit control still appears only for the group's owner — organizing a meetup grants no edit access.
 - **Meetup changed or deleted by someone else while the details screen is open**: The user is not left looking at silently stale information; returning to the screen shows current state, and a meetup that no longer exists does not present a broken edit path.
 - **Location search active on the meetup forms**: The forms collapse their fields while the user searches for a location. The save icon remains visible in that state and behaves normally — saving with incomplete data produces the usual validation message.
 - **Very long titles, place names, or group names** on the details screen wrap or truncate gracefully rather than pushing other information off-screen.
@@ -144,7 +144,7 @@ On the Group Detail page, tapping a meetup currently jumps a group owner straigh
 - **Group name for the details screen**: The group's name is expected to be available from the context the user navigated from; where it is not, a fallback is shown rather than an empty field.
 - **Read-only means read-only**: The details screen shows information and offers only the two navigation actions specified (open in maps, and edit for owners). Deleting a meetup remains available only where it is today, on the Group Detail page.
 - **Past meetups**: No distinct presentation or restriction for meetups whose date has passed.
-- **Icon style**: Text glyphs are used rather than new image files for the new edit and map affordances, matching the delete and accept actions already shipping in the app, because that presentation is already proven across all supported platforms. The existing save icon asset is reused for the save control.
+- **Icon style**: Text glyphs are used rather than new image files for the new edit and map controls, matching the delete and accept actions already shipping in the app, because that presentation is already proven across all supported platforms. The existing save icon asset is reused for the save control.
 - **Card location tapping (decided 2026-07-30)**: The cards' current behavior — where the location text is silently tappable and opens maps — is replaced by an explicit map control on the location row, with the rest of the card opening the details screen (FR-019, FR-020). This keeps one-tap directions available while making the target visible, rather than leaving an unlabelled tap boundary inside a card that now has a different primary destination.
 
 ## Out of Scope
