@@ -1,15 +1,16 @@
 using System.Text.Json;
 using Microsoft.Maui.Storage;
-using Supabase.Gotrue;
 using Supabase.Gotrue.Interfaces;
+// The Features.Auth.Session child namespace shadows the Gotrue type name here.
+using GotrueSession = Supabase.Gotrue.Session;
 
 namespace LoopMeet.App.Features.Auth;
 
-public sealed class MauiSessionPersistence : IGotrueSessionPersistence<Session>
+public sealed class MauiSessionPersistence : IGotrueSessionPersistence<GotrueSession>
 {
     private const string SessionKey = "loopmeet.auth.session";
 
-    public void SaveSession(Session session)
+    public void SaveSession(GotrueSession session)
     {
         var json = JsonSerializer.Serialize(session);
         Preferences.Default.Set(SessionKey, json);
@@ -20,7 +21,7 @@ public sealed class MauiSessionPersistence : IGotrueSessionPersistence<Session>
         Preferences.Default.Remove(SessionKey);
     }
 
-    public Session? LoadSession()
+    public GotrueSession? LoadSession()
     {
         var json = Preferences.Default.Get(SessionKey, string.Empty);
         if (string.IsNullOrWhiteSpace(json))
@@ -30,7 +31,7 @@ public sealed class MauiSessionPersistence : IGotrueSessionPersistence<Session>
 
         try
         {
-            return JsonSerializer.Deserialize<Session>(json);
+            return JsonSerializer.Deserialize<GotrueSession>(json);
         }
         catch
         {

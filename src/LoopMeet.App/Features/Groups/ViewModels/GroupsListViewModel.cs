@@ -121,26 +121,17 @@ public sealed partial class GroupsListViewModel : ObservableObject
         }
         catch (Refit.ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if ((apiEx.ReasonPhrase ?? "").Contains("Unauthorized", StringComparison.OrdinalIgnoreCase))
-            {
-                _logger.LogError(apiEx, "Failed to load groups tab list: unauthorized. Access token may be invalid or expired.");
-                await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
-            }
-            else
-            {
-                _logger.LogError(apiEx, "Failed to load groups tab list: API returned unauthorized. Reason: {ReasonPhrase}", apiEx.ReasonPhrase);
-                await ShowApiUnavailableAndQuitAsync();
-            }
+            // Session end is handled centrally (refresh-retry, then forced
+            // sign-out + routing by the SessionCoordinator) — no per-screen redirect.
+            _logger.LogInformation(apiEx, "Groups load unauthorized; session handling owns the response.");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load groups tab list.");
             await Shell.Current.DisplayAlertAsync(
-                "Un Oh!", 
-                "Something went pear shaped while trying to load your groups. To try to fix this please try logging in again.",
+                "Un Oh!",
+                "Something went pear shaped while trying to load your groups. Please try again.",
                 "OK");
-            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
-            
         }
         finally
         {

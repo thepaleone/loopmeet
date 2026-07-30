@@ -24,7 +24,7 @@ public sealed class NotificationService
         if (intent is null)
         {
             _logger.LogWarning("Notification open did not include required routing payload. Keys={Keys}", string.Join(",", additionalData.Keys));
-            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//Home"));
+            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//home"));
             return;
         }
 
@@ -32,7 +32,7 @@ public sealed class NotificationService
         {
             _logger.LogInformation("Notification tap queued until sign-in. Type={Type} EventId={EventId}", intent.NotificationType, intent.EventId);
             await _intentStore.SaveAsync(intent);
-            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//Login"));
+            await MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync("//login"));
             return;
         }
 

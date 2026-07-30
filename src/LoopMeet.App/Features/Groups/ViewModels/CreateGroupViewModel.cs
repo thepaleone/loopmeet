@@ -1,15 +1,18 @@
 using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Services;
 using Refit;
 
 namespace LoopMeet.App.Features.Groups.ViewModels;
 
-public sealed partial class CreateGroupViewModel : ObservableObject
+public sealed partial class CreateGroupViewModel : ObservableObject, IHasUnsavedInput
 {
     private readonly GroupsApi _groupsApi;
+
+    public bool HasUnsavedInput => !string.IsNullOrWhiteSpace(Name);
 
     [ObservableProperty]
     private string _name = string.Empty;

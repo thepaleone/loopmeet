@@ -21,6 +21,17 @@ public sealed class OneSignalIdentityService
     }
 
     /// <summary>
+    /// Unlinks the device from the current user so a sign-out leaves no
+    /// identity behind (FR-004; the device reverts to an anonymous subscription).
+    /// </summary>
+    public Task LogoutAsync()
+    {
+        OneSignal.Logout();
+        _logger.LogInformation("OneSignal logout completed.");
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Ensures the device is opted in to push delivery. In OneSignalSDK.DotNet v5+
     /// the OS permission grant is tracked separately from the push subscription
     /// opt-in state, so a freshly-granted permission still leaves the device as

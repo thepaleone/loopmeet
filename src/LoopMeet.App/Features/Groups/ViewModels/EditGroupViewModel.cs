@@ -1,6 +1,7 @@
 using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
@@ -8,10 +9,13 @@ using Refit;
 
 namespace LoopMeet.App.Features.Groups.ViewModels;
 
-public sealed partial class EditGroupViewModel : ObservableObject
+public sealed partial class EditGroupViewModel : ObservableObject, IHasUnsavedInput
 {
     private readonly GroupsApi _groupsApi;
     private readonly ILogger<EditGroupViewModel> _logger;
+    private string _appliedName = string.Empty;
+
+    public bool HasUnsavedInput => Name != _appliedName;
 
     [ObservableProperty]
     private Guid _groupId;
@@ -47,6 +51,7 @@ public sealed partial class EditGroupViewModel : ObservableObject
             Name = name;
         }
 
+        _appliedName = Name;
         _logger.LogInformation("Editing group {GroupId} ({GroupName})", groupId, name ?? "");
     }
 

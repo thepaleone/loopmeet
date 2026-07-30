@@ -1,17 +1,20 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Meetups.Models;
 using LoopMeet.App.Services;
 
 namespace LoopMeet.App.Features.Meetups.ViewModels;
 
-public sealed partial class CreateMeetupViewModel : ObservableObject
+public sealed partial class CreateMeetupViewModel : ObservableObject, IHasUnsavedInput
 {
     private readonly MeetupsApi _meetupsApi;
     private readonly PlacesApi _placesApi;
     private readonly MeetupLocationLookupBehavior _locationLookupBehavior;
     private CancellationTokenSource? _searchCts;
+
+    public bool HasUnsavedInput => !string.IsNullOrWhiteSpace(Title) || HasSelectedLocation;
 
     public ObservableCollection<PlacePrediction> Predictions { get; } = new();
 

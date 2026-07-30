@@ -10,5 +10,15 @@
 	-->
 	<key>aps-environment</key>
 	<string>production</string>
+	<!--
+	  Sign in with Apple capability. The "Default" scope enables the
+	  standard Sign in with Apple flow. Must be matched by the provisioning
+	  profile (Apple Developer Portal → App ID → enable "Sign in with Apple",
+	  then regenerate + reinstall the Ad Hoc / App Store profile).
+	-->
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
 </dict>
 </plist>

@@ -12,6 +12,13 @@
     Title="LoopMeet"
     FlyoutBehavior="Disabled">
 
+    <!-- First ShellContent renders on cold launch: the startup gate decides
+         login vs home without ever flashing the wrong screen (FR-008/FR-009). -->
+    <ShellContent
+        Title="Startup"
+        ContentTemplate="{DataTemplate auth:StartupGatePage}"
+        Route="startup" />
+
     <ShellContent
         Title="Login"
         ContentTemplate="{DataTemplate auth:LoginPage}"

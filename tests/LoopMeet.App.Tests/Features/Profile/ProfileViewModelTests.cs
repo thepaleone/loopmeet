@@ -74,15 +74,17 @@ public sealed class ProfileViewModelTests
     }
 
     [Fact]
-    public void ProfileViewModel_HasLogoutCommandThatCallsSignOutAndNavigatesToLogin()
+    public void ProfileViewModel_HasLogoutCommandThatRoutesThroughTheSessionCoordinator()
     {
         var viewModelPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs"));
         var source = File.ReadAllText(viewModelPath);
 
+        // Sign-out clearing AND the //login navigation are owned by
+        // SessionCoordinator.SignOutAsync (feature 010, INV-2) — the viewmodel
+        // only invokes it.
         Assert.Contains("LogoutAsync", source, StringComparison.Ordinal);
-        Assert.Contains("SignOutAsync", source, StringComparison.Ordinal);
-        Assert.Contains("//login", source, StringComparison.Ordinal);
-        Assert.Contains("AuthService", source, StringComparison.Ordinal);
+        Assert.Contains("SignOutAsync(SignOutReason.UserInitiated)", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("GoToAsync(\"//login\")", source, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth;
+using LoopMeet.App.Features.Auth.Session;
 using LoopMeet.App.Features.Profile.Models;
 using LoopMeet.App.Services;
 using LoopMeet.App.Services.Notifications;
@@ -13,6 +14,7 @@ namespace LoopMeet.App.Features.Profile.ViewModels;
 public sealed partial class ProfileViewModel : ObservableObject
 {
     private readonly AuthService _authService;
+    private readonly SessionCoordinator _sessionCoordinator;
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
     private readonly NotificationSettingsLauncher _notificationSettingsLauncher;
@@ -55,12 +57,14 @@ public sealed partial class ProfileViewModel : ObservableObject
 
     public ProfileViewModel(
         AuthService authService,
+        SessionCoordinator sessionCoordinator,
         UsersApi usersApi,
         UserProfileCache userProfileCache,
         NotificationSettingsLauncher notificationSettingsLauncher,
         ILogger<ProfileViewModel> logger)
     {
         _authService = authService;
+        _sessionCoordinator = sessionCoordinator;
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
         _notificationSettingsLauncher = notificationSettingsLauncher;
@@ -101,14 +105,13 @@ public sealed partial class ProfileViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            await _authService.SignOutAsync();
+            // The coordinator owns the full clearing checklist and navigation (INV-2).
+            await _sessionCoordinator.SignOutAsync(SignOutReason.UserInitiated);
         }
         finally
         {
             IsBusy = false;
         }
-
-        await Shell.Current.GoToAsync("//login");
     }
 
     [RelayCommand]
@@ -135,6 +138,12 @@ public sealed partial class ProfileViewModel : ObservableObject
             var profile = await _usersApi.GetProfileSummaryAsync();
             _userProfileCache.SetCachedProfile(profile);
             Apply(profile);
+        }
+        catch (ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            // Session end is handled centrally (refresh-retry, then forced
+            // sign-out + routing by the SessionCoordinator) — never masked here.
+            _logger.LogInformation(apiEx, "Profile load unauthorized; session handling owns the response.");
         }
         catch (Exception ex)
         {
