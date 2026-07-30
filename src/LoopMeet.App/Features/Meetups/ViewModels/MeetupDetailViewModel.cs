@@ -172,5 +172,15 @@ public sealed partial class MeetupDetailViewModel : ObservableObject
         IsOwner = currentUserId.HasValue
             && meetup.GroupOwnerUserId != Guid.Empty
             && currentUserId.Value == meetup.GroupOwnerUserId;
+
+        if (meetup.GroupOwnerUserId == Guid.Empty)
+        {
+            // The response carried no group owner, so ownership is unknowable and
+            // the edit control is withheld. Most likely the API predates the
+            // groupOwnerUserId field — deploy it before expecting the edit path.
+            _logger.LogWarning(
+                "Meetup {MeetupId} arrived without GroupOwnerUserId; edit control withheld. Is the API up to date?",
+                meetup.Id);
+        }
     }
 }
