@@ -126,7 +126,7 @@
 - [X] T032 [P] Confirm the location-guard de-duplication is complete: neither `src/LoopMeet.App/Features/Home/ViewModels/HomeViewModel.cs` nor `src/LoopMeet.App/Features/Groups/ViewModels/GroupDetailViewModel.cs` retains an inline `Latitude is not null && Longitude is not null` guard — both defer to `MeetupSummary.CanOpenLocation` (contract §4, Constitution I).
 - [X] T033 Verify observability (Constitution VII) against `src/LoopMeet.Api/Services/Meetups/MeetupQueryService.cs`: exercise both list endpoints and confirm its log lines include `organizersResolved` and `organizersUnresolved`, and that the departed-creator case increments the unresolved count rather than failing silently.
 - [ ] T034 Device validation: quickstart row **27** — the edit pencil and map glyphs render correctly on both Android and iOS (the reason glyphs were chosen over new image assets).
-- [ ] T035 Open a pull request titled "feat(meetups): icon save, meetup details screen, owner-gated edit" summarizing the three stories and the read-model extension (including the `GroupOwnerUserId` addition and its rationale), with the 27-row quickstart matrix as a checklist and explicit confirmation that T015/T023/T030 suites and all device rows passed.
+- [X] T035 Open a pull request titled "feat(meetups): icon save, meetup details screen, owner-gated edit" summarizing the three stories and the read-model extension (including the `GroupOwnerUserId` addition and its rationale), with the 27-row quickstart matrix as a checklist and explicit confirmation that T015/T023/T030 suites and all device rows passed.
 
 ---
 
