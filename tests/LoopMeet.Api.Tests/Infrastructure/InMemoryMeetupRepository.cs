@@ -32,7 +32,7 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
         }
     }
 
-    public Task<IReadOnlyList<(Meetup Meetup, string GroupName)>> ListUpcomingByUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<Meetup>> ListUpcomingByUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         lock (_store.SyncRoot)
         {
@@ -45,17 +45,9 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
             var results = _store.Meetups
                 .Where(meetup => memberGroupIds.Contains(meetup.GroupId) && meetup.ScheduledAt > DateTimeOffset.UtcNow)
                 .OrderBy(meetup => meetup.ScheduledAt)
-                .Select(meetup =>
-                {
-                    var groupName = _store.Groups
-                        .Where(group => group.Id == meetup.GroupId)
-                        .Select(group => group.Name)
-                        .FirstOrDefault() ?? string.Empty;
-                    return (meetup, groupName);
-                })
                 .ToList();
 
-            return Task.FromResult<IReadOnlyList<(Meetup Meetup, string GroupName)>>(results);
+            return Task.FromResult<IReadOnlyList<Meetup>>(results);
         }
     }
 

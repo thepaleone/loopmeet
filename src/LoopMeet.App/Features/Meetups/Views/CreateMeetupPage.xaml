@@ -6,10 +6,33 @@
     x:Name="CreateMeetupPageRoot"
     Title="Create Meetup">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="12">
-            <Label Text="Create Meetup" FontSize="24" FontAttributes="Bold" />
+    <!-- Header row lives outside the ScrollView so the save control cannot be
+         scrolled away or covered by the on-screen keyboard (FR-002). -->
+    <Grid RowDefinitions="Auto,*">
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="*,Auto"
+            Padding="24,24,24,0"
+            ColumnSpacing="12">
+            <Label
+                Text="Create Meetup"
+                FontSize="24"
+                FontAttributes="Bold"
+                VerticalOptions="Center" />
+            <Label
+                Grid.Column="1"
+                Text="💾"
+                FontSize="24"
+                VerticalOptions="Center"
+                SemanticProperties.Description="Save meetup">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveCommand}" />
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
 
+        <ScrollView Grid.Row="1">
+        <VerticalStackLayout Padding="24" Spacing="12">
             <Border
                 Padding="16"
                 Style="{StaticResource BubbleCardBorderStyle}">
@@ -57,8 +80,7 @@
             </Border>
 
             <Label Text="{Binding ErrorMessage}" TextColor="Red" IsVisible="{Binding HasError}" />
-
-            <Button Text="Create Meetup" Command="{Binding SaveCommand}" />
         </VerticalStackLayout>
-    </ScrollView>
+        </ScrollView>
+    </Grid>
 </ContentPage>

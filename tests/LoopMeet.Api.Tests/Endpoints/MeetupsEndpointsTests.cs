@@ -233,7 +233,162 @@ public sealed class MeetupsEndpointsTests
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
+    // ── 011: read-model resolution (organizer, group name, group owner) ───
+
+    [Fact]
+    public async Task GroupMeetupsResolveOrganizerDisplayNameAndGroupName()
+    {
+        var userId = Guid.NewGuid();
+        _client.DefaultRequestHeaders.Add("X-Test-UserId", userId.ToString());
+
+        SeedUser(userId, "Ada Lovelace");
+        var groupId = SeedGroupWithMembership(userId, "Climbing Club");
+        SeedMeetup(groupId, userId, "Boulder Night", DateTimeOffset.UtcNow.AddDays(3));
+
+        var response = await _client.GetAsync($"/groups/{groupId}/meetups");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var payload = await response.Content.ReadFromJsonAsync<MeetupsResponse>();
+        var meetup = Assert.Single(payload!.Meetups);
+        Assert.Equal("Ada Lovelace", meetup.CreatedByDisplayName);
+        Assert.Equal("Climbing Club", meetup.GroupName);
+        Assert.Equal(userId, meetup.GroupOwnerUserId);
+    }
+
+    [Fact]
+    public async Task GroupMeetupsLeaveOrganizerEmptyWhenCreatorIsNoLongerAMember()
+    {
+        var ownerId = Guid.NewGuid();
+        var departedId = Guid.NewGuid();
+        _client.DefaultRequestHeaders.Add("X-Test-UserId", ownerId.ToString());
+
+        SeedUser(ownerId, "Ada Lovelace");
+        SeedUser(departedId, "Grace Hopper");
+        var groupId = SeedGroupWithMembership(ownerId, "Climbing Club");
+        // Grace created the meetup but holds no membership row for this group.
+        SeedMeetup(groupId, departedId, "Boulder Night", DateTimeOffset.UtcNow.AddDays(3));
+
+        var response = await _client.GetAsync($"/groups/{groupId}/meetups");
+
+        var payload = await response.Content.ReadFromJsonAsync<MeetupsResponse>();
+        var meetup = Assert.Single(payload!.Meetups);
+        Assert.Equal(string.Empty, meetup.CreatedByDisplayName);
+        Assert.Equal(departedId, meetup.CreatedByUserId);
+        Assert.Equal("Climbing Club", meetup.GroupName);
+    }
+
+    [Fact]
+    public async Task GroupMeetupsLeaveOrganizerEmptyWhenCreatorHasNoProfile()
+    {
+        var userId = Guid.NewGuid();
+        _client.DefaultRequestHeaders.Add("X-Test-UserId", userId.ToString());
+
+        // Member row exists, profile row does not.
+        var groupId = SeedGroupWithMembership(userId, "Climbing Club");
+        SeedMeetup(groupId, userId, "Boulder Night", DateTimeOffset.UtcNow.AddDays(3));
+
+        var response = await _client.GetAsync($"/groups/{groupId}/meetups");
+
+        var payload = await response.Content.ReadFromJsonAsync<MeetupsResponse>();
+        var meetup = Assert.Single(payload!.Meetups);
+        Assert.Equal(string.Empty, meetup.CreatedByDisplayName);
+    }
+
+    [Fact]
+    public async Task UpcomingMeetupsResolveOrganizerAndGroupOwnerPerGroup()
+    {
+        var viewerId = Guid.NewGuid();
+        var otherOwnerId = Guid.NewGuid();
+        _client.DefaultRequestHeaders.Add("X-Test-UserId", viewerId.ToString());
+        _client.DefaultRequestHeaders.Add("X-Test-Email", "viewer@test.com");
+
+        SeedUser(viewerId, "Ada Lovelace");
+        SeedUser(otherOwnerId, "Grace Hopper");
+
+        var ownedGroupId = SeedGroupWithMembership(viewerId, "Owned Group");
+        // A group the viewer belongs to but does not own; owner also created the meetup.
+        var joinedGroupId = SeedGroupWithMembership(otherOwnerId, "Joined Group");
+        SeedMembership(joinedGroupId, viewerId, "member");
+
+        SeedMeetup(ownedGroupId, viewerId, "Mine", DateTimeOffset.UtcNow.AddDays(1));
+        SeedMeetup(joinedGroupId, otherOwnerId, "Theirs", DateTimeOffset.UtcNow.AddDays(2));
+
+        var response = await _client.GetAsync("/meetups/upcoming");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var payload = await response.Content.ReadFromJsonAsync<UpcomingMeetupsResponse>();
+        Assert.Equal(2, payload!.Meetups.Count);
+
+        var mine = payload.Meetups.Single(item => item.Title == "Mine");
+        Assert.Equal("Ada Lovelace", mine.CreatedByDisplayName);
+        Assert.Equal("Owned Group", mine.GroupName);
+        Assert.Equal(viewerId, mine.GroupOwnerUserId);
+
+        var theirs = payload.Meetups.Single(item => item.Title == "Theirs");
+        Assert.Equal("Grace Hopper", theirs.CreatedByDisplayName);
+        Assert.Equal("Joined Group", theirs.GroupName);
+        // The gate the client uses to decide whether to offer editing.
+        Assert.Equal(otherOwnerId, theirs.GroupOwnerUserId);
+        Assert.NotEqual(viewerId, theirs.GroupOwnerUserId);
+    }
+
+    [Fact]
+    public void MeetupQueryServiceLogsOrganizerResolutionCounts()
+    {
+        // Constitution VII: an unexpected organizer-fallback rate must be visible
+        // in logs rather than silent. Asserted on source because the log call
+        // itself is not observable through the endpoint.
+        var servicePath = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "../../../../../src/LoopMeet.Api/Services/Meetups/MeetupQueryService.cs"));
+        var source = File.ReadAllText(servicePath);
+
+        Assert.Equal(2, CountOccurrences(source, "organizersResolved="));
+        Assert.Equal(2, CountOccurrences(source, "organizersUnresolved="));
+    }
+
+    private static int CountOccurrences(string source, string value)
+    {
+        var count = 0;
+        var index = 0;
+        while ((index = source.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += value.Length;
+        }
+
+        return count;
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    private void SeedUser(Guid userId, string displayName)
+    {
+        lock (_store.SyncRoot)
+        {
+            _store.Users.Add(new User
+            {
+                Id = userId,
+                DisplayName = displayName,
+                Email = $"{userId:N}@test.com"
+            });
+        }
+    }
+
+    private void SeedMembership(Guid groupId, Guid userId, string role)
+    {
+        lock (_store.SyncRoot)
+        {
+            _store.Memberships.Add(new Membership
+            {
+                Id = Guid.NewGuid(),
+                GroupId = groupId,
+                UserId = userId,
+                Role = role,
+                CreatedAt = DateTimeOffset.UtcNow
+            });
+        }
+    }
 
     private Guid SeedGroupWithMembership(Guid userId, string? groupName = null)
     {

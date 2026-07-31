@@ -32,6 +32,22 @@ public sealed class InMemoryMembershipRepository : IMembershipRepository
         }
     }
 
+    public Task<IReadOnlyList<Membership>> ListMembersByGroupsAsync(IReadOnlyList<Guid> groupIds, CancellationToken cancellationToken = default)
+    {
+        if (groupIds.Count == 0)
+        {
+            return Task.FromResult<IReadOnlyList<Membership>>(Array.Empty<Membership>());
+        }
+
+        lock (_store.SyncRoot)
+        {
+            var results = _store.Memberships
+                .Where(membership => groupIds.Contains(membership.GroupId))
+                .ToList();
+            return Task.FromResult<IReadOnlyList<Membership>>(results);
+        }
+    }
+
     public Task AddAsync(Membership membership, CancellationToken cancellationToken = default)
     {
         lock (_store.SyncRoot)

@@ -41,7 +41,7 @@ public sealed class MeetupRepository : IMeetupRepository
             .ToList();
     }
 
-    public async Task<IReadOnlyList<(Meetup Meetup, string GroupName)>> ListUpcomingByUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Meetup>> ListUpcomingByUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         var membershipResponse = await _client
             .From<MembershipRecord>()
@@ -55,35 +55,19 @@ public sealed class MeetupRepository : IMeetupRepository
 
         if (groupIds.Count == 0)
         {
-            return Array.Empty<(Meetup, string)>();
+            return Array.Empty<Meetup>();
         }
 
         var now = DateTimeOffset.UtcNow.ToString("o");
-        var allMeetups = new List<MeetupRecord>();
-        foreach (var groupId in groupIds)
-        {
-            var meetupResponse = await _client
-                .From<MeetupRecord>()
-                .Filter("group_id", Operator.Equals, groupId.ToString())
-                .Filter("scheduled_at", Operator.GreaterThan, now)
-                .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Ascending)
-                .Get();
+        var response = await _client
+            .From<MeetupRecord>()
+            .Filter("group_id", Operator.In, groupIds.Select(id => id.ToString()).ToList())
+            .Filter("scheduled_at", Operator.GreaterThan, now)
+            .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Ascending)
+            .Get();
 
-            allMeetups.AddRange(meetupResponse.Models);
-        }
-
-        var groupsResponse = await _client.From<GroupRecord>().Get();
-        var groupLookup = groupsResponse.Models
-            .Where(g => groupIds.Contains(g.Id))
-            .ToDictionary(g => g.Id, g => g.Name);
-
-        return allMeetups
-            .OrderBy(m => m.ScheduledAt)
-            .Select(m =>
-            {
-                groupLookup.TryGetValue(m.GroupId, out var groupName);
-                return (Map(m), groupName ?? string.Empty);
-            })
+        return response.Models
+            .Select(Map)
             .ToList();
     }
 

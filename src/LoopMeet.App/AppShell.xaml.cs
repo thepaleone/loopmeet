@@ -27,6 +27,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("change-password", typeof(ChangePasswordPage));
 		Routing.RegisterRoute("create-meetup", typeof(CreateMeetupPage));
 		Routing.RegisterRoute("edit-meetup", typeof(EditMeetupPage));
+		Routing.RegisterRoute("meetup-detail", typeof(MeetupDetailPage));
 
 		this.DevToolsTab.IsVisible = ShowDevTools;
 	}

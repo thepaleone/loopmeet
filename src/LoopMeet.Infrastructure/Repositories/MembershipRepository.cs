@@ -32,6 +32,23 @@ public sealed class MembershipRepository : IMembershipRepository
             .ToList();
     }
 
+    public async Task<IReadOnlyList<Membership>> ListMembersByGroupsAsync(IReadOnlyList<Guid> groupIds, CancellationToken cancellationToken = default)
+    {
+        if (groupIds.Count == 0)
+        {
+            return Array.Empty<Membership>();
+        }
+
+        var response = await _client
+            .From<MembershipRecord>()
+            .Filter("group_id", Operator.In, groupIds.Select(id => id.ToString()).ToList())
+            .Get();
+
+        return response.Models
+            .Select(Map)
+            .ToList();
+    }
+
     public async Task AddAsync(Membership membership, CancellationToken cancellationToken = default)
     {
         var record = Map(membership);
