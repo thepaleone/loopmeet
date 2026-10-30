@@ -1,6 +1,7 @@
 using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
+using LoopMeet.Core.Meetups;
 using LoopMeet.Core.Models;
 
 namespace LoopMeet.Api.Services.Meetups;
@@ -112,14 +113,23 @@ public sealed class MeetupCommandService
             existing.Title = trimmedTitle;
         }
 
-        if (request.ScheduledAt is not null)
+        // The future-time rule guards upcoming meetups only, and only when their
+        // time actually changes: a past meetup may be corrected to any time, and
+        // resending the stored time is not a change.
+        var now = _timeProvider.GetUtcNow();
+        if (request.ScheduledAt is { } requested && requested != existing.ScheduledAt)
         {
-            if (request.ScheduledAt.Value <= _timeProvider.GetUtcNow())
+            var wasPast = MeetupLifecycle.IsPast(existing.ScheduledAt, existing.Timezone, now);
+            if (!wasPast && requested <= now)
             {
-                _logger.LogWarning("Update meetup invalid schedule {MeetupId} in group {GroupId}", meetupId, groupId);
+                _logger.LogWarning(
+                    "Update meetup invalid schedule {MeetupId} in group {GroupId} wasPast={WasPast}",
+                    meetupId,
+                    groupId,
+                    wasPast);
                 return new MeetupCommandResult(MeetupCommandStatus.InvalidSchedule, null);
             }
-            existing.ScheduledAt = request.ScheduledAt.Value;
+            existing.ScheduledAt = requested;
         }
 
         if (!string.IsNullOrWhiteSpace(request.PlaceName) && (request.Latitude is null || request.Longitude is null))
@@ -137,7 +147,7 @@ public sealed class MeetupCommandService
         {
             existing.Timezone = NormalizeTimezone(request.Timezone);
         }
-        existing.UpdatedAt = _timeProvider.GetUtcNow();
+        existing.UpdatedAt = now;
 
         await _meetupRepository.UpdateAsync(existing, cancellationToken);
 

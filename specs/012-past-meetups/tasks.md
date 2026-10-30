@@ -165,28 +165,28 @@
 
 ### Tests for User Story 2
 
-- [ ] T029 [P] [US2] Extend `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs` with `PATCH` cases per contract §5, setting `factory.Clock` explicitly:
+- [X] T029 [P] [US2] Extend `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs` with `PATCH` cases per contract §5, setting `factory.Clock` explicitly:
   - Past meetup, location-only change (`scheduledAt` omitted) → 200.
   - Past meetup, `scheduledAt` resent unchanged → 200.
   - Past meetup moved to an earlier past instant → 200, and it appears at its new position in `/past`.
   - Upcoming meetup, `scheduledAt` changed to a future instant → 200.
   - Upcoming meetup, `scheduledAt` changed to a past instant → 400 `invalid_meetup_schedule`.
   - `DELETE` of a past meetup → 204, and it's gone from `/past` (FR-022).
-- [ ] T030 [P] [US2] Create `supabase/functions/notifications-dispatch/webhook-router.test.ts` testing `resolveSuppression(payload, now)` with a fixed `now`. Import assertions with `import { assertEquals } from "jsr:@std/assert@1";` (see T008):
+- [X] T030 [P] [US2] Create `supabase/functions/notifications-dispatch/webhook-router.test.ts` testing `resolveSuppression(payload, now)` with a fixed `now`. Import assertions with `import { assertEquals } from "jsr:@std/assert@1";` (see T008):
   - `meetups` UPDATE past→past → `"past_meetup"`.
   - past→past where `record.status` is `"canceled"` → `"past_meetup"`. Future-proofing only: meetups have no status column today, but suppression must keep running before the status branch (research D7).
   - upcoming→upcoming → `null`.
   - upcoming→past → `null` (old record was upcoming, FR-026).
   - `meetups` INSERT → `null`; `meetups` DELETE → `null`; `invitations` INSERT → `null`; UPDATE with `old_record` missing → `null`.
   - Also assert `resolveNotificationType` still returns `null` for a `meetups` DELETE (deletes never push, FR-025) and `"meetup.updated"` for a plain UPDATE.
-- [ ] T031 [P] [US2] Create `tests/LoopMeet.Api.Tests/Integration/PastMeetupNotificationGuardTests.cs` (source inspection, same path pattern as `WebhookNotificationMappingTests.cs`):
+- [X] T031 [P] [US2] Create `tests/LoopMeet.Api.Tests/Integration/PastMeetupNotificationGuardTests.cs` (source inspection, same path pattern as `WebhookNotificationMappingTests.cs`):
   - (a) `supabase/functions/notifications-dispatch/index.ts` calls `resolveSuppression(` **before** `resolveNotificationType(` (compare `IndexOf`), and contains `"notification_suppressed"` and `reason` (FR-028).
   - (b) `supabase/functions/reminders-scheduler/index.ts` still contains `localScheduled.isoDate !== localNow.isoDate` (FR-027, research D8).
   - (c) `webhook-router.ts` imports `isMeetupPast` from `../_shared/meetup-lifecycle.ts`.
 
 ### Implementation for User Story 2 — backend validation
 
-- [ ] T032 [US2] In `MeetupCommandService.UpdateAsync` (`src/LoopMeet.Api/Services/Meetups/MeetupCommandService.cs`), replace the `ScheduledAt` block with the research D9 rule:
+- [X] T032 [US2] In `MeetupCommandService.UpdateAsync` (`src/LoopMeet.Api/Services/Meetups/MeetupCommandService.cs`), replace the `ScheduledAt` block with the research D9 rule:
   - `var now = _timeProvider.GetUtcNow(); var wasPast = MeetupLifecycle.IsPast(existing.ScheduledAt, existing.Timezone, now);`
   - Only when `request.ScheduledAt is { } requested && requested != existing.ScheduledAt`: reject with `InvalidSchedule` if `!wasPast && requested <= now` (keep the existing warning log, adding `wasPast` to it), otherwise assign.
   - Leave `CreateAsync`'s future-only rule untouched.
@@ -194,20 +194,20 @@
 
 ### Implementation for User Story 2 — push suppression
 
-- [ ] T033 [US2] In `supabase/functions/notifications-dispatch/webhook-router.ts`, add `import { isMeetupPast } from "../_shared/meetup-lifecycle.ts";`, `export type SuppressionReason = "past_meetup";`, and `export const resolveSuppression = (payload: WebhookPayload, now: Date): SuppressionReason | null`. It returns `"past_meetup"` only when `table === "meetups"`, `type === "UPDATE"`, `old_record` is present, and `isMeetupPast` is true for both `old_record` and `record` (reading `scheduled_at` as a string and `timezone` as string-or-null). Otherwise it returns `null`. Leave `resolveNotificationType` unchanged. Run T030 to green.
-- [ ] T034 [US2] In `supabase/functions/notifications-dispatch/index.ts`, right after parsing `payload`:
+- [X] T033 [US2] In `supabase/functions/notifications-dispatch/webhook-router.ts`, add `import { isMeetupPast } from "../_shared/meetup-lifecycle.ts";`, `export type SuppressionReason = "past_meetup";`, and `export const resolveSuppression = (payload: WebhookPayload, now: Date): SuppressionReason | null`. It returns `"past_meetup"` only when `table === "meetups"`, `type === "UPDATE"`, `old_record` is present, and `isMeetupPast` is true for both `old_record` and `record` (reading `scheduled_at` as a string and `timezone` as string-or-null). Otherwise it returns `null`. Leave `resolveNotificationType` unchanged. Run T030 to green.
+- [X] T034 [US2] In `supabase/functions/notifications-dispatch/index.ts`, right after parsing `payload`:
   - Call `const suppression = resolveSuppression(payload, new Date());`.
   - When it's non-null, `console.log(JSON.stringify({ level: "info", message: "notification_suppressed", reason: suppression, table: payload.table, type: payload.type, meetupId: payload.record.id ?? null, groupId: payload.record.group_id ?? null }))` (same JSON log style as `reminders-scheduler`), then return `Response.json({ skipped: true, reason: suppression })` before `resolveNotificationType`.
   - Run `(cd supabase/functions/notifications-dispatch && deno check index.ts)`, then T031 to green.
 
 ### Implementation for User Story 2 — client edit
 
-- [ ] T035 [US2] In `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`:
+- [X] T035 [US2] In `src/LoopMeet.App/Features/Meetups/ViewModels/EditMeetupViewModel.cs`:
   - Load via `_meetupsApi.GetMeetupAsync(GroupId, MeetupId)` (keep the existing "Could not load meetup details." message on failure), and store `_loadedScheduledAt` (`DateTimeOffset`) and `_loadedIsPast` (`bool`).
   - In `SaveAsync`, compute `var timeChanged = TruncateToMinute(scheduledAt) != TruncateToMinute(_loadedScheduledAt);`, using a private static helper that zeroes seconds and sub-seconds.
   - Show the existing "Scheduled time must be in the future." error only when `timeChanged && !_loadedIsPast && scheduledAt <= DateTimeOffset.Now`.
   - Send `ScheduledAt = timeChanged ? scheduledAt : null` and `Timezone = timeChanged ? TimezoneHelper.GetCurrentDeviceTimezoneId() : null` (research D9).
-- [ ] T036 [US2] Extend `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs` with a source-inspection `[Fact]` asserting `EditMeetupViewModel.cs` contains `GetMeetupAsync(GroupId, MeetupId)`, `timeChanged && !_loadedIsPast`, `ScheduledAt = timeChanged ? scheduledAt : null`, and `Timezone = timeChanged ?` (FR-021a), and no longer contains `GetGroupMeetupsAsync`.
+- [X] T036 [US2] Extend `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs` with a source-inspection `[Fact]` asserting `EditMeetupViewModel.cs` contains `GetMeetupAsync(GroupId, MeetupId)`, `timeChanged && !_loadedIsPast`, `ScheduledAt = timeChanged ? scheduledAt : null`, and `Timezone = timeChanged ?` (FR-021a), and no longer contains `GetGroupMeetupsAsync`.
 
 **Checkpoint**: Quickstart rows 8, 9 and 11 pass, with the `notification_suppressed` log line visible for rows 8–9.
 
@@ -221,9 +221,9 @@
 
 The behavior is produced by US2's rule (T032) and suppression predicate (T033). This phase pins it with tests so a later change can't silently break it.
 
-- [ ] T037 [P] [US3] Extend `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs`: a past meetup `PATCH`ed to `now + 1 day` → 200. It's absent from `/groups/{g}/meetups/past`, present in `/groups/{g}/meetups` with `isPast=false`, and present in `/meetups/upcoming` for a member. Rely on the `PATCH` invalidating the group keys (`meetups:{groupId}`, `meetups:past:{groupId}`), and read `/meetups/upcoming` as a member who hasn't read it yet in this test, because `home-meetups:{userId}` only expires by TTL. **Don't** advance `factory.Clock` to expire caches: `CacheService` uses `IMemoryCache` on the real clock, not `TimeProvider`.
-- [ ] T038 [P] [US3] Extend `supabase/functions/notifications-dispatch/webhook-router.test.ts`: `meetups` UPDATE with a past `old_record` and a future `record` → `resolveSuppression` returns `null` **and** `resolveNotificationType` returns `"meetup.updated"` (FR-024).
-- [ ] T039 [P] [US3] Add a `[Fact]` to `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs` asserting that the future-time error branch is guarded by `!_loadedIsPast`, so a past meetup's date can be moved anywhere, including the future, without a client-side block.
+- [X] T037 [P] [US3] Extend `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs`: a past meetup `PATCH`ed to `now + 1 day` → 200. It's absent from `/groups/{g}/meetups/past`, present in `/groups/{g}/meetups` with `isPast=false`, and present in `/meetups/upcoming` for a member. Rely on the `PATCH` invalidating the group keys (`meetups:{groupId}`, `meetups:past:{groupId}`), and read `/meetups/upcoming` as a member who hasn't read it yet in this test, because `home-meetups:{userId}` only expires by TTL. **Don't** advance `factory.Clock` to expire caches: `CacheService` uses `IMemoryCache` on the real clock, not `TimeProvider`.
+- [X] T038 [P] [US3] Extend `supabase/functions/notifications-dispatch/webhook-router.test.ts`: `meetups` UPDATE with a past `old_record` and a future `record` → `resolveSuppression` returns `null` **and** `resolveNotificationType` returns `"meetup.updated"` (FR-024).
+- [X] T039 [P] [US3] Add a `[Fact]` to `tests/LoopMeet.App.Tests/Features/Meetups/EditMeetupViewModelTests.cs` asserting that the future-time error branch is guarded by `!_loadedIsPast`, so a past meetup's date can be moved anywhere, including the future, without a client-side block.
 
 **Checkpoint**: Quickstart row 10 passes on both platforms.
 

@@ -186,7 +186,119 @@ public sealed class MeetupHistoryEndpointsTests
         Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
     }
 
+    // ── US2: PATCH / DELETE of past meetups ──────────────────────────────
+
+    [Fact]
+    public async Task Patch_PastMeetupLocationOnly_Succeeds()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var id = SeedMeetup(groupId, "Taco night", Now.AddDays(-3));
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest
+        {
+            Title = "Taco night",
+            PlaceName = "La Taqueria",
+            Latitude = 37.75,
+            Longitude = -122.41
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        lock (_store.SyncRoot)
+        {
+            Assert.Equal("La Taqueria", _store.Meetups.Single(m => m.Id == id).PlaceName);
+        }
+    }
+
+    [Fact]
+    public async Task Patch_PastMeetupWithUnchangedTimeResent_Succeeds()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var scheduledAt = Now.AddDays(-3);
+        var id = SeedMeetup(groupId, "Taco night", scheduledAt);
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest { Title = "Taco night!", ScheduledAt = scheduledAt });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Patch_PastMeetupMovedToAnotherPastTime_SucceedsAndReorders()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var moved = SeedMeetup(groupId, "Moved", Now.AddDays(-2));
+        var anchor = SeedMeetup(groupId, "Anchor", Now.AddDays(-5));
+
+        var response = await PatchAsync(groupId, moved, new UpdateMeetupRequest { ScheduledAt = Now.AddDays(-9) });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var page = await GetPastAsync(groupId);
+        Assert.Equal(new[] { anchor, moved }, page.Meetups.Select(m => m.Id));
+    }
+
+    [Fact]
+    public async Task Patch_UpcomingMeetupMovedLater_Succeeds()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var id = SeedMeetup(groupId, "Ride", Now.AddDays(3));
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest { ScheduledAt = Now.AddDays(4) });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Patch_UpcomingMeetupMovedIntoThePast_IsRejected()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var id = SeedMeetup(groupId, "Ride", Now.AddDays(3));
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest { ScheduledAt = Now.AddDays(-1) });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.Equal("invalid_meetup_schedule", error!.Code);
+    }
+
+    [Fact]
+    public async Task Delete_PastMeetup_RemovesItFromThePastList()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var id = SeedMeetup(groupId, "Old", Now.AddDays(-4));
+
+        var response = await _client.DeleteAsync($"/groups/{groupId}/meetups/{id}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        var page = await GetPastAsync(groupId);
+        Assert.DoesNotContain(page.Meetups, m => m.Id == id);
+    }
+
+    // ── US3: moving a past meetup back into the future ───────────────────
+
+    [Fact]
+    public async Task Patch_PastMeetupMovedIntoTheFuture_BecomesUpcomingEverywhere()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var id = SeedMeetup(groupId, "Repeat it", Now.AddDays(-3));
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest { ScheduledAt = Now.AddDays(1) });
+
+        // The PATCH invalidated both group caches; the Home cache has not been read
+        // in this test, so every list below is computed fresh.
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var past = await GetPastAsync(groupId);
+        Assert.DoesNotContain(past.Meetups, m => m.Id == id);
+        var upcoming = await _client.GetFromJsonAsync<MeetupsResponse>($"/groups/{groupId}/meetups");
+        var moved = Assert.Single(upcoming!.Meetups, m => m.Id == id);
+        Assert.False(moved.IsPast);
+        var home = await _client.GetFromJsonAsync<UpcomingMeetupsResponse>("/meetups/upcoming");
+        Assert.Contains(home!.Meetups, m => m.Id == id);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    private Task<HttpResponseMessage> PatchAsync(Guid groupId, Guid meetupId, UpdateMeetupRequest request) =>
+        _client.PatchAsJsonAsync($"/groups/{groupId}/meetups/{meetupId}", request);
+
 
     private async Task<PastMeetupsResponse> GetPastAsync(Guid groupId, string? cursor = null, int? limit = null)
     {
