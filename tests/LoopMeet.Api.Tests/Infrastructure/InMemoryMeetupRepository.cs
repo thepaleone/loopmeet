@@ -52,9 +52,48 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
         }
     }
 
+    /// <summary>
+    /// Same batch-and-skip algorithm as the Supabase repository: read up to
+    /// <paramref name="limit"/> raw rows after the cursor, keep the past ones, and stop
+    /// once the page is full or a raw batch comes back short.
+    /// </summary>
     public Task<MeetupPage> ListPastByGroupAsync(Guid groupId, DateTimeOffset now, MeetupPageCursor? before, int limit, CancellationToken cancellationToken = default)
     {
-        throw new NotSupportedException("Replaced in T019.");
+        lock (_store.SyncRoot)
+        {
+            var items = new List<Meetup>(limit);
+            var cursor = before;
+            while (true)
+            {
+                var batch = _store.Meetups
+                    .Where(meetup => meetup.GroupId == groupId && meetup.ScheduledAt <= now)
+                    .Where(meetup => cursor is not { } position
+                        || meetup.ScheduledAt < position.ScheduledAt
+                        || (meetup.ScheduledAt == position.ScheduledAt && meetup.Id.CompareTo(position.Id) < 0))
+                    .OrderByDescending(meetup => meetup.ScheduledAt)
+                    .ThenByDescending(meetup => meetup.Id)
+                    .Take(limit)
+                    .ToList();
+
+                foreach (var meetup in batch)
+                {
+                    cursor = new MeetupPageCursor(meetup.ScheduledAt, meetup.Id);
+                    if (MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now))
+                    {
+                        items.Add(meetup);
+                        if (items.Count == limit)
+                        {
+                            return Task.FromResult(new MeetupPage(items, cursor));
+                        }
+                    }
+                }
+
+                if (batch.Count < limit)
+                {
+                    return Task.FromResult(new MeetupPage(items, null));
+                }
+            }
+        }
     }
 
     public Task<Meetup> AddAsync(Meetup meetup, CancellationToken cancellationToken = default)

@@ -80,6 +80,16 @@ public sealed class MeetupListItemResponse
     public bool IsPast { get; init; }
 }
 
+/// <summary>
+/// One newest-first page of a group's past meetups. A page can hold fewer than the
+/// requested limit and still have a <see cref="NextCursor"/>; page until it is null.
+/// </summary>
+public sealed class PastMeetupsResponse
+{
+    public IReadOnlyList<MeetupListItemResponse> Meetups { get; init; } = Array.Empty<MeetupListItemResponse>();
+    public string? NextCursor { get; init; }
+}
+
 public sealed class UpcomingMeetupsResponse
 {
     public IReadOnlyList<MeetupListItemResponse> Meetups { get; init; } = Array.Empty<MeetupListItemResponse>();

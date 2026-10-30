@@ -9,6 +9,7 @@ namespace LoopMeet.Api.Services.Meetups;
 public sealed class MeetupQueryService
 {
     private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
+    public const int DefaultPastPageSize = 20;
     private readonly IMeetupRepository _meetupRepository;
     private readonly IGroupRepository _groupRepository;
     private readonly IMembershipRepository _membershipRepository;
@@ -73,6 +74,68 @@ public sealed class MeetupQueryService
                 items.Count(item => string.IsNullOrEmpty(item.CreatedByDisplayName)));
             return new UpcomingMeetupsResponse { Meetups = items };
         }) ?? new UpcomingMeetupsResponse();
+    }
+
+    /// <summary>
+    /// Newest-first page of a group's past meetups. Only the default-sized first page
+    /// is cached; requests carrying a cursor always read through.
+    /// </summary>
+    public async Task<PastMeetupsResponse> GetPastGroupMeetupsAsync(
+        Guid groupId,
+        MeetupPageCursor? before,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation(
+            "Loading past meetups for group {GroupId} cursor={HasCursor} limit={Limit}",
+            groupId,
+            before is not null,
+            limit);
+
+        async Task<PastMeetupsResponse> LoadAsync()
+        {
+            var now = _timeProvider.GetUtcNow();
+            var page = await _meetupRepository.ListPastByGroupAsync(groupId, now, before, limit, cancellationToken);
+            var items = await ProjectAsync(page.Items, now, cancellationToken);
+
+            _logger.LogInformation(
+                "Loaded past meetups for group {GroupId} count={Count} hasMore={HasMore}",
+                groupId,
+                items.Count,
+                page.NextCursor is not null);
+            return new PastMeetupsResponse
+            {
+                Meetups = items,
+                NextCursor = page.NextCursor is { } next ? MeetupCursorCodec.Encode(next) : null
+            };
+        }
+
+        if (before is not null || limit != DefaultPastPageSize)
+        {
+            return await LoadAsync();
+        }
+
+        return await _cacheService.GetOrSetAsync($"meetups:past:{groupId}", CacheTtl, LoadAsync)
+            ?? new PastMeetupsResponse();
+    }
+
+    /// <summary>
+    /// One meetup of the group, upcoming or past; null when it does not exist or
+    /// belongs to another group. Not cached, so it reflects edits immediately.
+    /// </summary>
+    public async Task<MeetupListItemResponse?> GetGroupMeetupAsync(
+        Guid groupId,
+        Guid meetupId,
+        CancellationToken cancellationToken = default)
+    {
+        var meetup = await _meetupRepository.GetByIdAsync(meetupId, cancellationToken);
+        if (meetup is null || meetup.GroupId != groupId)
+        {
+            return null;
+        }
+
+        var items = await ProjectAsync(new[] { meetup }, _timeProvider.GetUtcNow(), cancellationToken);
+        return items[0];
     }
 
     /// <summary>

@@ -90,7 +90,7 @@
 
 ### Tests for User Story 1
 
-- [ ] T016 [P] [US1] Create `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs` with US1 coverage of contract §1/§2. Set `factory.Clock.UtcNow` explicitly in every test, and seed meetups, groups, memberships and users through `InMemoryStore` (copy the seeding helpers already used in `tests/LoopMeet.Api.Tests/Endpoints/MeetupsEndpointsTests.cs`). Cases:
+- [X] T016 [P] [US1] Create `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs` with US1 coverage of contract §1/§2. Set `factory.Clock.UtcNow` explicitly in every test, and seed meetups, groups, memberships and users through `InMemoryStore` (copy the seeding helpers already used in `tests/LoopMeet.Api.Tests/Endpoints/MeetupsEndpointsTests.cs`). Cases:
   - `GET /groups/{g}/meetups/past` returns only past meetups, ordered `scheduledAt` desc, with `isPast=true` and organizer/group fields populated.
   - Default `limit` is 20.
   - Following `nextCursor` until it's `null` over 45 seeded meetups returns all 45 exactly once.
@@ -100,7 +100,7 @@
   - `?cursor=garbage` → 400 `invalid_cursor`; `?limit=0` and `?limit=51` → 400 `invalid_limit`.
   - `GET /groups/{g}/meetups/{id}` for a past meetup → 200 with `isPast=true`; for a meetup in another group → 404; for an unknown id → 404.
   - Cache: read the past first page, `DELETE` one of its meetups, re-read → the deleted meetup is gone (proves `meetups:past:{groupId}` invalidation).
-- [ ] T017 [P] [US1] Create `tests/LoopMeet.App.Tests/Features/Groups/GroupDetailPastMeetupsSurfaceTests.cs` (source inspection; copy the `ReadSource` helper pattern from `tests/LoopMeet.App.Tests/Features/Meetups/MeetupInteractionSurfaceTests.cs`) asserting:
+- [X] T017 [P] [US1] Create `tests/LoopMeet.App.Tests/Features/Groups/GroupDetailPastMeetupsSurfaceTests.cs` (source inspection; copy the `ReadSource` helper pattern from `tests/LoopMeet.App.Tests/Features/Meetups/MeetupInteractionSurfaceTests.cs`) asserting:
   - `GroupDetailPage.xaml` contains both labels "Upcoming Meetups" and "Past Meetups", `SelectMeetupListCommand`, `{Binding PastMeetups}`, a `RefreshView` bound to `RefreshMeetupsCommand`, both empty-state messages ("No upcoming meetups" and "No past meetups yet"), the load-more retry text, and a shared card template referenced via `StaticResource` from both lists.
   - `GroupDetailPage.xaml` does **not** contain `IsVisible="{Binding HasMeetups}"` on the section heading (the toggle is always visible, FR-003) and contains no `CollectionView` (BindableLayout rule).
   - `GroupDetailPage.xaml.cs` resets the list mode inside `ApplyQueryAttributes` and not inside `OnAppearing`, and wires `Scrolled` to `LoadMorePastMeetupsCommand`.
@@ -109,30 +109,30 @@
 
 ### Implementation for User Story 1 — backend
 
-- [ ] T018 [US1] Implement `ListPastByGroupAsync` in `src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs` per research D4/D5:
+- [X] T018 [US1] Implement `ListPastByGroupAsync` in `src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs` per research D4/D5:
   - Query `group_id = groupId AND scheduled_at <= now`, ordered `scheduled_at` desc then `id` desc, limited to `limit`.
   - When `before` is set, add the keyset `or=(scheduled_at.lt.{ts},and(scheduled_at.eq.{ts},id.lt.{id}))` through `QueryFilter` with `Operator.Or`/`Operator.And`. If the client can't express the nested `and`, use the documented fallback (`scheduled_at <= ts`, then drop rows with `scheduled_at == ts && id >= before.Id` in memory) and say so in a code comment.
   - Map rows, keep only those where `MeetupLifecycle.IsPast(...)`, and set the cursor to the last raw row **examined**.
   - Repeat raw batches until `limit` past rows are collected or a batch returns fewer than `limit` rows. `NextCursor` is `null` exactly when the last raw batch was short.
   - Remove the T010 stub.
-- [ ] T019 [US1] Implement `ListPastByGroupAsync` in `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryMeetupRepository.cs` with the same semantics (keyset on `(ScheduledAt desc, Id desc)`, `MeetupLifecycle.IsPast` filter, cursor = last examined, null when exhausted), and remove the T010 stub there.
-- [ ] T020 [P] [US1] Create `src/LoopMeet.Api/Services/Meetups/MeetupCursorCodec.cs`: `internal static class MeetupCursorCodec` with `string Encode(MeetupPageCursor cursor)` (base64url of `"{ScheduledAt.UtcTicks}:{Id:N}"`) and `bool TryDecode(string? value, out MeetupPageCursor cursor)`, which returns `false` on any malformed input and never throws.
-- [ ] T021 [US1] Add `PastMeetupsResponse { IReadOnlyList<MeetupListItemResponse> Meetups; string? NextCursor; }` to `src/LoopMeet.Api/Contracts/MeetupContracts.cs`. In `src/LoopMeet.Api/Services/Meetups/MeetupQueryService.cs`, add:
+- [X] T019 [US1] Implement `ListPastByGroupAsync` in `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryMeetupRepository.cs` with the same semantics (keyset on `(ScheduledAt desc, Id desc)`, `MeetupLifecycle.IsPast` filter, cursor = last examined, null when exhausted), and remove the T010 stub there.
+- [X] T020 [P] [US1] Create `src/LoopMeet.Api/Services/Meetups/MeetupCursorCodec.cs`: `internal static class MeetupCursorCodec` with `string Encode(MeetupPageCursor cursor)` (base64url of `"{ScheduledAt.UtcTicks}:{Id:N}"`) and `bool TryDecode(string? value, out MeetupPageCursor cursor)`, which returns `false` on any malformed input and never throws.
+- [X] T021 [US1] Add `PastMeetupsResponse { IReadOnlyList<MeetupListItemResponse> Meetups; string? NextCursor; }` to `src/LoopMeet.Api/Contracts/MeetupContracts.cs`. In `src/LoopMeet.Api/Services/Meetups/MeetupQueryService.cs`, add:
   - `GetPastGroupMeetupsAsync(Guid groupId, MeetupPageCursor? before, int limit, CancellationToken)`. It projects via `ProjectAsync` and encodes `NextCursor`. It goes through the 30 s cache under `meetups:past:{groupId}` **only** when `before` is null and `limit` is the default 20. It logs `Loading past meetups for group {GroupId} cursor={HasCursor} limit={Limit}` and `Loaded past meetups for group {GroupId} count={Count} hasMore={HasMore}`.
   - `GetGroupMeetupAsync(Guid groupId, Guid meetupId, CancellationToken)`. It calls `GetByIdAsync`, returns `null` when missing or `GroupId != groupId`, and otherwise returns the single projected item. Not cached (research D10).
-- [ ] T022 [US1] In `src/LoopMeet.Api/Endpoints/MeetupsEndpoints.cs`, add `GET /groups/{groupId:guid}/meetups/past` with `string? cursor` and `int? limit` query parameters.
+- [X] T022 [US1] In `src/LoopMeet.Api/Endpoints/MeetupsEndpoints.cs`, add `GET /groups/{groupId:guid}/meetups/past` with `string? cursor` and `int? limit` query parameters.
   - Validate `limit` in 1–50 (default 20) → `400 { code: "invalid_limit", message: "Limit must be between 1 and 50." }`.
   - Decode `cursor` with `MeetupCursorCodec.TryDecode` → `400 { code: "invalid_cursor", message: "The paging cursor is invalid. Refresh and try again." }`.
   - Add `GET /groups/{groupId:guid}/meetups/{meetupId:guid}` returning 200 or 404.
   - Map `/past` **before** the `{meetupId:guid}` route; the guid constraint already prevents a clash, but declaring it first makes the intent obvious.
   - Both routes `.RequireAuthorization()`, with entry/exit log lines matching the existing style in that file.
-- [ ] T023 [US1] In `src/LoopMeet.Api/Services/Meetups/MeetupCommandService.cs`, add `await _cacheService.RemoveAsync($"meetups:past:{groupId}");` next to every existing `RemoveAsync($"meetups:{groupId}")` call (create, update, delete), then run T016 to green.
+- [X] T023 [US1] In `src/LoopMeet.Api/Services/Meetups/MeetupCommandService.cs`, add `await _cacheService.RemoveAsync($"meetups:past:{groupId}");` next to every existing `RemoveAsync($"meetups:{groupId}")` call (create, update, delete), then run T016 to green.
 
 ### Implementation for User Story 1 — client
 
-- [ ] T024 [P] [US1] In `src/LoopMeet.App/Features/Meetups/Models/MeetupModels.cs`, add `public sealed class PastMeetupsResponse { public List<MeetupSummary> Meetups { get; set; } = new(); public string? NextCursor { get; set; } }`. In `src/LoopMeet.App/Services/MeetupsApi.cs`, add the two Refit methods from contract §8 (`GetPastMeetupsAsync(Guid groupId, [Query] string? cursor = null, [Query] int? limit = null)` and `GetMeetupAsync(Guid groupId, Guid meetupId)`) and matching pass-through methods on the `MeetupsApi` wrapper.
-- [ ] T025 [US1] In `src/LoopMeet.App/Features/Meetups/ViewModels/MeetupDetailViewModel.cs`, replace the "fetch the upcoming list and find the id" load with `await _meetupsApi.GetMeetupAsync(_groupId, _meetupId)`. Map `Refit.ApiException { StatusCode: HttpStatusCode.NotFound }` to the existing not-found branch (same state changes and log line), and update its comment, which currently says lists are upcoming-only. In `tests/LoopMeet.App.Tests/Features/Meetups/MeetupInteractionSurfaceTests.cs` (`MeetupDetailViewModel_LoadsFromIdsAndOffersNoDelete`), change the asserted string from `GetGroupMeetupsAsync(_groupId)` to `GetMeetupAsync(_groupId, _meetupId)`. All other assertions in that test stay.
-- [ ] T026 [US1] Extend `src/LoopMeet.App/Features/Groups/ViewModels/GroupDetailViewModel.cs`:
+- [X] T024 [P] [US1] In `src/LoopMeet.App/Features/Meetups/Models/MeetupModels.cs`, add `public sealed class PastMeetupsResponse { public List<MeetupSummary> Meetups { get; set; } = new(); public string? NextCursor { get; set; } }`. In `src/LoopMeet.App/Services/MeetupsApi.cs`, add the two Refit methods from contract §8 (`GetPastMeetupsAsync(Guid groupId, [Query] string? cursor = null, [Query] int? limit = null)` and `GetMeetupAsync(Guid groupId, Guid meetupId)`) and matching pass-through methods on the `MeetupsApi` wrapper.
+- [X] T025 [US1] In `src/LoopMeet.App/Features/Meetups/ViewModels/MeetupDetailViewModel.cs`, replace the "fetch the upcoming list and find the id" load with `await _meetupsApi.GetMeetupAsync(_groupId, _meetupId)`. Map `Refit.ApiException { StatusCode: HttpStatusCode.NotFound }` to the existing not-found branch (same state changes and log line), and update its comment, which currently says lists are upcoming-only. In `tests/LoopMeet.App.Tests/Features/Meetups/MeetupInteractionSurfaceTests.cs` (`MeetupDetailViewModel_LoadsFromIdsAndOffersNoDelete`), change the asserted string from `GetGroupMeetupsAsync(_groupId)` to `GetMeetupAsync(_groupId, _meetupId)`. All other assertions in that test stay.
+- [X] T026 [US1] Extend `src/LoopMeet.App/Features/Groups/ViewModels/GroupDetailViewModel.cs`:
   - Create a top-level `public enum MeetupListMode { Upcoming, Past }` in `src/LoopMeet.App/Features/Groups/ViewModels/MeetupListMode.cs` (not nested in the view model, so XAML `x:Static` can reference it plainly), and add `[ObservableProperty] MeetupListMode _listMode`, with computed `IsUpcomingSelected` / `IsPastSelected` (raise change notifications from `OnListModeChanged`).
   - Add `ObservableCollection<MeetupSummary> PastMeetups`, plus `HasPastMeetups`, `IsLoadingMorePast`, `HasLoadMoreError`, a private `string? _pastNextCursor` and `bool _pastLoaded`.
   - `ResetListMode()` sets Upcoming and clears the past state (called on navigation).
@@ -143,7 +143,7 @@
   - `LoadAsync` (runs on every appearance) reloads the group, the members and the **selected** list, so returning from an edit refreshes the past list in place.
   - `DeleteMeetupAsync` removes the item from whichever collection contains it and updates the matching `Has…` flag.
   - Keep the existing `Meetups` name and `HasMeetups` for the upcoming list (011's source-inspection tests bind to them).
-- [ ] T027 [US1] Restructure `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml`. **Before** writing any `StaticResource`/`DynamicResource`, confirm every key exists in `src/LoopMeet.App/Resources/Styles/Colors.xaml` or `Styles.xaml` (memory: missing keys fail silently).
+- [X] T027 [US1] Restructure `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml`. **Before** writing any `StaticResource`/`DynamicResource`, confirm every key exists in `src/LoopMeet.App/Resources/Styles/Colors.xaml` or `Styles.xaml` (memory: missing keys fail silently).
   - Move the meetup card `DataTemplate` (the whole `SwipeView` … `</SwipeView>` block, unchanged so 011's assertions on it still pass) into `<ContentPage.Resources>` as `x:Key="MeetupCardTemplate"`.
   - Replace the "Upcoming Meetups" label with a segmented toggle: a rounded `Border` holding a two-column `Grid` of `Button`s "Upcoming Meetups" / "Past Meetups", each running `SelectMeetupListCommand` with an `x:Static` `MeetupListMode` parameter, and with `DataTrigger`s on `IsUpcomingSelected` / `IsPastSelected` for the selected look. Always visible.
   - Render two `VerticalStackLayout` lists via `BindableLayout.ItemsSource` (`Meetups` / `PastMeetups`), both using `BindableLayout.ItemTemplate="{StaticResource MeetupCardTemplate}"`, visible per mode and non-empty state.
@@ -151,7 +151,7 @@
   - Below the past list, add an `ActivityIndicator` bound to `IsLoadingMorePast` and a tappable "Couldn't load more — tap to retry" label bound to `HasLoadMoreError` → `LoadMorePastMeetupsCommand`.
   - Wrap the existing `ScrollView` in a `RefreshView` (`Command="{Binding RefreshMeetupsCommand}"`, `IsRefreshing="{Binding IsRefreshing}"`), and give the `ScrollView` `x:Name="ContentScroll"` and `Scrolled="OnContentScrolled"`.
   - Leave the FABs outside the `RefreshView`, as now.
-- [ ] T028 [US1] In `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml.cs`: in `ApplyQueryAttributes`, call `viewModel.ResetListMode()` after setting `GroupId` (FR-002: reset on open only), and leave `OnAppearing` calling `LoadCommand` without resetting. Add `OnContentScrolled(object? sender, ScrolledEventArgs e)`: when `viewModel.IsPastSelected` and `e.ScrollY >= ContentScroll.ContentSize.Height - ContentScroll.Height - 300` and `LoadMorePastMeetupsCommand.CanExecute(null)`, execute it. Then run T017 and the full App test project to green.
+- [X] T028 [US1] In `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml.cs`: in `ApplyQueryAttributes`, call `viewModel.ResetListMode()` after setting `GroupId` (FR-002: reset on open only), and leave `OnAppearing` calling `LoadCommand` without resetting. Add `OnContentScrolled(object? sender, ScrolledEventArgs e)`: when `viewModel.IsPastSelected` and `e.ScrollY >= ContentScroll.ContentSize.Height - ContentScroll.Height - 300` and `LoadMorePastMeetupsCommand.CanExecute(null)`, execute it. Then run T017 and the full App test project to green.
 
 **Checkpoint**: US1 is fully usable. Quickstart rows 1–7 and 15 pass on a device. Detail opens past meetups (read-only for members).
 

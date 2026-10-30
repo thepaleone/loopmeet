@@ -3,7 +3,9 @@ using LoopMeet.Core.Meetups;
 using LoopMeet.Core.Models;
 using LoopMeet.Infrastructure.Supabase.Models;
 using Supabase;
+using Supabase.Postgrest.Interfaces;
 using Operator = Supabase.Postgrest.Constants.Operator;
+using QueryFilter = Supabase.Postgrest.QueryFilter;
 
 namespace LoopMeet.Infrastructure.Repositories;
 
@@ -70,9 +72,61 @@ public sealed class MeetupRepository : IMeetupRepository
             .ToList();
     }
 
-    public Task<MeetupPage> ListPastByGroupAsync(Guid groupId, DateTimeOffset now, MeetupPageCursor? before, int limit, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Newest-first keyset page of past meetups. Rows inside the classification band
+    /// that are still upcoming are skipped (not counted), so batches are read until
+    /// <paramref name="limit"/> past rows are found or the table is exhausted.
+    /// </summary>
+    public async Task<MeetupPage> ListPastByGroupAsync(Guid groupId, DateTimeOffset now, MeetupPageCursor? before, int limit, CancellationToken cancellationToken = default)
     {
-        throw new NotSupportedException("Replaced in T018.");
+        var items = new List<Meetup>(limit);
+        var cursor = before;
+        while (true)
+        {
+            var query = _client
+                .From<MeetupRecord>()
+                .Filter("group_id", Operator.Equals, groupId.ToString())
+                .Filter("scheduled_at", Operator.LessThanOrEqual, now.UtcDateTime.ToString("o"));
+
+            if (cursor is { } position)
+            {
+                var at = position.ScheduledAt.UtcDateTime.ToString("o");
+                query = query.Or(new List<IPostgrestQueryFilter>
+                {
+                    new QueryFilter("scheduled_at", Operator.LessThan, at),
+                    new QueryFilter(Operator.And, new List<IPostgrestQueryFilter>
+                    {
+                        new QueryFilter("scheduled_at", Operator.Equals, at),
+                        new QueryFilter("id", Operator.LessThan, position.Id.ToString())
+                    })
+                });
+            }
+
+            var response = await query
+                .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Descending)
+                .Order("id", global::Supabase.Postgrest.Constants.Ordering.Descending)
+                .Limit(limit)
+                .Get();
+
+            var batch = response.Models.Select(Map).ToList();
+            foreach (var meetup in batch)
+            {
+                cursor = new MeetupPageCursor(meetup.ScheduledAt, meetup.Id);
+                if (MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now))
+                {
+                    items.Add(meetup);
+                    if (items.Count == limit)
+                    {
+                        return new MeetupPage(items, cursor);
+                    }
+                }
+            }
+
+            if (batch.Count < limit)
+            {
+                return new MeetupPage(items, null);
+            }
+        }
     }
 
     public async Task<Meetup> AddAsync(Meetup meetup, CancellationToken cancellationToken = default)

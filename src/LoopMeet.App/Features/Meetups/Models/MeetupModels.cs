@@ -44,6 +44,13 @@ public sealed class MeetupsResponse
     public List<MeetupSummary> Meetups { get; set; } = new();
 }
 
+/// <summary>One newest-first page of past meetups; keep paging until NextCursor is null.</summary>
+public sealed class PastMeetupsResponse
+{
+    public List<MeetupSummary> Meetups { get; set; } = new();
+    public string? NextCursor { get; set; }
+}
+
 public sealed class UpcomingMeetupsResponse
 {
     public List<MeetupSummary> Meetups { get; set; } = new();

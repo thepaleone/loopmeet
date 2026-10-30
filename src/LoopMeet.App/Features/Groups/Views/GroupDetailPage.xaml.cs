@@ -24,6 +24,7 @@ public partial class GroupDetailPage : ContentPage, IQueryAttributable
             && Guid.TryParse(groupIdValue?.ToString(), out var groupId))
         {
             viewModel.GroupId = groupId;
+            viewModel.ResetListMode();
         }
     }
 
@@ -34,6 +35,21 @@ public partial class GroupDetailPage : ContentPage, IQueryAttributable
         if (BindingContext is GroupDetailViewModel viewModel)
         {
             viewModel.LoadCommand.Execute(null);
+        }
+    }
+
+    /// <summary>Loads the next page of past meetups as the user nears the bottom.</summary>
+    private void OnContentScrolled(object? sender, ScrolledEventArgs e)
+    {
+        if (BindingContext is not GroupDetailViewModel { IsPastSelected: true, HasLoadMoreError: false } viewModel)
+        {
+            return;
+        }
+
+        var distanceFromBottom = ContentScroll.ContentSize.Height - ContentScroll.Height - e.ScrollY;
+        if (distanceFromBottom <= 300 && viewModel.LoadMorePastMeetupsCommand.CanExecute(null))
+        {
+            viewModel.LoadMorePastMeetupsCommand.Execute(null);
         }
     }
 }

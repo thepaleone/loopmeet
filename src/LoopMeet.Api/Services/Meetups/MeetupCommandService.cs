@@ -82,6 +82,7 @@ public sealed class MeetupCommandService
         var created = await _meetupRepository.AddAsync(meetup, cancellationToken);
 
         await _cacheService.RemoveAsync($"meetups:{groupId}");
+        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
         _logger.LogInformation("Created meetup {MeetupId} for group {GroupId} by {UserId}", created.Id, groupId, userId);
 
         return new MeetupCommandResult(MeetupCommandStatus.Success, MapResponse(created));
@@ -141,6 +142,7 @@ public sealed class MeetupCommandService
         await _meetupRepository.UpdateAsync(existing, cancellationToken);
 
         await _cacheService.RemoveAsync($"meetups:{groupId}");
+        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
         _logger.LogInformation("Updated meetup {MeetupId} in group {GroupId}", meetupId, groupId);
 
         return new MeetupCommandResult(MeetupCommandStatus.Success, MapResponse(existing));
@@ -161,6 +163,7 @@ public sealed class MeetupCommandService
         await _meetupRepository.DeleteAsync(meetupId, cancellationToken);
 
         await _cacheService.RemoveAsync($"meetups:{groupId}");
+        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
         _logger.LogInformation("Deleted meetup {MeetupId} from group {GroupId}", meetupId, groupId);
 
         return new MeetupCommandResult(MeetupCommandStatus.Success, null);
