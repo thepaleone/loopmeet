@@ -43,7 +43,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     private bool _hasMeetups;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUpcomingSelected), nameof(IsPastSelected), nameof(ShowUpcomingEmpty), nameof(ShowPastEmpty), nameof(ShowLoadMoreError))]
+    [NotifyPropertyChangedFor(nameof(IsUpcomingSelected), nameof(IsPastSelected), nameof(SelectedListLabel), nameof(ShowUpcomingEmpty), nameof(ShowPastEmpty), nameof(ShowLoadMoreError))]
     private MeetupListMode _listMode = MeetupListMode.Upcoming;
 
     [ObservableProperty]
@@ -62,6 +62,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
 
     public bool IsUpcomingSelected => ListMode == MeetupListMode.Upcoming;
     public bool IsPastSelected => ListMode == MeetupListMode.Past;
+    public string SelectedListLabel => IsPastSelected ? "Past Meetups" : "Upcoming Meetups";
     public bool ShowUpcomingEmpty => IsUpcomingSelected && _upcomingLoaded && !HasMeetups;
     public bool ShowPastEmpty => IsPastSelected && _pastLoaded && !HasPastMeetups && !HasLoadMoreError;
     public bool ShowLoadMoreError => IsPastSelected && HasLoadMoreError;

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using LoopMeet.App.Features.Groups.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,10 @@ public partial class GroupDetailPage : ContentPage, IQueryAttributable
 
         var services = Application.Current?.Handler?.MauiContext?.Services;
         BindingContext = services?.GetService<GroupDetailViewModel>();
+        if (BindingContext is GroupDetailViewModel viewModel)
+        {
+            viewModel.PropertyChanged += OnViewModelPropertyChanged;
+        }
     }
 
     public void ApplyQueryAttributes(IDictionary<string, object> query)
@@ -50,6 +55,39 @@ public partial class GroupDetailPage : ContentPage, IQueryAttributable
         if (distanceFromBottom <= 300 && viewModel.LoadMorePastMeetupsCommand.CanExecute(null))
         {
             viewModel.LoadMorePastMeetupsCommand.Execute(null);
+        }
+    }
+
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(GroupDetailViewModel.IsPastSelected))
+        {
+            MoveMeetupListSwitchThumb(animate: true);
+        }
+    }
+
+    private void OnMeetupListSwitchSizeChanged(object? sender, EventArgs e) =>
+        MoveMeetupListSwitchThumb(animate: false);
+
+    /// <summary>Sizes the thumb to half the track and slides it under the selected label.</summary>
+    private void MoveMeetupListSwitchThumb(bool animate)
+    {
+        var half = MeetupListSwitchTrack.Width / 2;
+        if (half <= 0 || BindingContext is not GroupDetailViewModel viewModel)
+        {
+            return;
+        }
+
+        MeetupListSwitchThumb.WidthRequest = half;
+        var target = viewModel.IsPastSelected ? half : 0;
+        if (animate)
+        {
+            MeetupListSwitchThumb.CancelAnimations();
+            _ = MeetupListSwitchThumb.TranslateToAsync(target, 0, 180, Easing.CubicInOut);
+        }
+        else
+        {
+            MeetupListSwitchThumb.TranslationX = target;
         }
     }
 }

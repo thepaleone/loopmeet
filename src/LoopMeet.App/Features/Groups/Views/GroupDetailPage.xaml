@@ -8,13 +8,12 @@
     Title="{Binding GroupName}">
 
     <ContentPage.Resources>
-        <!-- Resting look of the list toggle; the selected look comes from DataTriggers. -->
-        <Style x:Key="MeetupListTabStyle" TargetType="Button">
-            <Setter Property="BackgroundColor" Value="Transparent" />
-            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+        <!-- Unselected switch labels; the selected label is drawn on the sliding thumb. -->
+        <Style x:Key="MeetupListSwitchOptionStyle" TargetType="Label">
             <Setter Property="FontSize" Value="14" />
-            <Setter Property="CornerRadius" Value="14" />
-            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
         </Style>
 
         <Style x:Key="MeetupListEmptyStyle" TargetType="Label">
@@ -150,43 +149,57 @@
                         </BindableLayout.ItemTemplate>
                     </FlexLayout>
 
-                    <!-- Meetups: Upcoming / Past toggle (always visible) -->
+                    <!-- Meetups: Upcoming / Past switch (always visible). The thumb slides
+                         between halves from code-behind; no triggers change colors. -->
                     <Border
+                        HeightRequest="44"
                         Padding="4"
                         Margin="0,8,0,4"
                         StrokeThickness="0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
                         <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="18" />
+                            <RoundRectangle CornerRadius="22" />
                         </Border.StrokeShape>
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
-                            <Button
+                        <Grid x:Name="MeetupListSwitchTrack" ColumnDefinitions="*,*" SizeChanged="OnMeetupListSwitchSizeChanged">
+                            <Label
                                 Text="Upcoming Meetups"
-                                Style="{StaticResource MeetupListTabStyle}"
-                                Command="{Binding SelectMeetupListCommand}"
-                                CommandParameter="{x:Static vm:MeetupListMode.Upcoming}">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding IsUpcomingSelected}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                        <Setter Property="TextColor" Value="{StaticResource White}" />
-                                        <Setter Property="FontAttributes" Value="Bold" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
-                            <Button
+                                Style="{StaticResource MeetupListSwitchOptionStyle}"
+                                SemanticProperties.Description="Show upcoming meetups">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding SelectMeetupListCommand}"
+                                        CommandParameter="{x:Static vm:MeetupListMode.Upcoming}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <Label
                                 Grid.Column="1"
                                 Text="Past Meetups"
-                                Style="{StaticResource MeetupListTabStyle}"
-                                Command="{Binding SelectMeetupListCommand}"
-                                CommandParameter="{x:Static vm:MeetupListMode.Past}">
-                                <Button.Triggers>
-                                    <DataTrigger TargetType="Button" Binding="{Binding IsPastSelected}" Value="True">
-                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                        <Setter Property="TextColor" Value="{StaticResource White}" />
-                                        <Setter Property="FontAttributes" Value="Bold" />
-                                    </DataTrigger>
-                                </Button.Triggers>
-                            </Button>
+                                Style="{StaticResource MeetupListSwitchOptionStyle}"
+                                SemanticProperties.Description="Show past meetups">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding SelectMeetupListCommand}"
+                                        CommandParameter="{x:Static vm:MeetupListMode.Past}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <Border
+                                x:Name="MeetupListSwitchThumb"
+                                Grid.ColumnSpan="2"
+                                HorizontalOptions="Start"
+                                InputTransparent="True"
+                                StrokeThickness="0"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="18" />
+                                </Border.StrokeShape>
+                                <Label
+                                    Text="{Binding SelectedListLabel}"
+                                    TextColor="{StaticResource White}"
+                                    FontAttributes="Bold"
+                                    FontSize="14"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
                         </Grid>
                     </Border>
 

@@ -24,6 +24,23 @@ public sealed class GroupDetailPastMeetupsSurfaceTests
     }
 
     [Fact]
+    public void Toggle_IsASlidingSwitchWithNoTriggerDrivenColors()
+    {
+        var page = ReadSource(Page);
+        var codeBehind = ReadSource(CodeBehind);
+        var viewModel = ReadSource(ViewModel);
+
+        // Regression: DataTrigger setters holding AppThemeBinding values were not
+        // reverted, leaving both toggle options looking selected.
+        Assert.DoesNotContain("<DataTrigger", page, StringComparison.Ordinal);
+        Assert.Contains("x:Name=\"MeetupListSwitchThumb\"", page, StringComparison.Ordinal);
+        Assert.Contains("Text=\"{Binding SelectedListLabel}\"", page, StringComparison.Ordinal);
+        Assert.Contains("MeetupListSwitchThumb.TranslateToAsync(", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("nameof(GroupDetailViewModel.IsPastSelected)", codeBehind, StringComparison.Ordinal);
+        Assert.Contains("SelectedListLabel => IsPastSelected ? \"Past Meetups\" : \"Upcoming Meetups\"", viewModel, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Page_ShowsBothListsThroughOneSharedCardTemplate()
     {
         var source = ReadSource(Page);
