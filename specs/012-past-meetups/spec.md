@@ -42,7 +42,7 @@ A group owner notices that a past meetup recorded the wrong venue (for example, 
 2. **Given** the owner edits a past meetup's location, title, or other details without changing its date/time, **When** they save, **Then** the save succeeds even though the meetup's time has passed.
 3. **Given** the owner changes a past meetup's date/time to another time that is also past, **When** they save, **Then** the save succeeds and the meetup stays in the past list, positioned by its new date.
 4. **Given** a meetup was past before an edit and is still past after it, **When** the edit is saved, **Then** no group member receives a push notification for that edit.
-5. **Given** the owner deletes or cancels a past meetup, **When** the action completes, **Then** the meetup is removed from (or shown as canceled in) the past list and no group member receives a push notification.
+5. **Given** the owner deletes a past meetup, **When** the action completes, **Then** the meetup is removed from the past list and no group member receives a push notification.
 
 ---
 
@@ -88,7 +88,6 @@ A member opens the app during or shortly after a meetup that started earlier the
 - **Past → future → past**: A meetup moved into the future and later moved back into the past follows the rules for each individual edit (notify on the first, not on the second). No reminders are ever sent for a day that has already ended.
 - **Paging while data changes**: If a meetup is added, edited, or deleted between page loads, the list must not show the same meetup twice; a refresh resets the list to the first page.
 - **Paging failure**: If loading a further page fails, the already-loaded meetups stay visible and the member can retry loading more.
-- **Canceled past meetups**: Canceled meetups are shown or hidden in the past list the same way canceled meetups are treated in the upcoming list today.
 - **Non-owner member opens a past meetup**: They can view it but are not offered edit or delete, matching current permissions.
 - **Group with a long history** (hundreds of meetups): The first page appears as quickly as the upcoming list does; older meetups load progressively.
 
@@ -131,24 +130,25 @@ A member opens the app during or shortly after a meetup that started earlier the
 - **FR-019**: Saving a past meetup with a future date/time MUST succeed and make it upcoming again.
 - **FR-020**: For an upcoming meetup, the "time must be in the future" rule MUST apply only when the date/time is being changed; saving an upcoming meetup whose time has already started today without changing its date/time MUST succeed.
 - **FR-021**: The edit rules MUST be enforced identically in the app and on the server, so the app never offers a save the server rejects and vice versa.
-- **FR-022**: Deleting or canceling a past meetup MUST be allowed for the group owner.
+- **FR-021a**: An edit that doesn't change a meetup's date/time MUST NOT change the timezone it's classified in. Otherwise a title or location edit could move it between lists, or change whether it notifies, without its time changing.
+- **FR-022**: Deleting a past meetup MUST be allowed for the group owner.
 
 #### Push notifications
 
 - **FR-023**: Editing a meetup that is past both before and after the edit MUST NOT send any push notification to group members.
 - **FR-024**: Editing a meetup that was past before the edit and is upcoming after it MUST send the same "meetup updated" notification as any upcoming-meetup edit.
-- **FR-025**: Deleting or canceling a meetup that was already past MUST NOT send any push notification.
-- **FR-026**: Creating, editing, canceling, and deleting upcoming meetups MUST notify exactly as they do today.
+- **FR-025**: Deleting a meetup that was already past MUST NOT send any push notification.
+- **FR-026**: Creating, editing and deleting upcoming meetups MUST notify exactly as they do today.
 - **FR-027**: Same-day meetup reminders MUST NEVER be sent for a meetup whose day has already ended, including meetups that were moved between past and future.
 - **FR-028**: Notification suppression decisions MUST be recorded in the existing structured logs (meetup, event type, reason suppressed) so a missing alert can be explained.
 
 #### Quality
 
-- **FR-029**: Regression tests MUST cover both sides of the end-of-day cutoff for: list classification, edit validation, and notification decisions (past→past edit, past→future edit, past delete/cancel, upcoming edit).
+- **FR-029**: Regression tests MUST cover both sides of the end-of-day cutoff for: list classification, edit validation, and notification decisions (past→past edit, past→future edit, past delete, upcoming edit).
 
 ### Key Entities
 
-- **Meetup** (existing, unchanged): a group's planned get-together with a title, scheduled date/time, optional location, optional timezone, status (e.g. canceled), and the group it belongs to. "Upcoming" and "past" are derived from the scheduled date/time and timezone at read time; they are not stored.
+- **Meetup** (existing, unchanged): a group's planned get-together with a title, scheduled date/time, optional location, optional timezone, and the group it belongs to. "Upcoming" and "past" are derived from the scheduled date/time and timezone at read time; they are not stored.
 - **Meetup list page** (new, derived): one slice of a group's past meetups in most-recent-first order, plus an indication of whether older meetups remain.
 
 ## Success Criteria *(mandatory)*
@@ -157,16 +157,17 @@ A member opens the app during or shortly after a meetup that started earlier the
 
 - **SC-001**: A member can go from opening a group to viewing the detail of any past meetup within that group in under 30 seconds for groups with up to 100 past meetups.
 - **SC-002**: The first page of past meetups appears within the same time as the upcoming list does today (target: under 2 seconds on a typical mobile connection).
-- **SC-003**: In test scenarios covering every edit/delete/cancel case, 0 notifications are delivered for changes to meetups that stay past, and 100% of the expected notifications are delivered for meetups moved into the future and for upcoming meetups.
+- **SC-003**: In test scenarios covering every edit and delete case, 0 notifications are delivered for changes to meetups that stay past, and 100% of the expected notifications are delivered for meetups moved into the future and for upcoming meetups.
 - **SC-004**: For every meetup tested at and around the end-of-day cutoff, it appears in exactly one of the two lists (never both, never neither), and the Home tab agrees with Group Detail.
 - **SC-005**: A group owner can correct a past meetup's location and save it on the first attempt, with no validation error, in 100% of manual test runs.
 
 ## Assumptions
 
 - **Timezone fallback**: When a meetup has no timezone, classification uses the same app-wide default timezone the reminder scheduler already falls back to (America/Los_Angeles). The per-recipient profile timezone is not used for classification because the lists are shared by all members and must agree.
-- **Canceled meetups** are treated the same way in the past list as they are in the upcoming list today; this feature does not change how canceled meetups are displayed.
-- **Hard deletes** already send no notification today; FR-025 confirms that behavior and adds the same rule for canceling a past meetup.
+- **Cancel is not a feature**: meetups have no canceled state today (the only way to remove one is delete). If a cancel state is added later, canceling a past meetup must also send no push (the push check already runs before any cancel handling).
+- **Timezone on edit**: today every edit overwrites the meetup's timezone with the editor's device timezone. After this feature, the timezone is only updated when the date/time is changed (FR-021a).
+- **Hard deletes** already send no notification today; FR-025 confirms that behavior.
 - **No data changes**: no new stored fields are expected. If the timezone-aware cutoff or paging needs a supporting database index or function to perform well, planning must call that out explicitly.
 - **Permissions** are unchanged: viewing past meetups follows existing group membership rules; editing and deleting stay group-owner-only in the app (database-level rules are intentionally unchanged, per feature 006).
-- **Out of scope**: attendance history, photos or notes on past meetups, searching or filtering past meetups, and a past-meetups view on the Home tab.
+- **Out of scope**: canceling meetups, attendance history, photos or notes on past meetups, searching or filtering past meetups, and a past-meetups view on the Home tab.
 - **Device verification**: because notification delivery is native behavior, a manual device check (edit/delete a past meetup → no push; move a past meetup into the future → push) is part of acceptance, alongside automated tests.

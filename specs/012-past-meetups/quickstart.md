@@ -46,6 +46,7 @@ Mark each row ✅/❌ for iOS and Android.
 | 13 | A edits "Started" → change the time to 30 minutes ago → save | Rejected with "Scheduled time must be in the future." | | |
 | 14 | After LA midnight (or by changing "Started"'s `scheduled_at` to yesterday in SQL), refresh both lists | "Started" is only in **Past**, and no longer on B's Home tab | | |
 | 15 | New group with no meetups. Open it and tap both toggle options | Toggle stays visible. Each option shows its own empty message | | |
+| 16 | On a normal mobile connection, B opens "012 QA", taps **Past Meetups**, and times it until the first card shows; then scrolls until Past #45 is visible and opens it | First page under 2 s (SC-002); reaching Past #45 and opening it under 30 s total (SC-001). Write the times in the row | | |
 
 ## Log check (push suppression)
 

@@ -20,7 +20,7 @@ The edit fix compares the requested `ScheduledAt` with the stored value: the fut
 ## Technical Context
 
 **Language/Version**: C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). No database schema changes.
-**Primary Dependencies**: Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client), `System.TimeProvider` (BCL). Deno std `@std/assert` for edge-function tests. No new NuGet packages.
+**Primary Dependencies**: Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client), `System.TimeProvider` (BCL). `jsr:@std/assert@1` (imported directly, no import map) for edge-function tests. No new NuGet packages.
 **Storage**: Existing Supabase `meetups` table, columns, indexes and RLS unchanged. "Past" is derived at read time.
 **Testing**: xUnit:
 
@@ -126,8 +126,7 @@ supabase/functions/
 ├── _shared/meetup-lifecycle.test.ts           # NEW
 ├── notifications-dispatch/webhook-router.ts   # MODIFIED: + resolveSuppression
 ├── notifications-dispatch/webhook-router.test.ts  # NEW
-├── notifications-dispatch/index.ts            # MODIFIED: suppression check + structured log
-└── notifications-dispatch/deno.json           # MODIFIED: + @std/assert import
+└── notifications-dispatch/index.ts            # MODIFIED: suppression check + structured log
 
 src/LoopMeet.App/
 ├── Services/MeetupsApi.cs                     # MODIFIED: + GetPastMeetupsAsync, GetMeetupAsync
@@ -136,6 +135,7 @@ src/LoopMeet.App/
 │   ├── MeetupDetailViewModel.cs               # MODIFIED: load by id; 404 → not-found
 │   └── EditMeetupViewModel.cs                 # MODIFIED: load by id; changed-time rule;
 │                                              #   send ScheduledAt/Timezone only if changed
+├── Features/Groups/ViewModels/MeetupListMode.cs        # NEW: Upcoming | Past (top-level enum for XAML x:Static)
 ├── Features/Groups/ViewModels/GroupDetailViewModel.cs  # MODIFIED: list mode, PastMeetups,
 │                                              #   paging, refresh, delete from either list
 └── Features/Groups/Views/
