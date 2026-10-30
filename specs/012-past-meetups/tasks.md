@@ -258,14 +258,14 @@ The behavior is produced by US2's rule (T032) and suppression predicate (T033). 
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T043 From the repo root, run all quality gates (Constitution: tests **and** static analysis/linting) and record the results in Notes against the T001 baseline:
+- [X] T043 From the repo root, run all quality gates (Constitution: tests **and** static analysis/linting) and record the results in Notes against the T001 baseline:
   - `dotnet build LoopMeet.slnx -c Debug -p:SkipMaciOSTargets=true`: no warnings beyond the T001 baseline count
   - `dotnet test LoopMeet.slnx -c Debug -p:SkipMaciOSTargets=true`: green
   - `deno lint supabase/functions/`: clean
   - `deno fmt --check` on **new** files only (`_shared/meetup-lifecycle.ts`, `_shared/meetup-lifecycle.test.ts`, `notifications-dispatch/webhook-router.test.ts`). Existing files such as `webhook-router.ts` and `index.ts` already fail `fmt` on `main`, and reformatting them is out of scope.
   - `deno test supabase/functions/`: green
-- [ ] T044 [P] Search the changed files for leftover `NotSupportedException` stubs, `TODO`, commented-out code, and stray `DateTimeOffset.UtcNow` in the meetup query/command/repository paths (`grep -rn "UtcNow\|TODO\|NotSupportedException" src/LoopMeet.Api/Services/Meetups src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs`). Expect no matches. T011 moves every meetup service call, `CreateAsync` included, onto the injected `TimeProvider`.
-- [ ] T045 [P] Add a "Known gotchas" bullet to `CLAUDE.md`: the meetup past/upcoming rule lives in both `LoopMeet.Core/Meetups/MeetupLifecycle.cs` and `supabase/functions/_shared/meetup-lifecycle.ts`; change both together and extend `meetup-lifecycle.cases.json`, which both test suites read.
+- [X] T044 [P] Search the changed files for leftover `NotSupportedException` stubs, `TODO`, commented-out code, and stray `DateTimeOffset.UtcNow` in the meetup query/command/repository paths (`grep -rn "UtcNow\|TODO\|NotSupportedException" src/LoopMeet.Api/Services/Meetups src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs`). Expect no matches. T011 moves every meetup service call, `CreateAsync` included, onto the injected `TimeProvider`.
+- [X] T045 [P] Add a "Known gotchas" bullet to `CLAUDE.md`: the meetup past/upcoming rule lives in both `LoopMeet.Core/Meetups/MeetupLifecycle.cs` and `supabase/functions/_shared/meetup-lifecycle.ts`; change both together and extend `meetup-lifecycle.cases.json`, which both test suites read.
 - [ ] T046 Deploy to staging: the Api (staging tag workflow), `supabase functions deploy notifications-dispatch`, and an Android build via `deploy/deploy-android.sh -c Debug`. Plus an iOS build. Then run the full [quickstart.md](./quickstart.md) matrix on one iOS and one Android device and record ✅/❌ per row and the row 16 timings in Notes. Any ❌ blocks the PR.
 - [ ] T047 Open the PR from `012-past-meetups` to `main`. The description lists the deploy order (Api → `notifications-dispatch` → app), the Home-tab behavior change for release notes, and the new CI Deno step. Mark this task complete with the PR number.
 
@@ -340,3 +340,10 @@ Do Phase 1, Phase 2, US1, then **US4**. US4 is P3, but it's tiny (3 tasks), and 
 
 - **T001 baseline (2026-10-30)**: `dotnet build` 8 warnings, 0 errors. `dotnet test` 159 passing, 0 failing (App 110, Core 5, Infrastructure 1, Api 43).
 - **T002 baseline (2026-10-30)**: Deno 2.9.7. `notifications-dispatch` type-checks cleanly. `reminders-scheduler` already fails on `main` with one TS2352 (`as MeetupRow[]` cast at `index.ts:114`). Pre-existing, and this feature doesn't change that file.
+- **T043 gates (2026-10-30)**:
+  - `dotnet build`: 8 warnings (= baseline), 0 errors
+  - `dotnet test`: 217 passing, 0 failing (App 118, Core 29, Infrastructure 1, Api 69)
+  - `deno lint supabase/functions/`: clean (16 files)
+  - `deno fmt --check` on new files: clean
+  - `deno test supabase/functions/`: 34 passing
+- **T044 sweep**: no `DateTimeOffset.UtcNow`, `TODO` or `NotSupportedException` left in the meetup services, repository or Core rule; the only matches are the injected `TimeProvider.GetUtcNow()`.

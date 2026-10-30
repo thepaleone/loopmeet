@@ -68,6 +68,7 @@ Api's `Supabase.Client` is constructed per-request, scoped, and impersonates the
 ## Known gotchas
 
 - `006-group-meetups`: meetup RLS at the DB layer intentionally allows all group members to CRUD, while the UI restricts mutation to owners (per FR-010). This is deliberate — don't "fix" the RLS to match the UI.
+- `012-past-meetups`: the "is this meetup past?" rule (past once its local calendar day has ended, timezone fallback `America/Los_Angeles`) exists twice — `src/LoopMeet.Core/Meetups/MeetupLifecycle.cs` (lists, edit validation) and `supabase/functions/_shared/meetup-lifecycle.ts` (push suppression). Change both together and extend `supabase/functions/_shared/meetup-lifecycle.cases.json`, which both test suites read. Edge-function tests import `jsr:` specifiers directly: `deno test` run from the repo root ignores the per-function `deno.json` import maps.
 - `IdentityModelEventSource.ShowPII = true` is left on unconditionally in the Api — this is a latent PII-leak risk in logs, not an intentional decision; worth turning off outside local dev if you're touching that code.
 - AGENTS.md and OPENCODE.md are separate generated snapshots of this same file and have drifted (AGENTS.md stops at 008 and still lists the stale EF Core stack). Treat CLAUDE.md + `.specify/memory/constitution.md` as the sources of truth; don't trust AGENTS.md's tech list.
 
