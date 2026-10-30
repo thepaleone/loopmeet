@@ -1,4 +1,5 @@
 using LoopMeet.Core.Interfaces;
+using LoopMeet.Core.Meetups;
 using LoopMeet.Core.Models;
 using LoopMeet.Infrastructure.Supabase.Models;
 using Supabase;
@@ -26,13 +27,12 @@ public sealed class MeetupRepository : IMeetupRepository
         return record is null ? null : Map(record);
     }
 
-    public async Task<IReadOnlyList<Meetup>> ListUpcomingByGroupAsync(Guid groupId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Meetup>> ListUpcomingByGroupAsync(Guid groupId, DateTimeOffset now, CancellationToken cancellationToken = default)
     {
-        var now = DateTimeOffset.UtcNow.ToString("o");
         var response = await _client
             .From<MeetupRecord>()
             .Filter("group_id", Operator.Equals, groupId.ToString())
-            .Filter("scheduled_at", Operator.GreaterThan, now)
+            .Filter("scheduled_at", Operator.GreaterThan, now.ToString("o"))
             .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
 
@@ -41,7 +41,7 @@ public sealed class MeetupRepository : IMeetupRepository
             .ToList();
     }
 
-    public async Task<IReadOnlyList<Meetup>> ListUpcomingByUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Meetup>> ListUpcomingByUserAsync(Guid userId, DateTimeOffset now, CancellationToken cancellationToken = default)
     {
         var membershipResponse = await _client
             .From<MembershipRecord>()
@@ -58,17 +58,21 @@ public sealed class MeetupRepository : IMeetupRepository
             return Array.Empty<Meetup>();
         }
 
-        var now = DateTimeOffset.UtcNow.ToString("o");
         var response = await _client
             .From<MeetupRecord>()
             .Filter("group_id", Operator.In, groupIds.Select(id => id.ToString()).ToList())
-            .Filter("scheduled_at", Operator.GreaterThan, now)
+            .Filter("scheduled_at", Operator.GreaterThan, now.ToString("o"))
             .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
 
         return response.Models
             .Select(Map)
             .ToList();
+    }
+
+    public Task<MeetupPage> ListPastByGroupAsync(Guid groupId, DateTimeOffset now, MeetupPageCursor? before, int limit, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException("Replaced in T018.");
     }
 
     public async Task<Meetup> AddAsync(Meetup meetup, CancellationToken cancellationToken = default)

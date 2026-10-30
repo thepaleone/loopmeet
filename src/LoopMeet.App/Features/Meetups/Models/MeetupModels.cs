@@ -19,6 +19,9 @@ public sealed class MeetupSummary
     /// <summary>Owner of this meetup's group — the sole input to edit gating.</summary>
     public Guid GroupOwnerUserId { get; set; }
 
+    /// <summary>Server-derived: the meetup's local day has ended.</summary>
+    public bool IsPast { get; set; }
+
     public bool HasLocation => !string.IsNullOrWhiteSpace(PlaceName);
 
     /// <summary>

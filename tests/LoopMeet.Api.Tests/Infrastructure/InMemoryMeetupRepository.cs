@@ -1,4 +1,5 @@
 using LoopMeet.Core.Interfaces;
+using LoopMeet.Core.Meetups;
 using LoopMeet.Core.Models;
 
 namespace LoopMeet.Api.Tests.Infrastructure;
@@ -20,19 +21,19 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
         }
     }
 
-    public Task<IReadOnlyList<Meetup>> ListUpcomingByGroupAsync(Guid groupId, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<Meetup>> ListUpcomingByGroupAsync(Guid groupId, DateTimeOffset now, CancellationToken cancellationToken = default)
     {
         lock (_store.SyncRoot)
         {
             var results = _store.Meetups
-                .Where(meetup => meetup.GroupId == groupId && meetup.ScheduledAt > DateTimeOffset.UtcNow)
+                .Where(meetup => meetup.GroupId == groupId && meetup.ScheduledAt > now)
                 .OrderBy(meetup => meetup.ScheduledAt)
                 .ToList();
             return Task.FromResult<IReadOnlyList<Meetup>>(results);
         }
     }
 
-    public Task<IReadOnlyList<Meetup>> ListUpcomingByUserAsync(Guid userId, CancellationToken cancellationToken = default)
+    public Task<IReadOnlyList<Meetup>> ListUpcomingByUserAsync(Guid userId, DateTimeOffset now, CancellationToken cancellationToken = default)
     {
         lock (_store.SyncRoot)
         {
@@ -43,12 +44,17 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
                 .ToHashSet();
 
             var results = _store.Meetups
-                .Where(meetup => memberGroupIds.Contains(meetup.GroupId) && meetup.ScheduledAt > DateTimeOffset.UtcNow)
+                .Where(meetup => memberGroupIds.Contains(meetup.GroupId) && meetup.ScheduledAt > now)
                 .OrderBy(meetup => meetup.ScheduledAt)
                 .ToList();
 
             return Task.FromResult<IReadOnlyList<Meetup>>(results);
         }
+    }
+
+    public Task<MeetupPage> ListPastByGroupAsync(Guid groupId, DateTimeOffset now, MeetupPageCursor? before, int limit, CancellationToken cancellationToken = default)
+    {
+        throw new NotSupportedException("Replaced in T019.");
     }
 
     public Task<Meetup> AddAsync(Meetup meetup, CancellationToken cancellationToken = default)

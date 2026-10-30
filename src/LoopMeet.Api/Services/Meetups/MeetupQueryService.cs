@@ -1,6 +1,7 @@
 using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
+using LoopMeet.Core.Meetups;
 using LoopMeet.Core.Models;
 
 namespace LoopMeet.Api.Services.Meetups;
@@ -13,6 +14,7 @@ public sealed class MeetupQueryService
     private readonly IMembershipRepository _membershipRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICacheService _cacheService;
+    private readonly TimeProvider _timeProvider;
     private readonly ILogger<MeetupQueryService> _logger;
 
     public MeetupQueryService(
@@ -21,6 +23,7 @@ public sealed class MeetupQueryService
         IMembershipRepository membershipRepository,
         IUserRepository userRepository,
         ICacheService cacheService,
+        TimeProvider timeProvider,
         ILogger<MeetupQueryService> logger)
     {
         _meetupRepository = meetupRepository;
@@ -28,6 +31,7 @@ public sealed class MeetupQueryService
         _membershipRepository = membershipRepository;
         _userRepository = userRepository;
         _cacheService = cacheService;
+        _timeProvider = timeProvider;
         _logger = logger;
     }
 
@@ -37,8 +41,9 @@ public sealed class MeetupQueryService
         _logger.LogInformation("Loading meetups for group {GroupId}", groupId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
-            var meetups = await _meetupRepository.ListUpcomingByGroupAsync(groupId, cancellationToken);
-            var items = await ProjectAsync(meetups, cancellationToken);
+            var now = _timeProvider.GetUtcNow();
+            var meetups = await _meetupRepository.ListUpcomingByGroupAsync(groupId, now, cancellationToken);
+            var items = await ProjectAsync(meetups, now, cancellationToken);
 
             _logger.LogInformation(
                 "Loaded meetups for group {GroupId} count={Count} organizersResolved={Resolved} organizersUnresolved={Unresolved}",
@@ -56,8 +61,9 @@ public sealed class MeetupQueryService
         _logger.LogInformation("Loading upcoming meetups for user {UserId}", userId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
-            var meetups = await _meetupRepository.ListUpcomingByUserAsync(userId, cancellationToken);
-            var items = await ProjectAsync(meetups, cancellationToken);
+            var now = _timeProvider.GetUtcNow();
+            var meetups = await _meetupRepository.ListUpcomingByUserAsync(userId, now, cancellationToken);
+            var items = await ProjectAsync(meetups, now, cancellationToken);
 
             _logger.LogInformation(
                 "Loaded upcoming meetups for user {UserId} count={Count} organizersResolved={Resolved} organizersUnresolved={Unresolved}",
@@ -78,6 +84,7 @@ public sealed class MeetupQueryService
     /// </summary>
     private async Task<List<MeetupListItemResponse>> ProjectAsync(
         IReadOnlyList<Meetup> meetups,
+        DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         if (meetups.Count == 0)
@@ -130,7 +137,8 @@ public sealed class MeetupQueryService
                     CreatedByUserId = meetup.CreatedByUserId,
                     GroupName = group?.Name ?? string.Empty,
                     CreatedByDisplayName = organizerName,
-                    GroupOwnerUserId = group?.OwnerUserId ?? Guid.Empty
+                    GroupOwnerUserId = group?.OwnerUserId ?? Guid.Empty,
+                    IsPast = MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now)
                 };
             })
             .ToList();

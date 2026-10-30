@@ -20,15 +20,18 @@ public sealed class MeetupCommandService
 {
     private readonly IMeetupRepository _meetupRepository;
     private readonly ICacheService _cacheService;
+    private readonly TimeProvider _timeProvider;
     private readonly ILogger<MeetupCommandService> _logger;
 
     public MeetupCommandService(
         IMeetupRepository meetupRepository,
         ICacheService cacheService,
+        TimeProvider timeProvider,
         ILogger<MeetupCommandService> logger)
     {
         _meetupRepository = meetupRepository;
         _cacheService = cacheService;
+        _timeProvider = timeProvider;
         _logger = logger;
     }
 
@@ -45,7 +48,7 @@ public sealed class MeetupCommandService
             return new MeetupCommandResult(MeetupCommandStatus.InvalidTitle, null);
         }
 
-        if (request.ScheduledAt <= DateTimeOffset.UtcNow)
+        if (request.ScheduledAt <= _timeProvider.GetUtcNow())
         {
             _logger.LogWarning("Create meetup invalid schedule for group {GroupId} by {UserId}", groupId, userId);
             return new MeetupCommandResult(MeetupCommandStatus.InvalidSchedule, null);
@@ -58,7 +61,7 @@ public sealed class MeetupCommandService
         }
 
         _logger.LogInformation("Creating meetup for group {GroupId} by {UserId}", groupId, userId);
-        var now = DateTimeOffset.UtcNow;
+        var now = _timeProvider.GetUtcNow();
         var meetup = new Meetup
         {
             Id = Guid.NewGuid(),
@@ -110,7 +113,7 @@ public sealed class MeetupCommandService
 
         if (request.ScheduledAt is not null)
         {
-            if (request.ScheduledAt.Value <= DateTimeOffset.UtcNow)
+            if (request.ScheduledAt.Value <= _timeProvider.GetUtcNow())
             {
                 _logger.LogWarning("Update meetup invalid schedule {MeetupId} in group {GroupId}", meetupId, groupId);
                 return new MeetupCommandResult(MeetupCommandStatus.InvalidSchedule, null);
@@ -133,7 +136,7 @@ public sealed class MeetupCommandService
         {
             existing.Timezone = NormalizeTimezone(request.Timezone);
         }
-        existing.UpdatedAt = DateTimeOffset.UtcNow;
+        existing.UpdatedAt = _timeProvider.GetUtcNow();
 
         await _meetupRepository.UpdateAsync(existing, cancellationToken);
 

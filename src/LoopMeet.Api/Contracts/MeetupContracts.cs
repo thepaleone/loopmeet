@@ -75,6 +75,9 @@ public sealed class MeetupListItemResponse
 
     /// <summary>Owner of the meetup's group — the sole input to edit gating.</summary>
     public Guid GroupOwnerUserId { get; init; }
+
+    /// <summary>Derived at read time via MeetupLifecycle; may be up to 30 s stale on cached lists.</summary>
+    public bool IsPast { get; init; }
 }
 
 public sealed class UpcomingMeetupsResponse

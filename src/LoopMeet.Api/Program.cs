@@ -105,6 +105,7 @@ builder.Services.AddScoped<GroupQueryService>();
 builder.Services.AddScoped<GroupCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();
 builder.Services.AddScoped<InvitationCommandService>();
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MeetupQueryService>();
 builder.Services.AddScoped<MeetupCommandService>();
 
