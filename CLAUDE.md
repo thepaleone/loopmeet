@@ -13,6 +13,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-09
 - `Preferences.Default` — Gotrue session JSON under `loopmeet.auth.session` (via existing `MauiSessionPersistence`) becomes the *only* credential store; the legacy `loopmeet.auth.access_token` key is removed (with one-time cleanup). `UserProfileCache` (`loopmeet.profile.cache`) unchanged in shape, cleared on sign-out. (010-fix-auth-session)
 - C# 13 / .NET 10 (MAUI client + minimal-API backend). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client). No new packages. (011-meetup-interactions)
 - Existing Supabase tables, unchanged. `meetups.created_by_user_id` already exists; display name and group name are resolved at read time, never stored on the meetup. (011-meetup-interactions)
+- C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client), `System.TimeProvider` (BCL). Deno std `@std/assert` for edge-function tests. No new NuGet packages. (012-past-meetups)
+- Existing Supabase `meetups` table, columns, indexes and RLS unchanged. "Past" is derived at read time. (012-past-meetups)
 
 - C# 13 / .NET 10 + Microsoft.Maui.Controls 10.0.30, CommunityToolkit.Maui 14.0.0, CommunityToolkit.Mvvm 8.4.0 (004-ui-polish)
 
@@ -32,9 +34,9 @@ tests/
 C# 13 / .NET 10: Follow standard conventions
 
 ## Recent Changes
+- 012-past-meetups: Added C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client), `System.TimeProvider` (BCL). Deno std `@std/assert` for edge-function tests. No new NuGet packages.
 - 011-meetup-interactions: Added C# 13 / .NET 10 (MAUI client + minimal-API backend). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client). No new packages.
 - 010-fix-auth-session: Added C# 13 / .NET 10 (MAUI client). No backend or Supabase schema changes. + Microsoft.Maui.Controls 10.0.70, Supabase 1.1.1 (Supabase.Gotrue 6.0.3: `TokenRefresh`, `GotrueException.Reason`, `Client.RefreshToken()`, `AddStateChangedListener`), CommunityToolkit.Mvvm 8.4.0, Refit.HttpClientFactory 10.1.6, OneSignalSDK.DotNet 6.1.8.
-- 009-apple-signin: Added C# 13 / .NET 10 (MAUI client). No backend changes. + Microsoft.Maui.Controls 10.0.70, Supabase 1.1.1 + Supabase.Gotrue, AuthenticationServices framework (Microsoft.iOS / Microsoft.MacCatalyst — already part of those workloads, no new NuGet package).
 
 
 <!-- MANUAL ADDITIONS START -->
