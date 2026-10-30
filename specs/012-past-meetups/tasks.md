@@ -239,7 +239,7 @@ The behavior is produced by US2's rule (T032) and suppression predicate (T033). 
 
 ### Tests for User Story 4
 
-- [ ] T040 [P] [US4] Extend `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs` with cutoff tests (FR-008, FR-009, FR-029), using a meetup in `America/New_York` scheduled at 19:00 local:
+- [X] T040 [P] [US4] Extend `tests/LoopMeet.Api.Tests/Endpoints/MeetupHistoryEndpointsTests.cs` with cutoff tests (FR-008, FR-009, FR-029), using a meetup in `America/New_York` scheduled at 19:00 local:
   - With `factory.Clock` at 23:59 local the same day, it's in `/groups/{g}/meetups` and `/meetups/upcoming`, and not in `/past`.
   - With the clock at 00:01 local the next day, it's in `/past` only.
   - Repeat with `timezone = null` at Los Angeles midnight.
@@ -249,8 +249,8 @@ The behavior is produced by US2's rule (T032) and suppression predicate (T033). 
 
 ### Implementation for User Story 4
 
-- [ ] T041 [US4] In `src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs`, change both `ListUpcomingByGroupAsync` and `ListUpcomingByUserAsync` to filter `scheduled_at > (now - MeetupLifecycle.ClassificationBand)` (formatted `"o"`, as today) and then drop rows where `MeetupLifecycle.IsPast(record.ScheduledAt, record.Timezone, now)` after mapping. Keep the ascending order.
-- [ ] T042 [US4] Apply the same band + `IsPast` filtering to both upcoming methods in `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryMeetupRepository.cs`, then run T040 and the full Api test project to green. Update any existing assertion in `tests/LoopMeet.Api.Tests/Endpoints/MeetupsEndpointsTests.cs` that relied on a meetup vanishing the moment it starts (search for meetups seeded with `DateTimeOffset.UtcNow.AddMinutes(-` / `AddHours(-`). Seed such meetups on a previous local day instead, preserving each test's intent.
+- [X] T041 [US4] In `src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs`, change both `ListUpcomingByGroupAsync` and `ListUpcomingByUserAsync` to filter `scheduled_at > (now - MeetupLifecycle.ClassificationBand)` (formatted `"o"`, as today) and then drop rows where `MeetupLifecycle.IsPast(record.ScheduledAt, record.Timezone, now)` after mapping. Keep the ascending order.
+- [X] T042 [US4] Apply the same band + `IsPast` filtering to both upcoming methods in `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryMeetupRepository.cs`, then run T040 and the full Api test project to green. Update any existing assertion in `tests/LoopMeet.Api.Tests/Endpoints/MeetupsEndpointsTests.cs` that relied on a meetup vanishing the moment it starts (search for meetups seeded with `DateTimeOffset.UtcNow.AddMinutes(-` / `AddHours(-`). Seed such meetups on a previous local day instead, preserving each test's intent.
 
 **Checkpoint**: Quickstart rows 12–14 pass. The Home tab and Group Detail agree at the cutoff.
 

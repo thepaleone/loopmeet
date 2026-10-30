@@ -294,7 +294,84 @@ public sealed class MeetupHistoryEndpointsTests
         Assert.Contains(home!.Meetups, m => m.Id == id);
     }
 
+    // ── US4: a meetup stays upcoming until local midnight ─────────────────
+
+    [Theory]
+    [InlineData("America/New_York", "2026-10-30T19:00:00-04:00", "2026-10-30T23:59:00-04:00", "2026-10-31T00:01:00-04:00")]
+    [InlineData(null, "2026-10-30T19:00:00-07:00", "2026-10-30T23:59:00-07:00", "2026-10-31T00:01:00-07:00")]
+    public async Task Cutoff_MeetupIsInExactlyOneListOnEachSideOfLocalMidnight(
+        string? timezone, string scheduledAt, string beforeMidnight, string afterMidnight)
+    {
+        var scheduled = DateTimeOffset.Parse(scheduledAt);
+
+        // A fresh member and group per clock setting, so no 30 s cache spans both.
+        _factory.Clock.UtcNow = DateTimeOffset.Parse(beforeMidnight);
+        var (beforeClient, beforeGroup, beforeId) = SeedMemberWithMeetup(scheduled, timezone);
+        await AssertListedAsUpcomingAsync(beforeClient, beforeGroup, beforeId);
+
+        _factory.Clock.UtcNow = DateTimeOffset.Parse(afterMidnight);
+        var (afterClient, afterGroup, afterId) = SeedMemberWithMeetup(scheduled, timezone);
+        await AssertListedAsPastAsync(afterClient, afterGroup, afterId);
+    }
+
+    [Fact]
+    public async Task Patch_StartedTodayWithUnchangedTime_Succeeds()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var scheduledAt = Now.AddHours(-4);
+        var id = SeedMeetup(groupId, "Started this morning", scheduledAt);
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest { Title = "Renamed", ScheduledAt = scheduledAt });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Patch_StartedTodayMovedToAnEarlierTime_IsRejected()
+    {
+        var groupId = SeedGroupWithMembership(_ownerId);
+        var id = SeedMeetup(groupId, "Started this morning", Now.AddHours(-4));
+
+        var response = await PatchAsync(groupId, id, new UpdateMeetupRequest { ScheduledAt = Now.AddMinutes(-30) });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.Equal("invalid_meetup_schedule", error!.Code);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    private (HttpClient Client, Guid GroupId, Guid MeetupId) SeedMemberWithMeetup(DateTimeOffset scheduledAt, string? timezone)
+    {
+        var memberId = Guid.NewGuid();
+        SeedUser(memberId, "Mia Member");
+        var groupId = SeedGroupWithMembership(memberId);
+        var meetupId = SeedMeetup(groupId, "Dinner", scheduledAt, timezone);
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Test-UserId", memberId.ToString());
+        return (client, groupId, meetupId);
+    }
+
+    private static async Task AssertListedAsUpcomingAsync(HttpClient client, Guid groupId, Guid meetupId)
+    {
+        var upcoming = await client.GetFromJsonAsync<MeetupsResponse>($"/groups/{groupId}/meetups");
+        var home = await client.GetFromJsonAsync<UpcomingMeetupsResponse>("/meetups/upcoming");
+        var past = await client.GetFromJsonAsync<PastMeetupsResponse>($"/groups/{groupId}/meetups/past");
+        Assert.Contains(upcoming!.Meetups, m => m.Id == meetupId);
+        Assert.Contains(home!.Meetups, m => m.Id == meetupId);
+        Assert.DoesNotContain(past!.Meetups, m => m.Id == meetupId);
+    }
+
+    private static async Task AssertListedAsPastAsync(HttpClient client, Guid groupId, Guid meetupId)
+    {
+        var upcoming = await client.GetFromJsonAsync<MeetupsResponse>($"/groups/{groupId}/meetups");
+        var home = await client.GetFromJsonAsync<UpcomingMeetupsResponse>("/meetups/upcoming");
+        var past = await client.GetFromJsonAsync<PastMeetupsResponse>($"/groups/{groupId}/meetups/past");
+        Assert.DoesNotContain(upcoming!.Meetups, m => m.Id == meetupId);
+        Assert.DoesNotContain(home!.Meetups, m => m.Id == meetupId);
+        Assert.Contains(past!.Meetups, m => m.Id == meetupId);
+    }
+
 
     private Task<HttpResponseMessage> PatchAsync(Guid groupId, Guid meetupId, UpdateMeetupRequest request) =>
         _client.PatchAsJsonAsync($"/groups/{groupId}/meetups/{meetupId}", request);

@@ -26,7 +26,8 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
         lock (_store.SyncRoot)
         {
             var results = _store.Meetups
-                .Where(meetup => meetup.GroupId == groupId && meetup.ScheduledAt > now)
+                .Where(meetup => meetup.GroupId == groupId && meetup.ScheduledAt > now - MeetupLifecycle.ClassificationBand
+                    && !MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now))
                 .OrderBy(meetup => meetup.ScheduledAt)
                 .ToList();
             return Task.FromResult<IReadOnlyList<Meetup>>(results);
@@ -44,7 +45,8 @@ public sealed class InMemoryMeetupRepository : IMeetupRepository
                 .ToHashSet();
 
             var results = _store.Meetups
-                .Where(meetup => memberGroupIds.Contains(meetup.GroupId) && meetup.ScheduledAt > now)
+                .Where(meetup => memberGroupIds.Contains(meetup.GroupId) && meetup.ScheduledAt > now - MeetupLifecycle.ClassificationBand
+                    && !MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now))
                 .OrderBy(meetup => meetup.ScheduledAt)
                 .ToList();
 

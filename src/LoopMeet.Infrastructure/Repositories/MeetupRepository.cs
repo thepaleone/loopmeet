@@ -34,12 +34,13 @@ public sealed class MeetupRepository : IMeetupRepository
         var response = await _client
             .From<MeetupRecord>()
             .Filter("group_id", Operator.Equals, groupId.ToString())
-            .Filter("scheduled_at", Operator.GreaterThan, now.ToString("o"))
+            .Filter("scheduled_at", Operator.GreaterThan, (now - MeetupLifecycle.ClassificationBand).ToString("o"))
             .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
 
         return response.Models
             .Select(Map)
+            .Where(meetup => !MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now))
             .ToList();
     }
 
@@ -63,12 +64,13 @@ public sealed class MeetupRepository : IMeetupRepository
         var response = await _client
             .From<MeetupRecord>()
             .Filter("group_id", Operator.In, groupIds.Select(id => id.ToString()).ToList())
-            .Filter("scheduled_at", Operator.GreaterThan, now.ToString("o"))
+            .Filter("scheduled_at", Operator.GreaterThan, (now - MeetupLifecycle.ClassificationBand).ToString("o"))
             .Order("scheduled_at", global::Supabase.Postgrest.Constants.Ordering.Ascending)
             .Get();
 
         return response.Models
             .Select(Map)
+            .Where(meetup => !MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now))
             .ToList();
     }
 
