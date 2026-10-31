@@ -267,7 +267,7 @@ The behavior is produced by US2's rule (T032) and suppression predicate (T033). 
 - [X] T044 [P] Search the changed files for leftover `NotSupportedException` stubs, `TODO`, commented-out code, and stray `DateTimeOffset.UtcNow` in the meetup query/command/repository paths (`grep -rn "UtcNow\|TODO\|NotSupportedException" src/LoopMeet.Api/Services/Meetups src/LoopMeet.Infrastructure/Repositories/MeetupRepository.cs`). Expect no matches. T011 moves every meetup service call, `CreateAsync` included, onto the injected `TimeProvider`.
 - [X] T045 [P] Add a "Known gotchas" bullet to `CLAUDE.md`: the meetup past/upcoming rule lives in both `LoopMeet.Core/Meetups/MeetupLifecycle.cs` and `supabase/functions/_shared/meetup-lifecycle.ts`; change both together and extend `meetup-lifecycle.cases.json`, which both test suites read.
 - [ ] T046 Deploy to staging: the Api (staging tag workflow), `supabase functions deploy notifications-dispatch`, and an Android build via `deploy/deploy-android.sh -c Debug`. Plus an iOS build. Then run the full [quickstart.md](./quickstart.md) matrix on one iOS and one Android device and record ✅/❌ per row and the row 16 timings in Notes. Any ❌ blocks the PR.
-- [ ] T047 Open the PR from `012-past-meetups` to `main`. The description lists the deploy order (Api → `notifications-dispatch` → app), the Home-tab behavior change for release notes, and the new CI Deno step. Mark this task complete with the PR number.
+- [X] T047 Open the PR from `012-past-meetups` to `main`. The description lists the deploy order (Api → `notifications-dispatch` → app), the Home-tab behavior change for release notes, and the new CI Deno step. Opened as PR #15.
 
 ---
 
