@@ -1,6 +1,7 @@
 using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services;
 using LoopMeet.Api.Services.Auth;
+using LoopMeet.Core.Meetups;
 using LoopMeet.Api.Services.Cache;
 using LoopMeet.Api.Services.Configuration;
 using LoopMeet.Api.Endpoints;
@@ -105,6 +106,7 @@ builder.Services.AddScoped<GroupQueryService>();
 builder.Services.AddScoped<GroupCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();
 builder.Services.AddScoped<InvitationCommandService>();
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MeetupQueryService>();
 builder.Services.AddScoped<MeetupCommandService>();
 
@@ -168,6 +170,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
 
+// Fail at startup, not on every meetup request, if the host has no IANA zone data
+// (e.g. an Alpine image without tzdata): MeetupLifecycle needs it to classify meetups.
+TimeZoneInfo.FindSystemTimeZoneById(MeetupLifecycle.DefaultTimezone);
 
 var app = builder.Build();
 

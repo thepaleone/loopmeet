@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import type { NotificationType } from "../_shared/notification-contract.ts";
 import { dispatchNotification } from "./dispatch-service.ts";
 import { resolveRecipients } from "./recipient-resolver.ts";
-import { resolveNotificationType, type WebhookPayload } from "./webhook-router.ts";
+import { resolveNotificationType, resolveSuppression, type WebhookPayload } from "./webhook-router.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -96,6 +96,21 @@ Deno.serve(async (request) => {
   }
 
   const payload = (await request.json()) as WebhookPayload;
+
+  const suppression = resolveSuppression(payload, new Date());
+  if (suppression) {
+    console.log(JSON.stringify({
+      level: "info",
+      message: "notification_suppressed",
+      reason: suppression,
+      table: payload.table,
+      type: payload.type,
+      meetupId: payload.record.id ?? null,
+      groupId: payload.record.group_id ?? null,
+    }));
+    return Response.json({ skipped: true, reason: suppression });
+  }
+
   const notificationType = resolveNotificationType(payload);
 
   if (!notificationType) {

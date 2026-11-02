@@ -19,6 +19,8 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
         _store = store;
     }
 
+    public FixedTimeProvider Clock { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration((_, config) =>
@@ -42,8 +44,10 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IInvitationRepository>();
             services.RemoveAll<IAuthIdentityRepository>();
             services.RemoveAll<IPasswordChangeService>();
+            services.RemoveAll<TimeProvider>();
 
             services.AddSingleton(_store);
+            services.AddSingleton<TimeProvider>(Clock);
             services.AddScoped<IUserRepository, InMemoryUserRepository>();
             services.AddScoped<IGroupRepository, InMemoryGroupRepository>();
             services.AddScoped<IMembershipRepository, InMemoryMembershipRepository>();

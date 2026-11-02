@@ -165,7 +165,7 @@ public sealed class MeetupInteractionSurfaceTests
         var source = ReadSource("src/LoopMeet.App/Features/Meetups/ViewModels/MeetupDetailViewModel.cs");
 
         // Deep-link ready: (groupId, meetupId) is all it needs.
-        Assert.Contains("GetGroupMeetupsAsync(_groupId)", source, StringComparison.Ordinal);
+        Assert.Contains("GetMeetupAsync(_groupId, _meetupId)", source, StringComparison.Ordinal);
         Assert.Contains("ApplyParameters", source, StringComparison.Ordinal);
         // FR-016: ownership comes from the group owner, never the creator.
         Assert.Contains("meetup.GroupOwnerUserId", source, StringComparison.Ordinal);

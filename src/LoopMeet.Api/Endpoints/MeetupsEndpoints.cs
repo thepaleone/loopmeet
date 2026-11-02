@@ -1,6 +1,7 @@
 using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services.Auth;
 using LoopMeet.Api.Services.Meetups;
+using LoopMeet.Core.Meetups;
 
 namespace LoopMeet.Api.Endpoints;
 
@@ -18,6 +19,62 @@ public static class MeetupsEndpoints
                 var response = await meetupQueryService.GetGroupMeetupsAsync(groupId, cancellationToken);
                 logger.LogInformation("Listed meetups for group {GroupId} count={Count}", groupId, response.Meetups.Count);
                 return Results.Ok(response);
+            })
+            .RequireAuthorization();
+
+        app.MapGet("/groups/{groupId:guid}/meetups/past", async (
+                Guid groupId,
+                string? cursor,
+                int? limit,
+                MeetupQueryService meetupQueryService,
+                ILogger<MeetupsEndpoints.LogMarker> logger,
+                CancellationToken cancellationToken) =>
+            {
+                var pageSize = limit ?? MeetupQueryService.DefaultPastPageSize;
+                if (pageSize is < 1 or > 50)
+                {
+                    logger.LogWarning("List past meetups invalid limit {Limit} for group {GroupId}", limit, groupId);
+                    return Results.Json(new ErrorResponse
+                    {
+                        Code = "invalid_limit",
+                        Message = "Limit must be between 1 and 50."
+                    }, statusCode: StatusCodes.Status400BadRequest);
+                }
+
+                MeetupPageCursor? before = null;
+                if (cursor is not null)
+                {
+                    if (!MeetupCursorCodec.TryDecode(cursor, out var decoded))
+                    {
+                        logger.LogWarning("List past meetups invalid cursor for group {GroupId}", groupId);
+                        return Results.Json(new ErrorResponse
+                        {
+                            Code = "invalid_cursor",
+                            Message = "The paging cursor is invalid. Refresh and try again."
+                        }, statusCode: StatusCodes.Status400BadRequest);
+                    }
+
+                    before = decoded;
+                }
+
+                logger.LogInformation("Listing past meetups for group {GroupId}", groupId);
+                var response = await meetupQueryService.GetPastGroupMeetupsAsync(groupId, before, pageSize, cancellationToken);
+                logger.LogInformation("Listed past meetups for group {GroupId} count={Count}", groupId, response.Meetups.Count);
+                return Results.Ok(response);
+            })
+            .RequireAuthorization();
+
+        app.MapGet("/groups/{groupId:guid}/meetups/{meetupId:guid}", async (
+                Guid groupId,
+                Guid meetupId,
+                MeetupQueryService meetupQueryService,
+                ILogger<MeetupsEndpoints.LogMarker> logger,
+                CancellationToken cancellationToken) =>
+            {
+                logger.LogInformation("Getting meetup {MeetupId} in group {GroupId}", meetupId, groupId);
+                var meetup = await meetupQueryService.GetGroupMeetupAsync(groupId, meetupId, cancellationToken);
+                logger.LogInformation("Get meetup {MeetupId} in group {GroupId} found={Found}", meetupId, groupId, meetup is not null);
+                return meetup is null ? Results.NotFound() : Results.Ok(meetup);
             })
             .RequireAuthorization();
 

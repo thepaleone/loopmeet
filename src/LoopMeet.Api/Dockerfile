@@ -14,6 +14,8 @@ COPY LoopMeet.Api LoopMeet.Api
 RUN dotnet publish LoopMeet.Api/LoopMeet.Api.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS runtime
+# Alpine ships without IANA zone data; meetup past/upcoming classification needs it.
+RUN apk add --no-cache tzdata
 WORKDIR /app
 ENV ASPNETCORE_URLS=http://0.0.0.0:5001
 EXPOSE 5001

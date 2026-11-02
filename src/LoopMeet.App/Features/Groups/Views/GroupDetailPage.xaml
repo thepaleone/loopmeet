@@ -4,142 +4,241 @@
     x:Name="GroupDetailPageRoot"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:LoopMeet.App.Features.Groups.ViewModels"
     Title="{Binding GroupName}">
 
+    <ContentPage.Resources>
+        <!-- Unselected switch labels; the selected label is drawn on the sliding thumb. -->
+        <Style x:Key="MeetupListSwitchOptionStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+        </Style>
+
+        <Style x:Key="MeetupListEmptyStyle" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,8" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+        </Style>
+
+        <!-- One card for both lists, so upcoming and past can never drift apart. -->
+        <DataTemplate x:Key="MeetupCardTemplate">
+            <SwipeView IsEnabled="{Binding BindingContext.IsOwner, Source={x:Reference GroupDetailPageRoot}}">
+                <SwipeView.LeftItems>
+                    <SwipeItems Mode="Execute">
+                        <SwipeItemView
+                            BackgroundColor="#DC2626"
+                            Command="{Binding BindingContext.DeleteMeetupCommand, Source={x:Reference GroupDetailPageRoot}}"
+                            CommandParameter="{Binding .}">
+                            <Grid Padding="14,0">
+                                <HorizontalStackLayout HorizontalOptions="Start" VerticalOptions="Center" Spacing="6">
+                                    <Label Text="🗑" FontSize="16" TextColor="White" />
+                                    <Label Text="Delete" FontAttributes="Bold" TextColor="White" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </SwipeItemView>
+                    </SwipeItems>
+                </SwipeView.LeftItems>
+
+                <Border
+                    Style="{StaticResource BubbleCardCompactBorderStyle}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
+                    Padding="12,10"
+                    Margin="0,0,0,4">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14,18,16,20" />
+                    </Border.StrokeShape>
+                    <!-- Opens details for every member, owner or not
+                         (FR-008); editing is offered there, gated
+                         on ownership. -->
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding BindingContext.OpenMeetupDetailCommand, Source={x:Reference GroupDetailPageRoot}}"
+                            CommandParameter="{Binding .}" />
+                    </Border.GestureRecognizers>
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="15" LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding DateTimeDisplay}" FontSize="13"
+                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Label Text="{Binding LocationDisplay}" FontSize="13"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                            <Label Grid.Column="1" Text="📍" FontSize="16"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding CanOpenLocation}"
+                                SemanticProperties.Description="Open location in maps">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding BindingContext.OpenLocationCommand, Source={x:Reference GroupDetailPageRoot}}"
+                                        CommandParameter="{Binding .}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+                        <!-- Desktop delete button fallback -->
+                        <HorizontalStackLayout
+                            Spacing="8"
+                            IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}">
+                            <Button Text="🗑 Delete"
+                                BackgroundColor="#DC2626" TextColor="White" FontSize="12" Padding="8,4"
+                                Command="{Binding BindingContext.DeleteMeetupCommand, Source={x:Reference GroupDetailPageRoot}}"
+                                CommandParameter="{Binding .}"
+                                IsVisible="{Binding BindingContext.IsOwner, Source={x:Reference GroupDetailPageRoot}}" />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+            </SwipeView>
+        </DataTemplate>
+    </ContentPage.Resources>
+
     <Grid>
-        <ScrollView>
-            <VerticalStackLayout Padding="24" Spacing="12">
-                <Label Text="{Binding GroupName}" FontSize="24" FontAttributes="Bold" />
-                <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
-                <Label Text="Members" FontAttributes="Bold" FontSize="16" Margin="0,8,0,4" />
-                <FlexLayout
-                    BindableLayout.ItemsSource="{Binding Members}"
-                    Wrap="Wrap"
-                    Direction="Row"
-                    JustifyContent="Start"
-                    AlignItems="Start">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <Border
-                                Style="{StaticResource BubbleCardCompactBorderStyle}"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                                Padding="10,8"
-                                Margin="0,0,8,8">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="14,18,16,20" />
-                                </Border.StrokeShape>
-                                <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
-                                    <!-- Avatar circle -->
-                                    <Border
-                                        WidthRequest="40" HeightRequest="40"
-                                        BackgroundColor="{StaticResource Gray400}"
-                                        StrokeThickness="0">
-                                        <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                                        <Grid WidthRequest="40" HeightRequest="40">
-                                            <Label
-                                                Text="{Binding Initial}"
-                                                FontSize="15" FontAttributes="Bold"
-                                                TextColor="White"
-                                                HorizontalOptions="Center" VerticalOptions="Center" />
-                                            <Image
-                                                Source="{Binding AvatarUrl}"
-                                                Aspect="AspectFill"
-                                                IsVisible="{Binding HasAvatar}" />
-                                        </Grid>
-                                    </Border>
-                                    <!-- Member name -->
-                                    <Label
-                                        Text="{Binding DisplayName}"
-                                        FontSize="12"
-                                        MaximumWidthRequest="80"
-                                        HorizontalOptions="Center"
-                                        HorizontalTextAlignment="Center"
-                                        LineBreakMode="TailTruncation" />
-                                </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </FlexLayout>
-
-                <!-- Upcoming Meetups Section -->
-                <Label Text="Upcoming Meetups" FontAttributes="Bold" FontSize="16" Margin="0,8,0,4"
-                    IsVisible="{Binding HasMeetups}" />
-                <VerticalStackLayout
-                    BindableLayout.ItemsSource="{Binding Meetups}"
-                    Spacing="8"
-                    IsVisible="{Binding HasMeetups}">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <SwipeView IsEnabled="{Binding BindingContext.IsOwner, Source={x:Reference GroupDetailPageRoot}}">
-                                <SwipeView.LeftItems>
-                                    <SwipeItems Mode="Execute">
-                                        <SwipeItemView
-                                            BackgroundColor="#DC2626"
-                                            Command="{Binding BindingContext.DeleteMeetupCommand, Source={x:Reference GroupDetailPageRoot}}"
-                                            CommandParameter="{Binding .}">
-                                            <Grid Padding="14,0">
-                                                <HorizontalStackLayout HorizontalOptions="Start" VerticalOptions="Center" Spacing="6">
-                                                    <Label Text="🗑" FontSize="16" TextColor="White" />
-                                                    <Label Text="Delete" FontAttributes="Bold" TextColor="White" />
-                                                </HorizontalStackLayout>
-                                            </Grid>
-                                        </SwipeItemView>
-                                    </SwipeItems>
-                                </SwipeView.LeftItems>
-
+        <RefreshView Command="{Binding RefreshMeetupsCommand}" IsRefreshing="{Binding IsRefreshing}">
+            <ScrollView x:Name="ContentScroll" Scrolled="OnContentScrolled">
+                <VerticalStackLayout Padding="24,24,24,120" Spacing="12">
+                    <Label Text="{Binding GroupName}" FontSize="24" FontAttributes="Bold" />
+                    <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
+                    <Label Text="Members" FontAttributes="Bold" FontSize="16" Margin="0,8,0,4" />
+                    <FlexLayout
+                        BindableLayout.ItemsSource="{Binding Members}"
+                        Wrap="Wrap"
+                        Direction="Row"
+                        JustifyContent="Start"
+                        AlignItems="Start">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
                                 <Border
                                     Style="{StaticResource BubbleCardCompactBorderStyle}"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                                    Padding="12,10"
-                                    Margin="0,0,0,4">
+                                    Padding="10,8"
+                                    Margin="0,0,8,8">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="14,18,16,20" />
                                     </Border.StrokeShape>
-                                    <!-- Opens details for every member, owner or not
-                                         (FR-008); editing is offered there, gated
-                                         on ownership. -->
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer
-                                            Command="{Binding BindingContext.OpenMeetupDetailCommand, Source={x:Reference GroupDetailPageRoot}}"
-                                            CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                    <VerticalStackLayout Spacing="4">
-                                        <Label Text="{Binding Title}" FontAttributes="Bold" FontSize="15" LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding DateTimeDisplay}" FontSize="13"
-                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray300}}" />
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
-                                            <Label Text="{Binding LocationDisplay}" FontSize="13"
-                                                VerticalOptions="Center"
-                                                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-                                            <Label Grid.Column="1" Text="📍" FontSize="16"
-                                                VerticalOptions="Center"
-                                                IsVisible="{Binding CanOpenLocation}"
-                                                SemanticProperties.Description="Open location in maps">
-                                                <Label.GestureRecognizers>
-                                                    <TapGestureRecognizer
-                                                        Command="{Binding BindingContext.OpenLocationCommand, Source={x:Reference GroupDetailPageRoot}}"
-                                                        CommandParameter="{Binding .}" />
-                                                </Label.GestureRecognizers>
-                                            </Label>
-                                        </Grid>
-                                        <!-- Desktop delete button fallback -->
-                                        <HorizontalStackLayout
-                                            Spacing="8"
-                                            IsVisible="{OnIdiom Phone=False, Tablet=False, Desktop=True, TV=True}">
-                                            <Button Text="🗑 Delete"
-                                                BackgroundColor="#DC2626" TextColor="White" FontSize="12" Padding="8,4"
-                                                Command="{Binding BindingContext.DeleteMeetupCommand, Source={x:Reference GroupDetailPageRoot}}"
-                                                CommandParameter="{Binding .}"
-                                                IsVisible="{Binding BindingContext.IsOwner, Source={x:Reference GroupDetailPageRoot}}" />
-                                        </HorizontalStackLayout>
+                                    <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+                                        <!-- Avatar circle -->
+                                        <Border
+                                            WidthRequest="40" HeightRequest="40"
+                                            BackgroundColor="{StaticResource Gray400}"
+                                            StrokeThickness="0">
+                                            <Border.StrokeShape><Ellipse /></Border.StrokeShape>
+                                            <Grid WidthRequest="40" HeightRequest="40">
+                                                <Label
+                                                    Text="{Binding Initial}"
+                                                    FontSize="15" FontAttributes="Bold"
+                                                    TextColor="White"
+                                                    HorizontalOptions="Center" VerticalOptions="Center" />
+                                                <Image
+                                                    Source="{Binding AvatarUrl}"
+                                                    Aspect="AspectFill"
+                                                    IsVisible="{Binding HasAvatar}" />
+                                            </Grid>
+                                        </Border>
+                                        <!-- Member name -->
+                                        <Label
+                                            Text="{Binding DisplayName}"
+                                            FontSize="12"
+                                            MaximumWidthRequest="80"
+                                            HorizontalOptions="Center"
+                                            HorizontalTextAlignment="Center"
+                                            LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
                                 </Border>
-                            </SwipeView>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+
+                    <!-- Meetups: Upcoming / Past switch (always visible). The thumb slides
+                         between halves from code-behind; no triggers change colors. -->
+                    <Border
+                        HeightRequest="44"
+                        Padding="4"
+                        Margin="0,8,0,4"
+                        StrokeThickness="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray900}}">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="22" />
+                        </Border.StrokeShape>
+                        <Grid x:Name="MeetupListSwitchTrack" ColumnDefinitions="*,*" SizeChanged="OnMeetupListSwitchSizeChanged">
+                            <Label
+                                Text="Upcoming Meetups"
+                                Style="{StaticResource MeetupListSwitchOptionStyle}"
+                                SemanticProperties.Description="Show upcoming meetups">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding SelectMeetupListCommand}"
+                                        CommandParameter="{x:Static vm:MeetupListMode.Upcoming}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <Label
+                                Grid.Column="1"
+                                Text="Past Meetups"
+                                Style="{StaticResource MeetupListSwitchOptionStyle}"
+                                SemanticProperties.Description="Show past meetups">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding SelectMeetupListCommand}"
+                                        CommandParameter="{x:Static vm:MeetupListMode.Past}" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                            <Border
+                                x:Name="MeetupListSwitchThumb"
+                                Grid.ColumnSpan="2"
+                                HorizontalOptions="Start"
+                                InputTransparent="True"
+                                StrokeThickness="0"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="18" />
+                                </Border.StrokeShape>
+                                <Label
+                                    Text="{Binding SelectedListLabel}"
+                                    TextColor="{StaticResource White}"
+                                    FontAttributes="Bold"
+                                    FontSize="14"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Upcoming list -->
+                    <VerticalStackLayout
+                        BindableLayout.ItemsSource="{Binding Meetups}"
+                        BindableLayout.ItemTemplate="{StaticResource MeetupCardTemplate}"
+                        Spacing="8"
+                        IsVisible="{Binding IsUpcomingSelected}" />
+                    <Label
+                        Text="No upcoming meetups"
+                        Style="{StaticResource MeetupListEmptyStyle}"
+                        IsVisible="{Binding ShowUpcomingEmpty}" />
+
+                    <!-- Past list: newest first, more pages load near the bottom -->
+                    <VerticalStackLayout
+                        BindableLayout.ItemsSource="{Binding PastMeetups}"
+                        BindableLayout.ItemTemplate="{StaticResource MeetupCardTemplate}"
+                        Spacing="8"
+                        IsVisible="{Binding IsPastSelected}" />
+                    <Label
+                        Text="No past meetups yet"
+                        Style="{StaticResource MeetupListEmptyStyle}"
+                        IsVisible="{Binding ShowPastEmpty}" />
+                    <ActivityIndicator
+                        HorizontalOptions="Center"
+                        IsRunning="{Binding IsLoadingMorePast}"
+                        IsVisible="{Binding IsLoadingMorePast}" />
+                    <Label
+                        Text="Couldn't load more — tap to retry"
+                        Style="{StaticResource MeetupListEmptyStyle}"
+                        IsVisible="{Binding ShowLoadMoreError}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LoadMorePastMeetupsCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
                 </VerticalStackLayout>
-            </VerticalStackLayout>
-        </ScrollView>
+            </ScrollView>
+        </RefreshView>
 
         <!-- Add Meetup FAB (above invite) -->
         <Button
