@@ -50,6 +50,20 @@ jobs:
             dotnet restore "$project"
           done < <(find tests -name '*.csproj' | sort)
 
+      - name: Audit NuGet packages (High/Critical)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The MAUI app needs workloads this job doesn't install; build.yml compiles it.
+          report=$(find src/LoopMeet.Api tests -name '*.csproj' | sort | while IFS= read -r project; do
+            dotnet list "$project" package --vulnerable --include-transitive 2>&1
+          done)
+          echo "$report"
+          if echo "$report" | grep -qE '^[[:space:]]*>.*[[:space:]](High|Critical)[[:space:]]'; then
+            echo "::error::High or Critical NuGet advisories found (see report above)."
+            exit 1
+          fi
+
       - name: Run tests
         shell: bash
         run: |
