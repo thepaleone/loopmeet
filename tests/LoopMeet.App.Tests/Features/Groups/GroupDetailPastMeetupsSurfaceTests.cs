@@ -80,6 +80,9 @@ public sealed class GroupDetailPastMeetupsSurfaceTests
         Assert.True(resetIndex > applyIndex && resetIndex < appearingIndex,
             "ResetListMode must be called from ApplyQueryAttributes, before OnAppearing.");
         Assert.Equal(1, CountOccurrences(source, "ResetListMode()"));
+        // Regression: Shell re-delivers the query when returning from meetup detail or
+        // edit; resetting on that re-delivery dropped the user back on Upcoming.
+        Assert.Contains("&& groupId != viewModel.GroupId)", source, StringComparison.Ordinal);
         Assert.Contains("LoadMorePastMeetupsCommand", source, StringComparison.Ordinal);
     }
 

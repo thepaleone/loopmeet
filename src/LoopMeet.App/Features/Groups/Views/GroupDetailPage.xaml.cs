@@ -25,8 +25,12 @@ public partial class GroupDetailPage : ContentPage, IQueryAttributable
             return;
         }
 
+        // Shell re-delivers these parameters when a page pushed on top of this one
+        // (meetup detail, edit) is popped. Each fresh open builds a new page and view
+        // model, so only a group change resets the list; coming back keeps Past.
         if (query.TryGetValue("groupId", out var groupIdValue)
-            && Guid.TryParse(groupIdValue?.ToString(), out var groupId))
+            && Guid.TryParse(groupIdValue?.ToString(), out var groupId)
+            && groupId != viewModel.GroupId)
         {
             viewModel.GroupId = groupId;
             viewModel.ResetListMode();
