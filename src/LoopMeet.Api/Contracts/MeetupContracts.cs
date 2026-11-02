@@ -75,6 +75,19 @@ public sealed class MeetupListItemResponse
 
     /// <summary>Owner of the meetup's group — the sole input to edit gating.</summary>
     public Guid GroupOwnerUserId { get; init; }
+
+    /// <summary>Derived at read time via MeetupLifecycle; may be up to 30 s stale on cached lists.</summary>
+    public bool IsPast { get; init; }
+}
+
+/// <summary>
+/// One newest-first page of a group's past meetups. A page can hold fewer than the
+/// requested limit and still have a <see cref="NextCursor"/>; page until it is null.
+/// </summary>
+public sealed class PastMeetupsResponse
+{
+    public IReadOnlyList<MeetupListItemResponse> Meetups { get; init; } = Array.Empty<MeetupListItemResponse>();
+    public string? NextCursor { get; init; }
 }
 
 public sealed class UpcomingMeetupsResponse

@@ -1,6 +1,7 @@
 using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services.Cache;
 using LoopMeet.Core.Interfaces;
+using LoopMeet.Core.Meetups;
 using LoopMeet.Core.Models;
 
 namespace LoopMeet.Api.Services.Meetups;
@@ -8,11 +9,13 @@ namespace LoopMeet.Api.Services.Meetups;
 public sealed class MeetupQueryService
 {
     private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
+    public const int DefaultPastPageSize = 20;
     private readonly IMeetupRepository _meetupRepository;
     private readonly IGroupRepository _groupRepository;
     private readonly IMembershipRepository _membershipRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICacheService _cacheService;
+    private readonly TimeProvider _timeProvider;
     private readonly ILogger<MeetupQueryService> _logger;
 
     public MeetupQueryService(
@@ -21,6 +24,7 @@ public sealed class MeetupQueryService
         IMembershipRepository membershipRepository,
         IUserRepository userRepository,
         ICacheService cacheService,
+        TimeProvider timeProvider,
         ILogger<MeetupQueryService> logger)
     {
         _meetupRepository = meetupRepository;
@@ -28,6 +32,7 @@ public sealed class MeetupQueryService
         _membershipRepository = membershipRepository;
         _userRepository = userRepository;
         _cacheService = cacheService;
+        _timeProvider = timeProvider;
         _logger = logger;
     }
 
@@ -37,8 +42,9 @@ public sealed class MeetupQueryService
         _logger.LogInformation("Loading meetups for group {GroupId}", groupId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
-            var meetups = await _meetupRepository.ListUpcomingByGroupAsync(groupId, cancellationToken);
-            var items = await ProjectAsync(meetups, cancellationToken);
+            var now = _timeProvider.GetUtcNow();
+            var meetups = await _meetupRepository.ListUpcomingByGroupAsync(groupId, now, cancellationToken);
+            var items = await ProjectAsync(meetups, now, cancellationToken);
 
             _logger.LogInformation(
                 "Loaded meetups for group {GroupId} count={Count} organizersResolved={Resolved} organizersUnresolved={Unresolved}",
@@ -56,8 +62,9 @@ public sealed class MeetupQueryService
         _logger.LogInformation("Loading upcoming meetups for user {UserId}", userId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
-            var meetups = await _meetupRepository.ListUpcomingByUserAsync(userId, cancellationToken);
-            var items = await ProjectAsync(meetups, cancellationToken);
+            var now = _timeProvider.GetUtcNow();
+            var meetups = await _meetupRepository.ListUpcomingByUserAsync(userId, now, cancellationToken);
+            var items = await ProjectAsync(meetups, now, cancellationToken);
 
             _logger.LogInformation(
                 "Loaded upcoming meetups for user {UserId} count={Count} organizersResolved={Resolved} organizersUnresolved={Unresolved}",
@@ -70,6 +77,68 @@ public sealed class MeetupQueryService
     }
 
     /// <summary>
+    /// Newest-first page of a group's past meetups. Only the default-sized first page
+    /// is cached; requests carrying a cursor always read through.
+    /// </summary>
+    public async Task<PastMeetupsResponse> GetPastGroupMeetupsAsync(
+        Guid groupId,
+        MeetupPageCursor? before,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation(
+            "Loading past meetups for group {GroupId} cursor={HasCursor} limit={Limit}",
+            groupId,
+            before is not null,
+            limit);
+
+        async Task<PastMeetupsResponse> LoadAsync()
+        {
+            var now = _timeProvider.GetUtcNow();
+            var page = await _meetupRepository.ListPastByGroupAsync(groupId, now, before, limit, cancellationToken);
+            var items = await ProjectAsync(page.Items, now, cancellationToken);
+
+            _logger.LogInformation(
+                "Loaded past meetups for group {GroupId} count={Count} hasMore={HasMore}",
+                groupId,
+                items.Count,
+                page.NextCursor is not null);
+            return new PastMeetupsResponse
+            {
+                Meetups = items,
+                NextCursor = page.NextCursor is { } next ? MeetupCursorCodec.Encode(next) : null
+            };
+        }
+
+        if (before is not null || limit != DefaultPastPageSize)
+        {
+            return await LoadAsync();
+        }
+
+        return await _cacheService.GetOrSetAsync($"meetups:past:{groupId}", CacheTtl, LoadAsync)
+            ?? new PastMeetupsResponse();
+    }
+
+    /// <summary>
+    /// One meetup of the group, upcoming or past; null when it does not exist or
+    /// belongs to another group. Not cached, so it reflects edits immediately.
+    /// </summary>
+    public async Task<MeetupListItemResponse?> GetGroupMeetupAsync(
+        Guid groupId,
+        Guid meetupId,
+        CancellationToken cancellationToken = default)
+    {
+        var meetup = await _meetupRepository.GetByIdAsync(meetupId, cancellationToken);
+        if (meetup is null || meetup.GroupId != groupId)
+        {
+            return null;
+        }
+
+        var items = await ProjectAsync(new[] { meetup }, _timeProvider.GetUtcNow(), cancellationToken);
+        return items[0];
+    }
+
+    /// <summary>
     /// Resolves group name, group owner, and organizer display name for a set of
     /// meetups using three lookups total, independent of how many meetups there
     /// are. An organizer resolves to a name only while they are still a member of
@@ -78,6 +147,7 @@ public sealed class MeetupQueryService
     /// </summary>
     private async Task<List<MeetupListItemResponse>> ProjectAsync(
         IReadOnlyList<Meetup> meetups,
+        DateTimeOffset now,
         CancellationToken cancellationToken)
     {
         if (meetups.Count == 0)
@@ -130,7 +200,8 @@ public sealed class MeetupQueryService
                     CreatedByUserId = meetup.CreatedByUserId,
                     GroupName = group?.Name ?? string.Empty,
                     CreatedByDisplayName = organizerName,
-                    GroupOwnerUserId = group?.OwnerUserId ?? Guid.Empty
+                    GroupOwnerUserId = group?.OwnerUserId ?? Guid.Empty,
+                    IsPast = MeetupLifecycle.IsPast(meetup.ScheduledAt, meetup.Timezone, now)
                 };
             })
             .ToList();

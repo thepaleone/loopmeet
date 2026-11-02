@@ -59,6 +59,17 @@ jobs:
             dotnet test "$project" --configuration Release --no-restore --logger "trx;LogFileName=$(basename "$project" .csproj).trx"
           done < <(find tests -name '*.csproj' | sort)
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint edge functions
+        run: deno lint supabase/functions/
+
+      - name: Run edge-function tests
+        run: deno test supabase/functions/
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

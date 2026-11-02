@@ -19,6 +19,9 @@ public sealed class MeetupSummary
     /// <summary>Owner of this meetup's group — the sole input to edit gating.</summary>
     public Guid GroupOwnerUserId { get; set; }
 
+    /// <summary>Server-derived: the meetup's local day has ended.</summary>
+    public bool IsPast { get; set; }
+
     public bool HasLocation => !string.IsNullOrWhiteSpace(PlaceName);
 
     /// <summary>
@@ -39,6 +42,13 @@ public sealed class MeetupSummary
 public sealed class MeetupsResponse
 {
     public List<MeetupSummary> Meetups { get; set; } = new();
+}
+
+/// <summary>One newest-first page of past meetups; keep paging until NextCursor is null.</summary>
+public sealed class PastMeetupsResponse
+{
+    public List<MeetupSummary> Meetups { get; set; } = new();
+    public string? NextCursor { get; set; }
 }
 
 public sealed class UpcomingMeetupsResponse

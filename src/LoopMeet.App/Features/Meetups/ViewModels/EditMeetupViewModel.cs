@@ -14,6 +14,8 @@ public sealed partial class EditMeetupViewModel : ObservableObject, IHasUnsavedI
     private readonly MeetupLocationLookupBehavior _locationLookupBehavior;
     private CancellationTokenSource? _searchCts;
     private string _loadedTitle = string.Empty;
+    private DateTimeOffset _loadedScheduledAt;
+    private bool _loadedIsPast;
 
     public bool HasUnsavedInput => Title != _loadedTitle;
 
@@ -195,12 +197,12 @@ public sealed partial class EditMeetupViewModel : ObservableObject, IHasUnsavedI
 
         try
         {
-            var response = await _meetupsApi.GetGroupMeetupsAsync(GroupId);
-            var meetup = response.Meetups.FirstOrDefault(m => m.Id == MeetupId);
-            if (meetup is null) return;
+            var meetup = await _meetupsApi.GetMeetupAsync(GroupId, MeetupId);
 
             Title = meetup.Title;
             _loadedTitle = Title;
+            _loadedScheduledAt = meetup.ScheduledAt;
+            _loadedIsPast = meetup.IsPast;
             ScheduledDate = meetup.ScheduledAt.LocalDateTime.Date;
             ScheduledTime = meetup.ScheduledAt.LocalDateTime.TimeOfDay;
             PlaceName = meetup.PlaceName;
@@ -235,7 +237,11 @@ public sealed partial class EditMeetupViewModel : ObservableObject, IHasUnsavedI
 
         var localDateTime = ScheduledDate.Date + ScheduledTime;
         var scheduledAt = new DateTimeOffset(localDateTime, TimeZoneInfo.Local.GetUtcOffset(localDateTime));
-        if (scheduledAt <= DateTimeOffset.Now)
+
+        // Same rule as the server: only a changed time on an upcoming meetup must
+        // be in the future. A past meetup can be corrected to any time.
+        var timeChanged = TruncateToMinute(scheduledAt) != TruncateToMinute(_loadedScheduledAt);
+        if (timeChanged && !_loadedIsPast && scheduledAt <= DateTimeOffset.Now)
         {
             ErrorMessage = "Scheduled time must be in the future.";
             return;
@@ -247,13 +253,15 @@ public sealed partial class EditMeetupViewModel : ObservableObject, IHasUnsavedI
             await _meetupsApi.UpdateMeetupAsync(GroupId, MeetupId, new UpdateMeetupRequest
             {
                 Title = trimmedTitle,
-                ScheduledAt = scheduledAt,
+                ScheduledAt = timeChanged ? scheduledAt : null,
                 PlaceName = PlaceName,
                 PlaceAddress = PlaceAddress,
                 Latitude = Latitude,
                 Longitude = Longitude,
                 PlaceId = PlaceId,
-                Timezone = TimezoneHelper.GetCurrentDeviceTimezoneId()
+                // The timezone travels with the time: an edit that keeps the time
+                // must not move the meetup into another day's classification.
+                Timezone = timeChanged ? TimezoneHelper.GetCurrentDeviceTimezoneId() : null
             });
             await Shell.Current.GoToAsync("..");
         }
@@ -266,4 +274,8 @@ public sealed partial class EditMeetupViewModel : ObservableObject, IHasUnsavedI
             IsBusy = false;
         }
     }
+
+    /// <summary>The pickers carry no seconds, so times are compared to the minute.</summary>
+    private static DateTimeOffset TruncateToMinute(DateTimeOffset value) =>
+        new(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0, value.Offset);
 }

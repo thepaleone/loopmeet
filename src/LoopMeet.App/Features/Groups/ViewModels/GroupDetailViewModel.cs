@@ -18,6 +18,13 @@ public sealed partial class GroupDetailViewModel : ObservableObject
 
     public ObservableCollection<GroupMember> Members { get; } = new();
     public ObservableCollection<MeetupSummary> Meetups { get; } = new();
+    public ObservableCollection<MeetupSummary> PastMeetups { get; } = new();
+
+    // Each list reloads on its own: only the selected one is refreshed when the
+    // page reappears, and the other is marked stale so selecting it reloads it.
+    private bool _upcomingLoaded;
+    private bool _pastLoaded;
+    private string? _pastNextCursor;
 
     [ObservableProperty]
     private string _groupName = string.Empty;
@@ -32,7 +39,33 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     private bool _isOwner;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowUpcomingEmpty))]
     private bool _hasMeetups;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUpcomingSelected), nameof(IsPastSelected), nameof(SelectedListLabel), nameof(ShowUpcomingEmpty), nameof(ShowPastEmpty), nameof(ShowLoadMoreError))]
+    private MeetupListMode _listMode = MeetupListMode.Upcoming;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPastEmpty))]
+    private bool _hasPastMeetups;
+
+    [ObservableProperty]
+    private bool _isLoadingMorePast;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowPastEmpty), nameof(ShowLoadMoreError))]
+    private bool _hasLoadMoreError;
+
+    [ObservableProperty]
+    private bool _isRefreshing;
+
+    public bool IsUpcomingSelected => ListMode == MeetupListMode.Upcoming;
+    public bool IsPastSelected => ListMode == MeetupListMode.Past;
+    public string SelectedListLabel => IsPastSelected ? "Past Meetups" : "Upcoming Meetups";
+    public bool ShowUpcomingEmpty => IsUpcomingSelected && _upcomingLoaded && !HasMeetups;
+    public bool ShowPastEmpty => IsPastSelected && _pastLoaded && !HasPastMeetups && !HasLoadMoreError;
+    public bool ShowLoadMoreError => IsPastSelected && HasLoadMoreError;
 
     public GroupDetailViewModel(GroupsApi groupsApi, MeetupsApi meetupsApi, AuthService authService)
     {
@@ -142,8 +175,13 @@ public sealed partial class GroupDetailViewModel : ObservableObject
         try
         {
             await _meetupsApi.DeleteMeetupAsync(GroupId, meetup.Id);
-            Meetups.Remove(meetup);
-            HasMeetups = Meetups.Count > 0;
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                Meetups.Remove(meetup);
+                PastMeetups.Remove(meetup);
+                HasMeetups = Meetups.Count > 0;
+                HasPastMeetups = PastMeetups.Count > 0;
+            });
         }
         catch
         {
@@ -185,20 +223,166 @@ public sealed partial class GroupDetailViewModel : ObservableObject
             Members.Add(member);
         }
 
-        // Load meetups
+        await LoadSelectedListAsync();
+    }
+
+    /// <summary>
+    /// Called when the page is navigated to (not when it reappears), so every
+    /// fresh open starts on Upcoming (FR-002).
+    /// </summary>
+    public void ResetListMode()
+    {
+        ListMode = MeetupListMode.Upcoming;
+        PastMeetups.Clear();
+        HasPastMeetups = false;
+        HasLoadMoreError = false;
+        _pastNextCursor = null;
+        _pastLoaded = false;
+        _upcomingLoaded = false;
+    }
+
+    /// <summary>Switches lists without reloading the rest of the page (FR-005).</summary>
+    [RelayCommand]
+    private async Task SelectMeetupListAsync(MeetupListMode mode)
+    {
+        if (ListMode == mode)
+        {
+            return;
+        }
+
+        ListMode = mode;
+        if (mode == MeetupListMode.Past ? !_pastLoaded : !_upcomingLoaded)
+        {
+            await LoadSelectedListAsync();
+        }
+    }
+
+    /// <summary>Pull-to-refresh: reloads only the list being shown (FR-006).</summary>
+    [RelayCommand]
+    private async Task RefreshMeetupsAsync()
+    {
         try
         {
-            var meetupsResponse = await _meetupsApi.GetGroupMeetupsAsync(GroupId);
-            Meetups.Clear();
-            foreach (var meetup in meetupsResponse.Meetups)
+            await LoadSelectedListAsync();
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+
+    /// <summary>
+    /// Appends the next page of past meetups. Also the retry action after a failed
+    /// page, including a failed first page.
+    /// </summary>
+    [RelayCommand]
+    private async Task LoadMorePastMeetupsAsync()
+    {
+        if (!IsPastSelected || GroupId == Guid.Empty)
+        {
+            return;
+        }
+
+        if (!_pastLoaded)
+        {
+            await LoadPastFirstPageAsync();
+            return;
+        }
+
+        if (_pastNextCursor is null || IsLoadingMorePast)
+        {
+            return;
+        }
+
+        IsLoadingMorePast = true;
+        HasLoadMoreError = false;
+        try
+        {
+            var page = await _meetupsApi.GetPastMeetupsAsync(GroupId, _pastNextCursor);
+            await MainThread.InvokeOnMainThreadAsync(() =>
             {
-                Meetups.Add(meetup);
-            }
-            HasMeetups = Meetups.Count > 0;
+                var shown = PastMeetups.Select(item => item.Id).ToHashSet();
+                foreach (var meetup in page.Meetups.Where(item => shown.Add(item.Id)))
+                {
+                    PastMeetups.Add(meetup);
+                }
+
+                _pastNextCursor = page.NextCursor;
+                HasPastMeetups = PastMeetups.Count > 0;
+            });
         }
         catch
         {
+            HasLoadMoreError = true;
+        }
+        finally
+        {
+            IsLoadingMorePast = false;
+        }
+    }
+
+    private Task LoadSelectedListAsync()
+    {
+        if (IsPastSelected)
+        {
+            _upcomingLoaded = false;
+            return LoadPastFirstPageAsync();
+        }
+
+        _pastLoaded = false;
+        return LoadUpcomingAsync();
+    }
+
+    private async Task LoadUpcomingAsync()
+    {
+        try
+        {
+            var meetupsResponse = await _meetupsApi.GetGroupMeetupsAsync(GroupId);
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                Meetups.Clear();
+                foreach (var meetup in meetupsResponse.Meetups)
+                {
+                    Meetups.Add(meetup);
+                }
+
+                _upcomingLoaded = true;
+                HasMeetups = Meetups.Count > 0;
+                OnPropertyChanged(nameof(ShowUpcomingEmpty));
+            });
+        }
+        catch
+        {
+            _upcomingLoaded = true;
             HasMeetups = false;
+            OnPropertyChanged(nameof(ShowUpcomingEmpty));
+        }
+    }
+
+    private async Task LoadPastFirstPageAsync()
+    {
+        HasLoadMoreError = false;
+        try
+        {
+            var page = await _meetupsApi.GetPastMeetupsAsync(GroupId);
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                PastMeetups.Clear();
+                foreach (var meetup in page.Meetups)
+                {
+                    PastMeetups.Add(meetup);
+                }
+
+                _pastNextCursor = page.NextCursor;
+                _pastLoaded = true;
+                HasPastMeetups = PastMeetups.Count > 0;
+                OnPropertyChanged(nameof(ShowPastEmpty));
+            });
+        }
+        catch
+        {
+            // Keep whatever is shown; the retry row offers the next attempt.
+            HasLoadMoreError = true;
         }
     }
 }

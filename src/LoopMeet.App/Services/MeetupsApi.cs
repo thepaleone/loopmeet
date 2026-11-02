@@ -8,6 +8,12 @@ public interface IMeetupsApi
     [Get("/groups/{groupId}/meetups")]
     Task<MeetupsResponse> GetGroupMeetupsAsync(Guid groupId);
 
+    [Get("/groups/{groupId}/meetups/past")]
+    Task<PastMeetupsResponse> GetPastMeetupsAsync(Guid groupId, [Query] string? cursor = null, [Query] int? limit = null);
+
+    [Get("/groups/{groupId}/meetups/{meetupId}")]
+    Task<MeetupSummary> GetMeetupAsync(Guid groupId, Guid meetupId);
+
     [Post("/groups/{groupId}/meetups")]
     Task<MeetupSummary> CreateMeetupAsync(Guid groupId, [Body] CreateMeetupRequest request);
 
@@ -32,6 +38,12 @@ public sealed class MeetupsApi
 
     public Task<MeetupsResponse> GetGroupMeetupsAsync(Guid groupId) =>
         _api.GetGroupMeetupsAsync(groupId);
+
+    public Task<PastMeetupsResponse> GetPastMeetupsAsync(Guid groupId, string? cursor = null) =>
+        _api.GetPastMeetupsAsync(groupId, cursor);
+
+    public Task<MeetupSummary> GetMeetupAsync(Guid groupId, Guid meetupId) =>
+        _api.GetMeetupAsync(groupId, meetupId);
 
     public Task<MeetupSummary> CreateMeetupAsync(Guid groupId, CreateMeetupRequest request) =>
         _api.CreateMeetupAsync(groupId, request);

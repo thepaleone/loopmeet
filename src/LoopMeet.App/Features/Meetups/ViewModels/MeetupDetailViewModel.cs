@@ -1,3 +1,4 @@
+using System.Net;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Auth;
@@ -5,6 +6,7 @@ using LoopMeet.App.Features.Meetups.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
+using Refit;
 
 namespace LoopMeet.App.Features.Meetups.ViewModels;
 
@@ -92,22 +94,18 @@ public sealed partial class MeetupDetailViewModel : ObservableObject
         HasError = false;
         try
         {
-            var response = await _meetupsApi.GetGroupMeetupsAsync(_groupId);
-            var meetup = response.Meetups.FirstOrDefault(item => item.Id == _meetupId);
-            if (meetup is null)
-            {
-                // Deleted, or now in the past — both lists are upcoming-only.
-                // IsOwner stays false so no edit path is offered for a meetup
-                // that may not exist.
-                _meetup = null;
-                IsOwner = false;
-                IsNotFound = true;
-                _logger.LogInformation("Meetup {MeetupId} in group {GroupId} is no longer listed.", _meetupId, _groupId);
-                return;
-            }
-
+            var meetup = await _meetupsApi.GetMeetupAsync(_groupId, _meetupId);
             Apply(meetup);
             IsLoaded = true;
+        }
+        catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            // Deleted, or moved to another group. IsOwner stays false so no edit
+            // path is offered for a meetup that no longer exists.
+            _meetup = null;
+            IsOwner = false;
+            IsNotFound = true;
+            _logger.LogInformation("Meetup {MeetupId} in group {GroupId} no longer exists.", _meetupId, _groupId);
         }
         catch (Exception ex)
         {
