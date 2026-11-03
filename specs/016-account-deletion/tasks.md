@@ -37,10 +37,10 @@
 
 **Purpose**: A known-good baseline, and a working local database test loop before any SQL is written.
 
-- [ ] T001 From the repo root, run `dotnet build LoopMeet.slnx -c Debug -p:SkipMaciOSTargets=true` and `dotnet test LoopMeet.slnx -c Debug -p:SkipMaciOSTargets=true`. Record the warning count and the passing and failing test counts as the baseline in this file's Notes section.
-- [ ] T002 [P] Run `deno lint supabase/functions/` and `deno test supabase/functions/` from the repo root and record the results in Notes.
-- [ ] T003 [P] Start the local stack with podman: `export DOCKER_HOST=…` as in quickstart.md, then `supabase start` and `supabase db reset`. Confirm every existing migration applies, and record the CLI version and any start-up flags needed (for example `-x studio,imgproxy,…`) in Notes.
-- [ ] T004 Add a `database-tests` job to `.github/workflows/tests.yml`:
+- [X] T001 From the repo root, run `dotnet build LoopMeet.slnx -c Debug -p:SkipMaciOSTargets=true` and `dotnet test LoopMeet.slnx -c Debug -p:SkipMaciOSTargets=true`. Record the warning count and the passing and failing test counts as the baseline in this file's Notes section.
+- [X] T002 [P] Run `deno lint supabase/functions/` and `deno test supabase/functions/` from the repo root and record the results in Notes.
+- [X] T003 [P] Start the local stack with podman: `export DOCKER_HOST=…` as in quickstart.md, then `supabase start` and `supabase db reset`. Confirm every existing migration applies, and record the CLI version and any start-up flags needed (for example `-x studio,imgproxy,…`) in Notes.
+- [X] T004 Add a `database-tests` job to `.github/workflows/tests.yml`:
   - `supabase/setup-cli@v1` pinned to the CLI version recorded in T003
   - `supabase start` excluding the services the tests don't need
   - `supabase test db`
@@ -58,12 +58,12 @@
 
 ### Database
 
-- [ ] T005 Create `supabase/migrations/20261103120000_account_deletion_core.sql`, following data-model.md:
+- [X] T005 Create `supabase/migrations/20261103120000_account_deletion_core.sql`, following data-model.md:
   - **Table:** `account_deletions`, with an `on delete cascade` FK to `auth.users`, a check constraint on `status` (`pending` or `purging`), and RLS enabled with only `account_deletions_select_self`.
   - **Helpers:** `private.account_is_active`, `private.group_is_active` and `private.email_is_active` (`security definer`, `stable`, `set search_path = public`), after `create schema if not exists private` and `grant usage on schema private to authenticated, service_role`.
   - **Functions:** `request_account_deletion()`, which inserts with `now()` and `now() + interval '30 days'` on conflict do nothing, returns the row, and raises if `auth.uid()` is null. `restore_account_deletion() → boolean`, which deletes when pending and `purge_after > now()` and returns `true`, otherwise raises `deletion_in_progress` (errcode `P0001`, message `deletion_in_progress`), and returns `false` when there is no row.
   - **Grants:** revoke from `public`/`anon`; grant execute to `authenticated` and `service_role` as listed.
-- [ ] T006 [P] Create `supabase/tests/database/account_deletion_core.test.sql` (pgTAP, `begin; … rollback;`). Impersonate users with `set local role authenticated` and `set local request.jwt.claims`. Assert:
+- [X] T006 [P] Create `supabase/tests/database/account_deletion_core.test.sql` (pgTAP, `begin; … rollback;`). Impersonate users with `set local role authenticated` and `set local request.jwt.claims`. Assert:
   - `request_account_deletion()` sets `purge_after - requested_at = interval '30 days'` exactly, and a second call returns the same row unchanged (FR-003, FR-005).
   - `restore_account_deletion()` removes a pending row and returns `true`, returns `false` with no row, and raises `deletion_in_progress` after `purge_after` and when `status = 'purging'` (FR-012).
   - A user can read only their own row. Direct `insert`, `update` and `delete` on `account_deletions` as `authenticated` fail.
@@ -73,17 +73,17 @@
 
 ### Core, Infrastructure, test double
 
-- [ ] T007 [P] Add the Core types:
+- [X] T007 [P] Add the Core types:
   - `src/LoopMeet.Core/Models/AccountDeletion.cs`: `AccountDeletion` record and `AccountDeletionStatus { Pending, Purging }`
   - `src/LoopMeet.Core/Accounts/AccountDeletionPolicy.cs`: `GracePeriod = TimeSpan.FromDays(30)`, with a doc comment that SQL is authoritative and both values are pinned by tests
   - `src/LoopMeet.Core/Interfaces/IAccountDeletionRepository.cs`: `GetAsync(Guid userId, …)`, `RequestAsync(…)`, `RestoreAsync(…)` and `AccountRestoreResult { Restored, NotPending, DeletionInProgress }`
-- [ ] T008 Create `src/LoopMeet.Infrastructure/Supabase/Models/AccountDeletionRecord.cs` (a Postgrest model for `account_deletions`) and `src/LoopMeet.Infrastructure/Repositories/AccountDeletionRepository.cs`.
+- [X] T008 Create `src/LoopMeet.Infrastructure/Supabase/Models/AccountDeletionRecord.cs` (a Postgrest model for `account_deletions`) and `src/LoopMeet.Infrastructure/Repositories/AccountDeletionRepository.cs`.
   - `GetAsync` selects the caller's row.
   - `RequestAsync` calls `Rpc("request_account_deletion")`.
   - `RestoreAsync` calls `Rpc("restore_account_deletion")`, which returns `boolean`: `true` maps to `Restored` and `false` to `NotPending`. A `PostgrestException` whose message contains `deletion_in_progress` maps to `DeletionInProgress`.
   - Mapping uses a manual `Map()`, following the existing repositories.
-- [ ] T009 [P] Add `Dictionary<Guid, AccountDeletion> AccountDeletions` to `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryStore.cs`. Create `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryAccountDeletionRepository.cs`, which mirrors the SQL semantics using the injected `TimeProvider`: 30 days, idempotent request, restore refused after the deadline or while purging. Register it in `TestWebApplicationFactory.cs` (`RemoveAll` + `AddScoped`).
-- [ ] T010 Register `IAccountDeletionRepository` → `AccountDeletionRepository` in `src/LoopMeet.Api/Program.cs`, next to the other repositories.
+- [X] T009 [P] Add `Dictionary<Guid, AccountDeletion> AccountDeletions` to `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryStore.cs`. Create `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryAccountDeletionRepository.cs`, which mirrors the SQL semantics using the injected `TimeProvider`: 30 days, idempotent request, restore refused after the deadline or while purging. Register it in `TestWebApplicationFactory.cs` (`RemoveAll` + `AddScoped`).
+- [X] T010 Register `IAccountDeletionRepository` → `AccountDeletionRepository` in `src/LoopMeet.Api/Program.cs`, next to the other repositories.
 
 **Checkpoint**: `supabase test db` and `dotnet test` pass. Nothing is user-visible yet.
 
@@ -97,13 +97,13 @@
 
 ### Tests for User Story 1
 
-- [ ] T011 [P] [US1] Create `tests/LoopMeet.Api.Tests/Endpoints/AccountDeletionEndpointsTests.cs` (request half):
+- [X] T011 [P] [US1] Create `tests/LoopMeet.Api.Tests/Endpoints/AccountDeletionEndpointsTests.cs` (request half):
   - **Preview:** `GET /users/account-deletion/preview` lists owned groups by name with member counts including the owner, returns `[]` when the caller owns none, uses `deletesAt = clock + 30 days` before a request, and returns the stored date after one.
   - **Request:** `POST` with `"DELETE"` returns 202 and the pending body. Repeating it returns the original dates. `"delete"`, `"DELETE "`, `""` and a missing body return 400 `invalid_confirmation`. A purging row returns 409 `deletion_in_progress`.
   - **Status:** `GET /users/account-deletion` returns `none` and then `pending`.
-- [ ] T012 [P] [US1] Create `tests/LoopMeet.Api.Tests/Infrastructure/CapturingLogSink.cs` (a hand-rolled Serilog `ILogEventSink` fake) and register it as a singleton `ILogEventSink` in `TestWebApplicationFactory.cs`. `Program.cs` uses `UseSerilog` without `writeToProviders`, so an `ILoggerProvider` would see nothing; `.ReadFrom.Services(services)` picks up the sink. Add a test to `AccountDeletionEndpointsTests.cs` that asserts on the rendered messages and properties: the request writes `AccountDeletionRequested` with a `UserId` property, and no captured message or property value contains the caller's email (FR-020).
-- [ ] T013 [P] [US1] Create `tests/LoopMeet.App.Tests/Features/Account/AccountDeletionConfirmationTests.cs`: `IsConfirmed` is true only for `"DELETE"` and false for `null`, `""`, `"delete"`, `"Delete"`, `" DELETE"`, `"DELETE "` and `"DELETED"` (FR-002, SC-002). Link `src/LoopMeet.App/Features/Account/AccountDeletionConfirmation.cs` in `tests/LoopMeet.App.Tests/LoopMeet.App.Tests.csproj`.
-- [ ] T014 [P] [US1] Create `tests/LoopMeet.App.Tests/Features/Account/DeleteAccountSurfaceTests.cs`. These are source-inspection tests:
+- [X] T012 [P] [US1] Create `tests/LoopMeet.Api.Tests/Infrastructure/CapturingLogSink.cs` (a hand-rolled Serilog `ILogEventSink` fake) and register it as a singleton `ILogEventSink` in `TestWebApplicationFactory.cs`. `Program.cs` uses `UseSerilog` without `writeToProviders`, so an `ILoggerProvider` would see nothing; `.ReadFrom.Services(services)` picks up the sink. Add a test to `AccountDeletionEndpointsTests.cs` that asserts on the rendered messages and properties: the request writes `AccountDeletionRequested` with a `UserId` property, and no captured message or property value contains the caller's email (FR-020).
+- [X] T013 [P] [US1] Create `tests/LoopMeet.App.Tests/Features/Account/AccountDeletionConfirmationTests.cs`: `IsConfirmed` is true only for `"DELETE"` and false for `null`, `""`, `"delete"`, `"Delete"`, `" DELETE"`, `"DELETE "` and `"DELETED"` (FR-002, SC-002). Link `src/LoopMeet.App/Features/Account/AccountDeletionConfirmation.cs` in `tests/LoopMeet.App.Tests/LoopMeet.App.Tests.csproj`.
+- [X] T014 [P] [US1] Create `tests/LoopMeet.App.Tests/Features/Account/DeleteAccountSurfaceTests.cs`. These are source-inspection tests:
   - `DeleteAccountPage.xaml` binds an `Entry` to `Confirmation`, the delete button to `DeleteCommand` and `CanDelete`, and the owned groups through `BindableLayout.ItemsSource="{Binding OwnedGroups}"` (no `CollectionView`).
   - `DeleteAccountViewModel.cs` uses `AccountDeletionConfirmation.IsConfirmed`, `RequestAccountDeletionAsync` and `SignOutAsync(SignOutReason.UserInitiated)`.
   - `AppShell.xaml.cs` registers `"delete-account"`.
@@ -111,27 +111,27 @@
 
 ### Implementation for User Story 1: backend
 
-- [ ] T015 [P] [US1] Create `src/LoopMeet.Api/Contracts/AccountDeletionContracts.cs` with `AccountDeletionRequest`, `AccountDeletionStatusResponse`, `AccountDeletionPreviewResponse`, `OwnedGroupSummary` and `AccountPendingDeletionResponse` (`Code`, `Message`, `DeletesAt`), as in contracts/api-account-deletion.md.
-- [ ] T016 [US1] Create `src/LoopMeet.Api/Services/Accounts/AccountDeletionService.cs` with a result enum, `AccountDeletionCommandResult(AccountDeletionCommandStatus, AccountDeletion?)`:
+- [X] T015 [P] [US1] Create `src/LoopMeet.Api/Contracts/AccountDeletionContracts.cs` with `AccountDeletionRequest`, `AccountDeletionStatusResponse`, `AccountDeletionPreviewResponse`, `OwnedGroupSummary` and `AccountPendingDeletionResponse` (`Code`, `Message`, `DeletesAt`), as in contracts/api-account-deletion.md.
+- [X] T016 [US1] Create `src/LoopMeet.Api/Services/Accounts/AccountDeletionService.cs` with a result enum, `AccountDeletionCommandResult(AccountDeletionCommandStatus, AccountDeletion?)`:
   - `GetStatusAsync`, returning the *effective* status: `Purging` when the stored status is `Pending` and `DeletesAt <= TimeProvider.GetUtcNow()` (`AccountDeletionService.EffectiveStatus`, also used by the preview and the gate)
   - `GetPreviewAsync`, which uses `IGroupRepository.ListOwnedAsync` and `IMembershipRepository.ListMembersByGroupsAsync`, ordered by name, with `AccountDeletionPolicy.GracePeriod` and `TimeProvider`
   - `RequestAsync(confirmation)`, which uses ordinal `"DELETE"`, removes cache key `account-deletion:{userId}` via `ICacheService`, and logs `AccountDeletionRequested` or `AccountDeletionAlreadyPending` with `{UserId}` and `{DeletesAt}`
-- [ ] T017 [US1] Create `src/LoopMeet.Api/Endpoints/AccountDeletionEndpoints.cs` with `GET /users/account-deletion`, `GET /users/account-deletion/preview` and `POST /users/account-deletion` (`RequireAuthorization`, `ErrorResponse` for 400 and 409). Register `AccountDeletionService` and call `app.MapAccountDeletionEndpoints()` in `src/LoopMeet.Api/Program.cs`.
+- [X] T017 [US1] Create `src/LoopMeet.Api/Endpoints/AccountDeletionEndpoints.cs` with `GET /users/account-deletion`, `GET /users/account-deletion/preview` and `POST /users/account-deletion` (`RequireAuthorization`, `ErrorResponse` for 400 and 409). Register `AccountDeletionService` and call `app.MapAccountDeletionEndpoints()` in `src/LoopMeet.Api/Program.cs`.
 
 ### Implementation for User Story 1: client
 
-- [ ] T018 [P] [US1] Create `src/LoopMeet.App/Features/Account/AccountDeletionConfirmation.cs`, MAUI-free: `public static bool IsConfirmed(string? text) => string.Equals(text, "DELETE", StringComparison.Ordinal);`
-- [ ] T019 [P] [US1] Create `src/LoopMeet.App/Features/Account/Models/AccountDeletionModels.cs` with the status, preview, owned-group and request DTOs. Add `GetAccountDeletionAsync`, `GetAccountDeletionPreviewAsync`, `RequestAccountDeletionAsync` and `RestoreAccountAsync` to `IUsersApi` and to the `UsersApi` wrapper in `src/LoopMeet.App/Services/UsersApi.cs`.
-- [ ] T020 [US1] Create `src/LoopMeet.App/Features/Account/ViewModels/DeleteAccountViewModel.cs` (`sealed partial class : ObservableObject`):
+- [X] T018 [P] [US1] Create `src/LoopMeet.App/Features/Account/AccountDeletionConfirmation.cs`, MAUI-free: `public static bool IsConfirmed(string? text) => string.Equals(text, "DELETE", StringComparison.Ordinal);`
+- [X] T019 [P] [US1] Create `src/LoopMeet.App/Features/Account/Models/AccountDeletionModels.cs` with the status, preview, owned-group and request DTOs. Add `GetAccountDeletionAsync`, `GetAccountDeletionPreviewAsync`, `RequestAccountDeletionAsync` and `RestoreAccountAsync` to `IUsersApi` and to the `UsersApi` wrapper in `src/LoopMeet.App/Services/UsersApi.cs`.
+- [X] T020 [US1] Create `src/LoopMeet.App/Features/Account/ViewModels/DeleteAccountViewModel.cs` (`sealed partial class : ObservableObject`):
   - It loads the preview on appearing into `OwnedGroups`, an `ObservableCollection` updated on the main thread.
   - `Confirmation` drives `CanDelete` via `AccountDeletionConfirmation.IsConfirmed`.
   - `DeleteAsync` posts the request. On success it shows "Your account will be permanently deleted on {local date}". On failure it shows "Couldn't schedule the deletion. Check your connection and try again." and stays signed in (US1 scenario 5).
   - `AcknowledgeAsync` calls `SessionCoordinator.SignOutAsync(SignOutReason.UserInitiated)`.
-- [ ] T021 [US1] Create `src/LoopMeet.App/Features/Account/Views/DeleteAccountPage.xaml(.cs)`:
+- [X] T021 [US1] Create `src/LoopMeet.App/Features/Account/Views/DeleteAccountPage.xaml(.cs)`:
   - The explanation, then the owned-group list ("{name} · {n} member(s)") inside a `ScrollView` with `BindableLayout`, then the `DELETE` entry and a destructive button.
   - After success, the date and an OK button.
   - Before using any style or colour key, confirm it exists in `Resources/Styles/Colors.xaml` and `Styles.xaml`.
-- [ ] T022 [US1] Register the `delete-account` route in `src/LoopMeet.App/AppShell.xaml.cs` and the page and view model in `src/LoopMeet.App/MauiProgram.cs`. Change `DeleteAccountAsync` in `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs` to `Shell.Current.GoToAsync("delete-account")`.
+- [X] T022 [US1] Register the `delete-account` route in `src/LoopMeet.App/AppShell.xaml.cs` and the page and view model in `src/LoopMeet.App/MauiProgram.cs`. Change `DeleteAccountAsync` in `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs` to `Shell.Current.GoToAsync("delete-account")`.
 
 **Checkpoint**: US1 is complete. Quickstart rows 1–3 pass on Android staging.
 
@@ -380,3 +380,22 @@ Each PR is merged to `main` only after its checkpoint passes. PR A–C may be de
 
 - Mark tasks `[X]` in place as they complete (living execution log).
 - Record baselines (T001–T003), repository review findings (T033) and provider retention values (T054) here.
+
+### Baselines (2026-11-03)
+
+- **T001**: `dotnet build` 4 warnings, 0 errors. `dotnet test` 227 passed, 0 failed (Core 29, Infrastructure 1, App 126, Api 71).
+- **T002**: Deno 2.9.8. `deno lint` clean (16 files). `deno test` 34 passed, 0 failed.
+- **T003**: Supabase CLI 3.0.0, podman 6.0.2. `/var/run/docker.sock` already links to the podman machine socket, so `DOCKER_HOST` isn't needed on this machine. No start-up flags needed locally. CI starts with `-x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor`.
+  - Applied with `supabase migration up` instead of `db reset`, to keep local data.
+  - **Fixed two existing migrations so a fresh database can apply them.** The production project has both recorded as applied, so it never re-runs them.
+    - `20260511103000` closed its `$cron$` string with `$$` and didn't parse.
+    - `20260511103000` and `20260515110000` raised when the vault secrets were missing. They now skip scheduling with a notice, so local and CI databases get no cron job.
+  - `supabase db lint` exits 0 by default even with errors; CI passes `--fail-on error`.
+- **T008**: `Client.Rpc<T>` ignores `[Column]` names, so a composite row comes back all defaults. `RequestAsync` parses the RPC JSON with explicit snake_case names. Verified all four repository paths against the local stack.
+
+### US1 notes (PR A)
+
+- **T012**: `UseSerilog` without `preserveStaticLogger` routes every host's `ILogger` through the static `Log.Logger`, and the most recently built host replaces it. Parallel test classes therefore leak events into each other's sinks. Classes that assert on logs join `[Collection(CapturedLogsCollection.Name)]`, which disables parallelization. A mutation check confirmed the no-email assertion fails when an email is logged.
+- **T019**: only `GetAccountDeletionPreviewAsync` and `RequestAccountDeletionAsync` were added. `GetAccountDeletionAsync` and `RestoreAccountAsync` move to T050/T052, where they're first used, so PR A has no unused client methods.
+- **T020/T021**: once the deletion is scheduled, the page hides the back button and swallows hardware back, so OK (sign out) is the only way out. The delete button keeps the default Button style, so its Disabled visual state still applies. There's no destructive colour key in `Colors.xaml`.
+- **Checkpoint**: quickstart rows 1–3 on Android staging need the core migration on staging, an Api `staging/**` tag and an app build.
