@@ -61,6 +61,18 @@ public sealed class AndroidPlayReleaseTests
     }
 
     [Fact]
+    public void Project_TargetsAtLeastAndroid24()
+    {
+        var project = XDocument.Parse(ReadSource(Project));
+        var android = Assert.Single(project.Descendants("SupportedOSPlatformVersion"),
+            element => ((string?)element.Attribute("Condition"))?.Contains("'android'", StringComparison.Ordinal) == true);
+
+        // Regression: Play rejected the first bundle (minSdk 21) because Play
+        // automatic protection requires minSdk 24 or higher.
+        Assert.True(Version.Parse(android.Value) >= new Version(24, 0), $"Android minimum is {android.Value}; Play requires 24.0 or higher.");
+    }
+
+    [Fact]
     public void ReleaseScript_BuildsSignedBundleWithSecretsFromEnvironment()
     {
         var script = ReadSource(ReleaseScript);

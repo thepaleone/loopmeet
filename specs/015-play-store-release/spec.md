@@ -60,6 +60,7 @@ A maintainer reads one version scheme in the project file that applies to both s
 - **FR-003**: The manifest MUST NOT request `READ_MEDIA_IMAGES`, and MUST keep both foreground location permissions.
 - **FR-004**: The project MUST use a semantic `ApplicationDisplayVersion` (starting at `0.1.0`) and an integer `ApplicationVersion` build number, shared by Android and iOS.
 - **FR-005**: Keystores and release output MUST be git-ignored.
+- **FR-006**: The Android minimum OS version MUST be API 24 (Android 7.0) or higher; Play automatic protection rejects bundles with a lower `minSdkVersion`.
 
 ## Success Criteria *(mandatory)*
 
