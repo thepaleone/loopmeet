@@ -81,8 +81,9 @@ jobs:
       - name: Lint edge functions
         run: deno lint supabase/functions/
 
+      # Read access lets source-inspection tests open the function files they check.
       - name: Run edge-function tests
-        run: deno test supabase/functions/
+        run: deno test --allow-read=supabase/functions supabase/functions/
 
       - name: Upload test results
         if: always()
