@@ -85,7 +85,7 @@ When a request reaches its date, everything tied to the user is permanently dele
 
 **Acceptance Scenarios**:
 
-1. **Given** a pending request whose date has passed, **When** the scheduled run happens, **Then** within 24 hours of the date every item listed above is gone and the request is marked complete without keeping identifying data.
+1. **Given** a pending request whose date has passed, **When** the scheduled run happens, **Then** within 24 hours of the date every item listed above is gone, no record of the request or the user remains, and the completion is logged.
 2. **Given** the run fails partway (for example the push provider is unreachable), **When** the next run happens, **Then** it carries on from where it stopped without errors, and the user stays hidden in the meantime.
 3. **Given** a completed deletion, **When** the run happens again for the same user, **Then** nothing fails and nothing else changes.
 4. **Given** the deleted user's email address, **When** someone later signs up or signs in with it, **Then** they get a brand-new, empty account with no link to the old data.
@@ -102,8 +102,9 @@ When a request reaches its date, everything tied to the user is permanently dele
 - **Invitations addressed to the pending user's email from other groups**: they are hidden from the inviter's view while the user is pending. Invitations created after the request are deleted with the account at permanent deletion.
 - **A member edits or deletes a meetup in a group owned by a pending user**: not possible, because the group is hidden from them. Server-side operations on hidden groups fail as "not found".
 - **The push provider or Apple is down at permanent-deletion time**: the run retries on later runs. The account's own data is still deleted on schedule, and only the outstanding external step is retried. Each failure is logged.
+- **Apple sign-in with no stored authorization** (for example, a sign-in that happened before this feature shipped): there is no token to revoke. The permanent deletion logs this and completes, and the user can still remove LoopMeet under Apple ID settings.
 - **An account with no profile row or no avatar** (an incomplete sign-up): deletion still completes.
-- **Hidden-now timing**: other users already looking at a screen may keep seeing stale data until it refreshes. Any action they take on it fails as "not found".
+- **Hidden-now timing**: other users already looking at a screen, or whose lists were loaded in the previous 30 seconds, may see stale data until it refreshes. Any action they take on it fails as "not found".
 
 ## Requirements *(mandatory)*
 
@@ -147,7 +148,7 @@ When a request reaches its date, everything tied to the user is permanently dele
 
 ### Key Entities
 
-- **Deletion request**: one per user. Holds the user's opaque identifier, when it was requested, the permanent-deletion time (request + 30 days), its state (pending, restored, completed) and, while completing, which steps are done. After completion it holds no identifying data.
+- **Deletion request**: exists only while a deletion is pending or in progress. It holds the user's opaque identifier, when it was requested, the permanent-deletion time (request + 30 days), whether permanent deletion has started, and which steps are done. Restoring removes it. Permanent deletion removes it last, and the completion is recorded in the logs.
 - **Pending user**: a user with a pending deletion request. They are hidden from everyone else and limited to the status, restore and sign-out actions.
 - **Owned group**: a group whose owner is the user. It is hidden while the owner is pending and deleted with them.
 - **External records**: the user's push-notification provider record and, for Apple sign-in users, their Apple authorization. These are removed or revoked at permanent deletion.
@@ -170,6 +171,7 @@ When a request reaches its date, everything tied to the user is permanently dele
 - Pending users' owned groups are hidden without telling the other members why. To them it looks the same as the owner deleting the group.
 - Only group owners create meetups through the app (the 006 rule), so meetups a user created in groups they don't own are rare, but they are still covered by FR-006 and FR-014.
 - Infrastructure backups and operational logs held by hosting providers can't be selectively purged. They are allowed to expire on the providers' own schedules, which FR-021 documents with their real durations.
+- FR-016 applies where an Apple authorization was captured at sign-in. Without one there is nothing to revoke, which is logged (see Edge Cases).
 - There is no legal requirement to keep any LoopMeet user data after deletion. If one appears, it is added to FR-021 explicitly.
 - Deleting the user's sign-in account also removes every sign-in method linked to it (email, Google, Apple), so the same email can later create a fresh, unrelated account.
 - Group ownership transfer, the web deletion page and the privacy policy text are out of scope (017 covers the latter two).

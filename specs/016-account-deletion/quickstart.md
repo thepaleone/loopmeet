@@ -45,7 +45,7 @@ Use three test accounts:
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
-| 1 | A: Profile → Delete Account | Screen lists G with "2 members" and the date 30 days out. Delete is disabled. | |
+| 1 | A: Profile → Delete Account | Screen lists G with "2 members" and the date 30 days out. Delete is disabled. Time from Profile to confirmed request is under 1 minute (SC-001). | |
 | 2 | Type `delete`, then `DELETE` followed by a space | Delete stays disabled | |
 | 3 | Type `DELETE`, tap Delete | The date is shown, and after acknowledging, A is on the sign-in screen | |
 | 4 | B: refresh Home and Groups (wait 30 s) | G and its meetups are gone. A's invitation to B is gone. | |

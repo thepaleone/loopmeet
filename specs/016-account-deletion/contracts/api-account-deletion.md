@@ -16,7 +16,7 @@ The caller's deletion status. It is allowed while pending.
 { "status": "pending", "requestedAt": "2026-11-03T18:00:00Z", "deletesAt": "2026-12-03T18:00:00Z" }
 ```
 
-`status` is one of `none`, `pending` or `purging`. `purging` means the date has passed and restore is no longer possible.
+`status` is one of `none`, `pending` or `purging`. `purging` means the permanent-deletion time has passed (whether or not the purge job has started) and restore is no longer possible. The Api derives it from `deletesAt` and the clock, not only from the stored status.
 
 ## `GET /users/account-deletion/preview`
 

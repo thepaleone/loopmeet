@@ -53,13 +53,15 @@ Apple refresh tokens, kept only so they can be revoked at permanent deletion (D7
 
 ## New SQL functions
 
+The three `*_is_active` helpers live in a `private` schema (`create schema if not exists private; grant usage on schema private to authenticated, service_role;`). PostgREST only exposes `public`, so no client can call them as RPCs to probe whether someone is pending deletion, while policies can still execute them.
+
 | Function | Runs as | Who may execute | Purpose |
 | --- | --- | --- | --- |
-| `account_is_active(p_user_id uuid) → boolean` | definer, `stable` | `authenticated`, `service_role` | `not exists (account_deletions where user_id = p_user_id)` |
-| `group_is_active(p_group_id uuid) → boolean` | definer, `stable` | `authenticated`, `service_role` | The group exists and `account_is_active(owner_user_id)` |
-| `email_is_active(p_email text) → boolean` | definer, `stable` | `authenticated`, `service_role` | No pending user has this auth email (case-insensitive) |
+| `private.account_is_active(p_user_id uuid) → boolean` | definer, `stable` | `authenticated`, `service_role` | `not exists (account_deletions where user_id = p_user_id)` |
+| `private.group_is_active(p_group_id uuid) → boolean` | definer, `stable` | `authenticated`, `service_role` | The group exists and `private.account_is_active(owner_user_id)` |
+| `private.email_is_active(p_email text) → boolean` | definer, `stable` | `authenticated`, `service_role` | No pending user has this auth email (case-insensitive) |
 | `request_account_deletion() → account_deletions` | definer | `authenticated` | Inserts `(auth.uid(), now(), now() + 30 days, 'pending')` on conflict do nothing, and returns the row. Raises if `auth.uid()` is null. |
-| `restore_account_deletion() → void` | definer | `authenticated` | Deletes the caller's row if `status = 'pending' and purge_after > now()`. If a row exists otherwise, raises `deletion_in_progress`. With no row it does nothing, so repeat calls are idempotent. |
+| `restore_account_deletion() → boolean` | definer | `authenticated` | Deletes the caller's row if `status = 'pending' and purge_after > now()` and returns `true`. If a row exists otherwise, raises `deletion_in_progress`. With no row it returns `false`, so repeat calls are idempotent. |
 | `claim_due_account_purges(p_limit int) → setof account_deletions` | definer | `service_role` only | Due rows with a free lease: sets `status = 'purging'`, `claimed_at = now()`, `attempts + 1`. Uses `for update skip locked`. |
 | `record_account_purge_step(p_user_id uuid, p_step text, p_error text) → void` | definer | `service_role` only | Appends the step on success, or sets `last_error` and clears `claimed_at` on failure. |
 | `purge_account_data(p_user_id uuid) → void` | definer | `service_role` only | The `database` step (D5), in one transaction. Idempotent. |
@@ -88,7 +90,7 @@ Apple refresh tokens, kept only so they can be revoked at permanent deletion (D7
 ```sql
 select m.* from memberships m
 join groups g on g.id = m.group_id
-where account_is_active(m.member_user_id) and account_is_active(g.owner_user_id)
+where private.account_is_active(m.member_user_id) and private.account_is_active(g.owner_user_id)
 ```
 
 ## Policy changes (existing tables)
@@ -97,18 +99,18 @@ Every policy is dropped and recreated with its existing predicate kept intact, *
 
 | Table | Policy | Added condition |
 | --- | --- | --- |
-| `groups` | select | `account_is_active(owner_user_id)` |
-| `groups` | insert | `account_is_active(auth.uid())` |
-| `groups` | update | `account_is_active(owner_user_id)` |
-| `memberships` | select | `group_is_active(group_id) and account_is_active(member_user_id)` |
-| `memberships` | insert | `account_is_active(auth.uid())` (except the existing `service_role` branch) |
-| `invitations` | select | `group_is_active(group_id) and account_is_active(invited_by_user_id) and (invited_user_id is null or account_is_active(invited_user_id)) and email_is_active(invited_email)` |
-| `invitations` | insert | `account_is_active(auth.uid())` |
+| `groups` | select | `private.account_is_active(owner_user_id)` |
+| `groups` | insert | `private.account_is_active(auth.uid())` |
+| `groups` | update | `private.account_is_active(owner_user_id)` |
+| `memberships` | select | `private.group_is_active(group_id) and private.account_is_active(member_user_id)` |
+| `memberships` | insert | `private.account_is_active(auth.uid())` (except the existing `service_role` branch) |
+| `invitations` | select | `private.group_is_active(group_id) and private.account_is_active(invited_by_user_id) and (invited_user_id is null or private.account_is_active(invited_user_id)) and private.email_is_active(invited_email)` |
+| `invitations` | insert | `private.account_is_active(auth.uid())` |
 | `invitations` | update | same as select |
-| `meetups` | select, update, delete | `group_is_active(group_id) and account_is_active(created_by_user_id)` |
-| `meetups` | insert | `account_is_active(auth.uid())` |
-| `user_profiles` | select | `account_is_active(id)` |
-| `user_profiles` | insert, update | `account_is_active(auth.uid())` |
+| `meetups` | select, update, delete | `private.group_is_active(group_id) and private.account_is_active(created_by_user_id)` |
+| `meetups` | insert | `private.account_is_active(auth.uid())` |
+| `user_profiles` | select | `private.account_is_active(id)` |
+| `user_profiles` | insert, update | `private.account_is_active(auth.uid())` |
 
 The helper functions `is_group_owner`, `is_group_member`, `is_group_invited_recipient` and `can_insert_membership` are unchanged. They're always combined with the new conditions in the policies above.
 

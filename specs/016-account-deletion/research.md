@@ -22,6 +22,7 @@ Decisions made while planning 016, each with the alternatives considered. Refere
 - AND those helpers into every existing select, update and delete policy on `groups`, `memberships`, `invitations`, `meetups` and `user_profiles`.
 - AND `account_is_active(auth.uid())` into every insert policy, so a pending user can't create data by calling PostgREST directly (FR-009 at the data layer).
 - A third helper, `email_is_active(email)`, hides invitations addressed by email to a pending user.
+- All three live in a `private` schema that PostgREST doesn't expose, so clients can't call them as RPCs to probe someone's deletion status (analysis H1).
 
 **Rationale**:
 - Nothing is copied or moved, so restoring (FR-012) only removes the `account_deletions` row and everything is "exactly as it was".
