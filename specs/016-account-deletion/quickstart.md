@@ -21,8 +21,8 @@ supabase stop
 
 | Setting | Staging value | Checked |
 | --- | --- | --- |
-| Api `Supabase:AvatarBucketName` | | |
-| Edge `AVATAR_BUCKET_NAME` | | |
+| Api `Supabase:AvatarBucketName` | avatars | |
+| Edge `AVATAR_BUCKET_NAME` | avatars | |
 
 ## Speed up the 30 days for testing
 
