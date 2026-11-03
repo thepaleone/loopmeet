@@ -197,6 +197,7 @@ app.Use(async (context, next) =>
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<AccountDeletionGateMiddleware>();
 app.UseHttpsRedirection();
 
 app.MapUserEndpoints();
