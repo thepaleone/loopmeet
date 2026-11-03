@@ -29,6 +29,7 @@
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SignOutReason.cs" Link="Included\SignOutReason.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Services\ApiAuthHandler.cs" Link="Included\ApiAuthHandler.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Meetups\MeetupOrganizerText.cs" Link="Included\MeetupOrganizerText.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionConfirmation.cs" Link="Included\AccountDeletionConfirmation.cs" />
   </ItemGroup>
 
   <ItemGroup>

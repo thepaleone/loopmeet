@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Account.Views.DeleteAccountPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:LoopMeet.App.Features.Account.Models"
+    Title="Delete Account">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12">
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsFormVisible}">
+                <Label Text="Delete your account" FontSize="20" FontAttributes="Bold" />
+                <Label Text="Your account will be scheduled for permanent deletion in 30 days. From now on nobody else will see you, your groups or your meetups. To cancel, sign in before the deletion date and choose Restore account." />
+                <Label Text="Deleted with your account: your profile and photo, your memberships, the invitations you sent and received, and your notification settings." />
+
+                <VerticalStackLayout Spacing="4" IsVisible="{Binding HasOwnedGroups}">
+                    <Label Text="These groups you own will be deleted for everyone, with all of their meetups, members and invitations:" FontAttributes="Bold" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding OwnedGroups}" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:OwnedGroupSummary">
+                                <Label Text="{Binding Description, StringFormat='• {0}'}" />
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <Label Text="Type DELETE to confirm." FontAttributes="Bold" />
+                <Entry
+                    Text="{Binding Confirmation}"
+                    Placeholder="DELETE"
+                    Keyboard="Plain"
+                    IsSpellCheckEnabled="False"
+                    IsTextPredictionEnabled="False" />
+
+                <Label Text="{Binding ErrorMessage}" IsVisible="{Binding ShowError}" TextColor="Red" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+
+                <HorizontalStackLayout Spacing="8">
+                    <Button Text="Cancel" Command="{Binding CancelCommand}" />
+                    <Button
+                        Text="Delete my account"
+                        Command="{Binding DeleteCommand}"
+                        IsEnabled="{Binding CanDelete}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsScheduled}">
+                <Label Text="Account scheduled for deletion" FontSize="20" FontAttributes="Bold" />
+                <Label Text="{Binding ScheduledMessage}" />
+                <Button Text="OK" Command="{Binding AcknowledgeCommand}" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

@@ -1,3 +1,4 @@
+using AccountModels = LoopMeet.App.Features.Account.Models;
 using AuthModels = LoopMeet.App.Features.Auth.Models;
 using ProfileModels = LoopMeet.App.Features.Profile.Models;
 using Refit;
@@ -21,6 +22,12 @@ public interface IUsersApi
     [Multipart]
     [Post("/users/avatar")]
     Task<AuthModels.UserProfileResponse> UploadAvatarAsync([AliasAs("image")] StreamPart image);
+
+    [Get("/users/account-deletion/preview")]
+    Task<AccountModels.AccountDeletionPreviewResponse> GetAccountDeletionPreviewAsync();
+
+    [Post("/users/account-deletion")]
+    Task<AccountModels.AccountDeletionStatusResponse> RequestAccountDeletionAsync([Body] AccountModels.AccountDeletionRequest request);
 }
 
 public sealed class UsersApi
@@ -47,6 +54,12 @@ public sealed class UsersApi
 
     public async Task<ProfileModels.UserProfileResponse> UploadAvatarAsync(StreamPart image) =>
         Map(await _api.UploadAvatarAsync(image));
+
+    public Task<AccountModels.AccountDeletionPreviewResponse> GetAccountDeletionPreviewAsync() =>
+        _api.GetAccountDeletionPreviewAsync();
+
+    public Task<AccountModels.AccountDeletionStatusResponse> RequestAccountDeletionAsync(string confirmation) =>
+        _api.RequestAccountDeletionAsync(new AccountModels.AccountDeletionRequest { Confirmation = confirmation });
 
     private static ProfileModels.UserProfileResponse Map(AuthModels.UserProfileResponse response)
     {

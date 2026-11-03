@@ -1,3 +1,4 @@
+using LoopMeet.App.Features.Account.Views;
 using LoopMeet.App.Features.Auth.Views;
 using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.Views;
@@ -25,6 +26,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("invite-member", typeof(InviteMemberPage));
 		Routing.RegisterRoute("invitation-detail", typeof(InvitationDetailPage));
 		Routing.RegisterRoute("change-password", typeof(ChangePasswordPage));
+		Routing.RegisterRoute("delete-account", typeof(DeleteAccountPage));
 		Routing.RegisterRoute("create-meetup", typeof(CreateMeetupPage));
 		Routing.RegisterRoute("edit-meetup", typeof(EditMeetupPage));
 		Routing.RegisterRoute("meetup-detail", typeof(MeetupDetailPage));
