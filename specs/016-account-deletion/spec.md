@@ -158,7 +158,7 @@ When a request reaches its date, everything tied to the user is permanently dele
 
 - **SC-001**: A user can go from Profile to a confirmed deletion request in under 1 minute.
 - **SC-002**: In testing, a deletion can never be confirmed without typing `DELETE`: 0 of 20 attempts with other input succeed.
-- **SC-003**: Immediately after a request, other users see none of the hidden items on their next refresh, and 0 notifications reach or concern a pending user during the grace period.
+- **SC-003**: Within 30 seconds of a request (the existing list cache lifetime), other users see none of the hidden items when they refresh, and 0 notifications reach or concern a pending user during the grace period.
 - **SC-004**: After a restore, 100% of the user's groups, meetups, memberships and invitations from before the request are back and visible to the same people.
 - **SC-005**: Within 24 hours of the permanent-deletion time, an audit of every store listed in FR-014 and FR-015 finds 0 records for the user. A second run for the same user completes with 0 errors.
 - **SC-006**: 100% of deletion log entries carry the user identifier and 0 contain an email address or display name.
