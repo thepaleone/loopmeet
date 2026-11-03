@@ -92,3 +92,26 @@ jobs:
           path: |
             tests/**/TestResults/**/*.trx
           if-no-files-found: ignore
+
+  database-tests:
+    name: Run Database Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 3.0.0
+
+      # Applies every migration to a fresh database. Only Postgres and Auth are needed.
+      - name: Start local Supabase
+        run: supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Run pgTAP tests
+        run: supabase test db
+
+      - name: Lint database schema
+        run: supabase db lint --schema public,private --level error --fail-on error
