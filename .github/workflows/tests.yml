@@ -106,6 +106,13 @@ jobs:
         with:
           version: 3.0.0
 
+      # supabase/signing_keys.json holds a private key and is gitignored, so CI uses a throwaway one.
+      # The CLI loads config.toml (which points at that file) before generating, so seed it empty.
+      - name: Generate local JWT signing key
+        run: |
+          echo '[]' > supabase/signing_keys.json
+          supabase gen signing-key --algorithm ES256 --append
+
       # Applies every migration to a fresh database. Only Postgres and Auth are needed.
       - name: Start local Supabase
         run: supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
