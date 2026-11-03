@@ -16,12 +16,10 @@ declare
         limit 1
     );
 begin
-    if vault_project_url is null or vault_project_url = '' then
-        raise exception 'Missing vault secret: project_url';
-    end if;
-
-    if vault_publishable_key is null or vault_publishable_key = '' then
-        raise exception 'Missing vault secret: publishable_key';
+    -- Fresh local and CI databases have no vault secrets, so they get no cron job.
+    if coalesce(vault_project_url, '') = '' or coalesce(vault_publishable_key, '') = '' then
+        raise notice 'Vault secrets project_url/publishable_key missing; skipping cron schedule';
+        return;
     end if;
 
     if exists (select 1 from cron.job where jobname = 'reminders-scheduler-every-15-minutes') then

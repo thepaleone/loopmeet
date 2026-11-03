@@ -15,6 +15,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-09
 - Existing Supabase tables, unchanged. `meetups.created_by_user_id` already exists; display name and group name are resolved at read time, never stored on the meetup. (011-meetup-interactions)
 - C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client), `System.TimeProvider` (BCL). Deno std `@std/assert` for edge-function tests. No new NuGet packages. (012-past-meetups)
 - Existing Supabase `meetups` table, columns, indexes and RLS unchanged. "Past" is derived at read time. (012-past-meetups)
+- C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). SQL (PostgreSQL 17, Supabase migrations). + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest `Rpc`, `Functions`), `System.TimeProvider`. `@supabase/supabase-js` in edge functions, WebCrypto for the Apple ES256 client secret, `jsr:@std/assert@1` for tests. **New test tooling**: pgTAP through the Supabase CLI (`supabase test db`). No new NuGet or npm packages. (016-account-deletion)
+- New tables `account_deletions` and `apple_authorizations`, a view `active_memberships`, 8 SQL functions, and recreated RLS policies on `groups`, `memberships`, `invitations`, `meetups` and `user_profiles` ([data-model.md](specs/016-account-deletion/data-model.md)). Avatar objects live in Supabase Storage under `{bucket}/{userId}/`. (016-account-deletion)
 
 - C# 13 / .NET 10 + Microsoft.Maui.Controls 10.0.30, CommunityToolkit.Maui 14.0.0, CommunityToolkit.Mvvm 8.4.0 (004-ui-polish)
 
@@ -34,9 +36,9 @@ tests/
 C# 13 / .NET 10: Follow standard conventions
 
 ## Recent Changes
+- 016-account-deletion: Added C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). SQL (PostgreSQL 17, Supabase migrations). + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest `Rpc`, `Functions`), `System.TimeProvider`. `@supabase/supabase-js` in edge functions, WebCrypto for the Apple ES256 client secret, `jsr:@std/assert@1` for tests. **New test tooling**: pgTAP through the Supabase CLI (`supabase test db`). No new NuGet or npm packages.
 - 012-past-meetups: Added C# 13 / .NET 10 (MAUI client + minimal-API backend). TypeScript on Deno 2.x (Supabase Edge Functions). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client), `System.TimeProvider` (BCL). Deno std `@std/assert` for edge-function tests. No new NuGet packages.
 - 011-meetup-interactions: Added C# 13 / .NET 10 (MAUI client + minimal-API backend). No database schema changes. + Microsoft.Maui.Controls 10.0.70, CommunityToolkit.Mvvm 8.4.2, Refit.HttpClientFactory 10.2.0, Supabase 1.1.1 (Postgrest client). No new packages.
-- 010-fix-auth-session: Added C# 13 / .NET 10 (MAUI client). No backend or Supabase schema changes. + Microsoft.Maui.Controls 10.0.70, Supabase 1.1.1 (Supabase.Gotrue 6.0.3: `TokenRefresh`, `GotrueException.Reason`, `Client.RefreshToken()`, `AddStateChangedListener`), CommunityToolkit.Mvvm 8.4.0, Refit.HttpClientFactory 10.1.6, OneSignalSDK.DotNet 6.1.8.
 
 
 <!-- MANUAL ADDITIONS START -->

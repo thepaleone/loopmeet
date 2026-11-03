@@ -10,6 +10,8 @@ using LoopMeet.App.Features.Invitations.ViewModels;
 using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Features.Meetups.ViewModels;
 using LoopMeet.App.Features.Meetups.Views;
+using LoopMeet.App.Features.Account.ViewModels;
+using LoopMeet.App.Features.Account.Views;
 using LoopMeet.App.Features.Profile.ViewModels;
 using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Features.DevTools.ViewModels;
@@ -127,6 +129,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<PendingInvitationsViewModel>();
 		builder.Services.AddTransient<ProfileViewModel>();
 		builder.Services.AddTransient<ChangePasswordViewModel>();
+		builder.Services.AddTransient<DeleteAccountViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<HomePage>();
@@ -143,6 +146,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<ProfilePage>();
 		builder.Services.AddTransient<SettingsPage>();
 		builder.Services.AddTransient<ChangePasswordPage>();
+		builder.Services.AddTransient<DeleteAccountPage>();
 		builder.Services.AddTransient<DevInfoViewModel>();
 		builder.Services.AddTransient<DevInfoPage>();
 
