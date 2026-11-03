@@ -29,6 +29,17 @@ public sealed class AuthService
     {
         try{
             var response = await _client.Auth.SignUp(email, password);
+
+            // Gotrue only stores a sign-up session when the user's confirmed_at is set, and Supabase
+            // Auth returns email_confirmed_at without it. Adopt the session so Api calls carry the
+            // token and it is persisted; otherwise the profile request goes out unauthenticated.
+            if (_client.Auth.CurrentSession is null
+                && !string.IsNullOrWhiteSpace(response?.AccessToken)
+                && !string.IsNullOrWhiteSpace(response.RefreshToken))
+            {
+                response = await _client.Auth.SetSession(response.AccessToken, response.RefreshToken);
+            }
+
             return new AuthSession { AccessToken = response?.AccessToken ?? string.Empty };
         }
         catch (Exception ex)
