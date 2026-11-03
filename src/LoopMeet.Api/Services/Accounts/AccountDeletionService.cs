@@ -42,7 +42,16 @@ public sealed class AccountDeletionService
         _logger = logger;
     }
 
+    private static readonly TimeSpan CacheTtl = TimeSpan.FromSeconds(30);
+
     public static string CacheKey(Guid userId) => $"account-deletion:{userId}";
+
+    /// <summary>
+    /// The caller's deletion row (null when active), cached for 30 seconds so the gate doesn't
+    /// query on every request. Requesting and restoring remove the entry.
+    /// </summary>
+    public Task<AccountDeletion?> GetCachedAsync(Guid userId, CancellationToken cancellationToken = default) =>
+        _cacheService.GetOrSetAsync(CacheKey(userId), CacheTtl, () => _deletionRepository.GetAsync(userId, cancellationToken));
 
     /// <summary>
     /// The status clients see. Once the deletion date has passed the account counts as purging,

@@ -99,6 +99,7 @@ public static class MeetupsEndpoints
                 return result.Status switch
                 {
                     MeetupCommandStatus.Success => Results.Created($"/groups/{groupId}/meetups/{result.Meetup!.Id}", result.Meetup),
+                    MeetupCommandStatus.NotFound => Results.NotFound(),
                     MeetupCommandStatus.InvalidTitle => Results.Json(new ErrorResponse
                     {
                         Code = "invalid_meetup_title",

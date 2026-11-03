@@ -145,7 +145,7 @@
 
 ### Tests for User Story 2
 
-- [ ] T023 [P] [US2] Create `supabase/tests/database/account_deletion_visibility.test.sql`.
+- [X] T023 [P] [US2] Create `supabase/tests/database/account_deletion_visibility.test.sql`.
   - **Fixture:**
     - users A, B and C, with profiles
     - group G owned by A, with members A and B, a meetup, and a pending invitation A → B
@@ -155,13 +155,13 @@
   - **As A:** inserts into `groups`, `meetups`, `invitations`, `memberships` and `user_profiles` fail (FR-009).
   - **Restore:** after `restore_account_deletion()` as A, every item is visible again with identical column values (FR-012).
   - **Control:** an unrelated active user's data stays visible throughout.
-- [ ] T024 [P] [US2] Add assertions to `account_deletion_visibility.test.sql` for `active_memberships`: it excludes A's memberships and every membership of G while A is pending, includes them again after restore, and can't be selected by `authenticated` (FR-008).
-- [ ] T025 [P] [US2] Create `supabase/functions/_shared/account-status.test.ts` (`isAccountActive` against a fake client) and `supabase/functions/notifications-dispatch/recipient-resolver.test.ts`:
+- [X] T024 [P] [US2] Add assertions to `account_deletion_visibility.test.sql` for `active_memberships`: it excludes A's memberships and every membership of G while A is pending, includes them again after restore, and can't be selected by `authenticated` (FR-008).
+- [X] T025 [P] [US2] Create `supabase/functions/_shared/account-status.test.ts` (`isAccountActive` against a fake client) and `supabase/functions/notifications-dispatch/recipient-resolver.test.ts`:
   - Meetup recipients come from `active_memberships`.
   - An invitation to a pending user returns `[]`, and one to an active user returns that user.
   - Use a fake client passed in as a parameter, and import `jsr:@std/assert@1` directly.
-- [ ] T026 [P] [US2] Add a Deno source test, `supabase/functions/reminders-scheduler/recipients-source.test.ts`, asserting that `index.ts` reads `.from("active_memberships")` and not `.from("memberships")`. The scheduler's handler isn't injectable, and this is the repo's accepted source-inspection pattern.
-- [ ] T027 [P] [US2] Create `tests/LoopMeet.Api.Tests/Endpoints/AccountDeletionGateTests.cs`:
+- [X] T026 [P] [US2] Add a Deno source test, `supabase/functions/reminders-scheduler/recipients-source.test.ts`, asserting that `index.ts` reads `.from("active_memberships")` and not `.from("memberships")`. The scheduler's handler isn't injectable, and this is the repo's accepted source-inspection pattern.
+- [X] T027 [P] [US2] Create `tests/LoopMeet.Api.Tests/Endpoints/AccountDeletionGateTests.cs`:
   - A pending caller gets 403 `account_pending_deletion` with `deletesAt` on `/groups` and `/users/profile`.
   - The same caller gets 200 on all three `/users/account-deletion*` routes.
   - An active caller and unauthenticated routes are unaffected.
@@ -169,23 +169,23 @@
 
 ### Implementation for User Story 2
 
-- [ ] T028 [US2] Create `supabase/migrations/20261103120100_account_deletion_visibility.sql`:
+- [X] T028 [US2] Create `supabase/migrations/20261103120100_account_deletion_visibility.sql`:
   - Drop and recreate every policy listed in data-model.md "Policy changes", with the existing predicate intact AND the added condition. Keep the existing `service_role` branch on memberships insert.
   - Create the `active_memberships` view: revoke from `public`, `anon` and `authenticated`; grant select to `service_role`.
-- [ ] T029 [P] [US2] Create `supabase/functions/_shared/account-status.ts` exporting `isAccountActive(client, userId)`.
-- [ ] T030 [US2] Change `supabase/functions/notifications-dispatch/recipient-resolver.ts`:
+- [X] T029 [P] [US2] Create `supabase/functions/_shared/account-status.ts` exporting `isAccountActive(client, userId)`.
+- [X] T030 [US2] Change `supabase/functions/notifications-dispatch/recipient-resolver.ts`:
   - `resolveRecipients(client, input)` takes the client as a parameter.
   - Meetups read `active_memberships`.
   - Invitations return `[]` unless `isAccountActive(invited_user_id)`.
 
   Update the call in `supabase/functions/notifications-dispatch/index.ts` to pass its service-role client.
-- [ ] T031 [US2] In `supabase/functions/reminders-scheduler/index.ts`, change `fetchRecipients` to read `active_memberships`.
-- [ ] T032 [US2] Create `src/LoopMeet.Api/Services/Accounts/AccountDeletionGateMiddleware.cs`.
+- [X] T031 [US2] In `supabase/functions/reminders-scheduler/index.ts`, change `fetchRecipients` to read `active_memberships`.
+- [X] T032 [US2] Create `src/LoopMeet.Api/Services/Accounts/AccountDeletionGateMiddleware.cs`.
   - For authenticated requests whose path doesn't start with `/users/account-deletion`, it reads the caller's status through `ICacheService.GetOrSetAsync("account-deletion:{userId}", 30 s, …)`.
   - When the status is pending or purging, it writes 403 `AccountPendingDeletionResponse` and logs `AccountDeletionGateBlocked` at debug level.
 
   Add `app.UseMiddleware<AccountDeletionGateMiddleware>()` after `app.UseAuthorization()` in `src/LoopMeet.Api/Program.cs`.
-- [ ] T033 [US2] Review every repository update, delete and accept path (`MeetupRepository`, `InvitationRepository`, `MembershipRepository`, `GroupRepository`) to confirm that a zero-row Postgrest result maps to not-found or a `*CommandStatus.NotFound` result rather than an exception (FR-007). Fix any path that throws, and record the findings in Notes.
+- [X] T033 [US2] Review every repository update, delete and accept path (`MeetupRepository`, `InvitationRepository`, `MembershipRepository`, `GroupRepository`) to confirm that a zero-row Postgrest result maps to not-found or a `*CommandStatus.NotFound` result rather than an exception (FR-007). Fix any path that throws, and record the findings in Notes.
 
 **Checkpoint**: US2 is complete. Quickstart rows 4, 5 and 12 pass.
 
@@ -399,3 +399,22 @@ Each PR is merged to `main` only after its checkpoint passes. PR A–C may be de
 - **T019**: only `GetAccountDeletionPreviewAsync` and `RequestAccountDeletionAsync` were added. `GetAccountDeletionAsync` and `RestoreAccountAsync` move to T050/T052, where they're first used, so PR A has no unused client methods.
 - **T020/T021**: once the deletion is scheduled, the page hides the back button and swallows hardware back, so OK (sign out) is the only way out. The delete button keeps the default Button style, so its Disabled visual state still applies. There's no destructive colour key in `Colors.xaml`.
 - **Checkpoint**: quickstart rows 1–3 on Android staging need the core migration on staging, an Api `staging/**` tag and an app build.
+
+### US2 notes (PR B)
+
+- **T028**:
+  - The recreated policies apply `to authenticated`, where before they applied to every role. anon has no usage on `private`, so with the helpers added an anon query would have failed instead of returning nothing. With no policy, anon still sees nothing; pgTAP asserts this.
+  - The memberships insert policy loses its `current_setting('role') = 'service_role'` branch. service_role has `bypassrls`, so that branch never decided anything.
+  - A pending user can't see their own groups any more, so their preview lists no owned groups. Nothing uses the preview after the request.
+- **T023/T024**: the restore check compares every row each viewer can see (as `to_jsonb`) before the request and after restore, so any changed column value fails it.
+- **T025/T029/T030**:
+  - `isAccountActive` and `resolveRecipients` take the service-role client as a parameter and type it with `import type { SupabaseClient } from "npm:@supabase/supabase-js@2"`.
+  - The full `npm:` specifier is needed because `deno test` from the repo root ignores the per-function import maps.
+  - A hand-written structural client type doesn't work: comparing it with supabase-js's generics fails with TS2589. The fake lives in `_shared/fake-query-client.ts` and casts to `SupabaseClient`.
+- **T026**: CI's `deno test` now runs with `--allow-read=supabase/functions` so the source test can read `index.ts`. A mutation check (reverting to `.from("memberships")`) fails it.
+  - `deno check` on `reminders-scheduler/index.ts` already reports TS2352 on `fetchTodayCandidateMeetups` on `main`. It's unrelated to this feature and left alone.
+- **T032**: the middleware resolves `AccountDeletionService` from `RequestServices` only for authenticated requests. Injecting it into `InvokeAsync` would build the scoped Supabase client, which throws without a bearer token, on every unauthenticated request. The cached read is `AccountDeletionService.GetCachedAsync`, next to `CacheKey`.
+- **T033**: repository update and delete calls ignore the returned rows, so a zero-row result never throws. The command services load the row first, so a hidden row becomes `NotFound`. This covers group rename, meetup update and delete, and invitation create, accept and decline.
+  - **Fixed**: `MeetupCommandService.CreateAsync` didn't check the group. In a group hidden by RLS, the insert check rejected the row and the request failed with 500. It now returns 404 when `GetByIdAsync` finds no group. Regression test: `CreateInAGroupTheCallerCannotSeeReturnsNotFound`.
+  - `create_membership_from_invitation` is security definer and bypasses RLS. A pending user could reach it only with an accepted invitation and no membership row, and the Api gate stops them first. It's unchanged.
+- **Checkpoint**: quickstart rows 4, 5 and 12 need the visibility migration on staging, an Api `staging/**` tag, and a redeploy of `notifications-dispatch` and `reminders-scheduler`.

@@ -88,6 +88,26 @@ public sealed class MeetupsEndpointsTests
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task CreateInAGroupTheCallerCannotSeeReturnsNotFound()
+    {
+        // RLS hides a group whose owner is pending deletion, and the insert would be rejected (FR-007).
+        var userId = Guid.NewGuid();
+        _client.DefaultRequestHeaders.Add("X-Test-UserId", userId.ToString());
+
+        var response = await _client.PostAsJsonAsync($"/groups/{Guid.NewGuid()}/meetups", new CreateMeetupRequest
+        {
+            Title = "Hidden group meetup",
+            ScheduledAt = DateTimeOffset.UtcNow.AddDays(7)
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        lock (_store.SyncRoot)
+        {
+            Assert.Empty(_store.Meetups);
+        }
+    }
+
     // ── T020: GET /groups/{groupId}/meetups ──────────────────────────────
 
     [Fact]

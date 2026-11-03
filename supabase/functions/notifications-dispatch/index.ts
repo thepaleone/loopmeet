@@ -117,7 +117,7 @@ Deno.serve(async (request) => {
     return Response.json({ skipped: true, reason: "unsupported_event" });
   }
 
-  const recipients = await resolveRecipients({ table: payload.table, record: payload.record });
+  const recipients = await resolveRecipients(supabase, { table: payload.table, record: payload.record });
   if (recipients.length === 0) {
     return Response.json({ skipped: true, reason: "no_recipients" });
   }

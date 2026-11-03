@@ -20,17 +20,20 @@ public sealed record MeetupCommandResult(MeetupCommandStatus Status, MeetupRespo
 public sealed class MeetupCommandService
 {
     private readonly IMeetupRepository _meetupRepository;
+    private readonly IGroupRepository _groupRepository;
     private readonly ICacheService _cacheService;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<MeetupCommandService> _logger;
 
     public MeetupCommandService(
         IMeetupRepository meetupRepository,
+        IGroupRepository groupRepository,
         ICacheService cacheService,
         TimeProvider timeProvider,
         ILogger<MeetupCommandService> logger)
     {
         _meetupRepository = meetupRepository;
+        _groupRepository = groupRepository;
         _cacheService = cacheService;
         _timeProvider = timeProvider;
         _logger = logger;
@@ -59,6 +62,14 @@ public sealed class MeetupCommandService
         {
             _logger.LogWarning("Create meetup invalid location for group {GroupId} by {UserId}", groupId, userId);
             return new MeetupCommandResult(MeetupCommandStatus.InvalidLocation, null);
+        }
+
+        // RLS hides groups the caller can't see, including one whose owner is pending deletion.
+        // Its insert check would reject the meetup, so report not found instead of failing.
+        if (await _groupRepository.GetByIdAsync(groupId, cancellationToken) is null)
+        {
+            _logger.LogWarning("Create meetup group not found {GroupId} for {UserId}", groupId, userId);
+            return new MeetupCommandResult(MeetupCommandStatus.NotFound, null);
         }
 
         _logger.LogInformation("Creating meetup for group {GroupId} by {UserId}", groupId, userId);
