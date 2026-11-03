@@ -26,3 +26,7 @@ dotnet build -c Staging -t:Run -f net10.0-android src/LoopMeet.App
 ```
 
 `-t:Run` builds the app, installs it on the connected device, and launches it.
+
+## Build a Google Play release
+
+`deploy/build-android-release.sh -b <build-number>` builds a signed `.aab` into `artifacts/android/<build-number>/`. It reads the upload key from `LOOPMEET_ANDROID_KEYSTORE`, `LOOPMEET_ANDROID_KEY_ALIAS` and `LOOPMEET_ANDROID_KEYSTORE_PASS` (plus `LOOPMEET_ANDROID_KEY_PASS` if the key has its own password). Every upload needs a build number higher than the last one.
