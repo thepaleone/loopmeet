@@ -67,5 +67,22 @@
 	<string>Assets.xcassets/appicon.appiconset</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>LoopMeet needs access to your photo library to let you set a profile picture.</string>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>__MAUI_DEFAULT_SCENE_CONFIGURATION__</string>
+					<key>UISceneDelegateClassName</key>
+					<string>SceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 </dict>
 </plist>
