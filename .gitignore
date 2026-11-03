@@ -84,3 +84,8 @@ Thumbs.db
 *.swp
 .idea/
 loopmeet-production-firebase-adminsdk-fbsvc-e8d81bec57.json
+
+# Android upload keys and release output (feature 015)
+*.keystore
+*.jks
+artifacts/
