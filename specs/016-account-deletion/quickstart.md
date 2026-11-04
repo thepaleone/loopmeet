@@ -21,8 +21,8 @@ supabase stop
 
 | Setting | Staging value | Checked |
 | --- | --- | --- |
-| Api `Supabase:AvatarBucketName` | avatars | |
-| Edge `AVATAR_BUCKET_NAME` | avatars | |
+| Api `Supabase:AvatarBucketName` | avatars | ✓ |
+| Edge `AVATAR_BUCKET_NAME` | avatars | ✓ |
 
 ## Speed up the 30 days for testing
 
@@ -45,16 +45,16 @@ Use three test accounts:
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
-| 1 | A: Profile → Delete Account | Screen lists G with "2 members" and the date 30 days out. Delete is disabled. Time from Profile to confirmed request is under 1 minute (SC-001). | |
-| 2 | Type `delete`, then `DELETE` followed by a space | Delete stays disabled | |
-| 3 | Type `DELETE`, tap Delete | The date is shown, and after acknowledging, A is on the sign-in screen | |
-| 4 | B: refresh Home and Groups (wait 30 s) | G and its meetups are gone. A's invitation to B is gone. | |
-| 5 | C: open H | A isn't in H's members and the count dropped by 1 | |
-| 6 | A was also signed in on a second device: open the app there | The scheduled-deletion screen with the date. Nothing else is reachable. | |
-| 7 | A signs in again → Sign out | Signed out, and the deletion is still scheduled (row unchanged) | |
-| 8 | A signs in again → Restore account | Home. G, meetups, memberships and invitations are all back for A, B and C. | |
-| 9 | Request again, then force the date and run the purge | `account_deletions` row gone, A can't sign in, B no longer has G, A's avatar folder is empty, and OneSignal has no user with external id A | |
-| 10 | Run the purge again | `{"claimed":0}` and no errors | |
-| 11 | Sign up again with A's email | A new, empty account | |
-| 12 | Push: create a meetup in H while A is pending | B and C get it, A doesn't | |
-| 13 | iOS only (after 013): Sign in with Apple, then request deletion and force the purge | An `apple_authorizations` row exists after sign-in. After the purge, LoopMeet is gone from Settings → Apple ID → Sign in with Apple. | |
+| 1 | A: Profile → Delete Account | Screen lists G with "2 members" and the date 30 days out. Delete is disabled. Time from Profile to confirmed request is under 1 minute (SC-001). || Pass, Android staging, 2026-11-04 |
+| 2 | Type `delete`, then `DELETE` followed by a space | Delete stays disabled || Pass, Android staging, 2026-11-04 |
+| 3 | Type `DELETE`, tap Delete | The date is shown, and after acknowledging, A is on the sign-in screen || Pass, Android staging, 2026-11-04 |
+| 4 | B: refresh Home and Groups (wait 30 s) | G and its meetups are gone. A's invitation to B is gone. || Pass, Android staging, 2026-11-04 |
+| 5 | C: open H | A isn't in H's members and the count dropped by 1 || Pass, Android staging, 2026-11-04 |
+| 6 | A was also signed in on a second device: open the app there | The scheduled-deletion screen with the date. Nothing else is reachable. || Pass, Android staging, 2026-11-04 |
+| 7 | A signs in again → Sign out | Signed out, and the deletion is still scheduled (row unchanged) || Pass, Android staging, 2026-11-04 |
+| 8 | A signs in again → Restore account | Home. G, meetups, memberships and invitations are all back for A, B and C. || Pass, Android staging, 2026-11-04 |
+| 9 | Request again, then force the date and run the purge | `account_deletions` row gone, A can't sign in, B no longer has G, A's avatar folder is empty, and OneSignal has no user with external id A || Pass, Android staging, 2026-11-04 |
+| 10 | Run the purge again | `{"claimed":0}` and no errors || Pass, Android staging, 2026-11-04 |
+| 11 | Sign up again with A's email | A new, empty account || Pass, Android staging, 2026-11-04. First attempt crashed on sign-up, an existing bug fixed in #23. |
+| 12 | Push: create a meetup in H while A is pending | B and C get it, A doesn't || Pass, Android staging, 2026-11-04 |
+| 13 | iOS only (after 013): Sign in with Apple, then request deletion and force the purge | An `apple_authorizations` row exists after sign-in. After the purge, LoopMeet is gone from Settings → Apple ID → Sign in with Apple. || Pending: needs the Apple secrets and 013 (iOS builds) |

@@ -318,7 +318,7 @@
   - New RLS policies must AND `private.account_is_active` / `private.group_is_active`.
   - `supabase test db` needs `DOCKER_HOST` pointed at podman locally.
 - [X] T056 [P] Run `deno lint supabase/functions/`, `deno test supabase/functions/`, `supabase test db` and the full `dotnet test`. Compare against the T001–T003 baselines in Notes. No new warnings.
-- [ ] T057 Deploy to staging per the quickstart.md checklist (migrations, secrets including `AVATAR_BUCKET_NAME`, functions, cron check, an Api `staging/**` tag, an app build) and fill in the bucket-name table.
+- [X] T057 Deploy to staging per the quickstart.md checklist (migrations, secrets including `AVATAR_BUCKET_NAME`, functions, cron check, an Api `staging/**` tag, an app build) and fill in the bucket-name table.
 - [ ] T058 Run quickstart.md rows 1–12 on Android staging and record the results. Row 13 (iOS Apple revocation) stays open until 013 can be tested on a device. Record the Google Play closed-testing review outcome for the delete-account path (SC-007).
 
 ---
@@ -473,3 +473,7 @@ Each PR is merged to `main` only after its checkpoint passes. PR A–C may be de
 - **Checkpoint**:
   - Rows 6–8 need an Api `staging/**` tag (for the restore endpoint) and an app build.
   - They also need a fresh test account, because A was permanently deleted in row 9.
+- **T057/T058**:
+  - Staging has every migration, both new edge functions, `AVATAR_BUCKET_NAME=avatars`, the `account-purge-hourly` cron job, the Api and app 0.1.3.
+  - Quickstart rows 1–12 pass on Android staging (2026-11-04). Row 11 first exposed an existing email sign-up crash, fixed in #23.
+  - T058 stays open for row 13 (iOS Apple revocation, which needs the Apple secrets and 013) and for the Google Play review outcome of the delete-account path (SC-007).
