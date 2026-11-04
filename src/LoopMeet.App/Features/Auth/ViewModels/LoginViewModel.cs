@@ -148,6 +148,11 @@ public sealed partial class LoginViewModel : ObservableObject
             ShowError = true;
             ErrorMessage = "That login did not work. Please try again or create an account.";
         }
+        catch (ApiException ex) when (AccountStatusHandler.IsPendingDeletion(ex.Content))
+        {
+            // AccountDeletionGate has already navigated to the scheduled-deletion screen.
+            _logger.LogInformation("Sign-in reached an account scheduled for deletion.");
+        }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Sign-in failed for {Email}: network error.", Email);
@@ -235,6 +240,11 @@ public sealed partial class LoginViewModel : ObservableObject
             await RunPostSignInSetupBoundedAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
+        catch (ApiException ex) when (AccountStatusHandler.IsPendingDeletion(ex.Content))
+        {
+            // AccountDeletionGate has already navigated to the scheduled-deletion screen.
+            _logger.LogInformation("Google sign-in reached an account scheduled for deletion.");
+        }
         catch (OperationCanceledException)
         {
             // Abandoned mid-flow (backgrounded native sheet or a fresh attempt
@@ -301,6 +311,11 @@ public sealed partial class LoginViewModel : ObservableObject
             await CacheProfileSummaryAsync();
             await RunPostSignInSetupBoundedAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
+        }
+        catch (ApiException ex) when (AccountStatusHandler.IsPendingDeletion(ex.Content))
+        {
+            // AccountDeletionGate has already navigated to the scheduled-deletion screen.
+            _logger.LogInformation("Apple sign-in reached an account scheduled for deletion.");
         }
         catch (OperationCanceledException)
         {

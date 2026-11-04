@@ -14,6 +14,7 @@ public static class ApiClient
             {
                 client.BaseAddress = new Uri(config.ApiBaseUrl);
             })
-            .AddHttpMessageHandler<ApiAuthHandler>();
+            .AddHttpMessageHandler<ApiAuthHandler>()
+            .AddHttpMessageHandler<AccountStatusHandler>();
     }
 }
