@@ -5,6 +5,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:LoopMeet.App.Features.Groups.ViewModels"
+    xmlns:controls="clr-namespace:LoopMeet.App.Controls"
     Title="{Binding GroupName}">
 
     <ContentPage.Resources>
@@ -100,6 +101,8 @@
                     <Label Text="{Binding GroupName}" FontSize="24" FontAttributes="Bold" />
                     <Button Text="Edit Group" Command="{Binding EditGroupCommand}" IsVisible="{Binding IsOwner}" />
                     <Label Text="Members" FontAttributes="Bold" FontSize="16" Margin="0,8,0,4" />
+                    <!-- Placeholders until the group loads (019) -->
+                    <controls:SkeletonList Variant="MemberTile" Count="4" IsActive="{Binding ShowMembersSkeleton}" />
                     <FlexLayout
                         BindableLayout.ItemsSource="{Binding Members}"
                         Wrap="Wrap"
@@ -203,7 +206,8 @@
                         </Grid>
                     </Border>
 
-                    <!-- Upcoming list -->
+                    <!-- Upcoming list, with placeholders until it first loads (019) -->
+                    <controls:SkeletonList Variant="GroupMeetupCard" Count="2" IsActive="{Binding ShowUpcomingSkeleton}" />
                     <VerticalStackLayout
                         BindableLayout.ItemsSource="{Binding Meetups}"
                         BindableLayout.ItemTemplate="{StaticResource MeetupCardTemplate}"
@@ -214,7 +218,8 @@
                         Style="{StaticResource MeetupListEmptyStyle}"
                         IsVisible="{Binding ShowUpcomingEmpty}" />
 
-                    <!-- Past list: newest first, more pages load near the bottom -->
+                    <!-- Past list: newest first, more pages load near the bottom; placeholders until the first page (019) -->
+                    <controls:SkeletonList Variant="GroupMeetupCard" Count="2" IsActive="{Binding ShowPastSkeleton}" />
                     <VerticalStackLayout
                         BindableLayout.ItemsSource="{Binding PastMeetups}"
                         BindableLayout.ItemTemplate="{StaticResource MeetupCardTemplate}"

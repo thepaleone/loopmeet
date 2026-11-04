@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Controls;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Services;
 using Microsoft.Maui.ApplicationModel;
@@ -21,11 +22,12 @@ public sealed partial class GroupsListViewModel : ObservableObject
     [ObservableProperty]
     private bool _showEmptyState;
 
-    [ObservableProperty]
-    private bool _isLoadingOwnedGroups;
+    // Set once the first load ends, however it ends, so the placeholders give way to the result.
+    // Reloads keep the listed groups on screen (019).
+    private bool _hasLoadedOnce;
 
-    [ObservableProperty]
-    private bool _isLoadingMemberGroups;
+    public bool ShowOwnedGroupsSkeleton => LoadingPlaceholders.ShouldShow(_hasLoadedOnce, OwnedGroups.Count);
+    public bool ShowMemberGroupsSkeleton => LoadingPlaceholders.ShouldShow(_hasLoadedOnce, MemberGroups.Count);
 
     [ObservableProperty]
     private bool _isRefreshing;
@@ -91,8 +93,6 @@ public sealed partial class GroupsListViewModel : ObservableObject
 
     private async Task LoadCoreAsync()
     {
-        IsLoadingOwnedGroups = true;
-        IsLoadingMemberGroups = true;
         try
         {
             _logger.LogInformation("Loading groups tab list...");
@@ -148,8 +148,9 @@ public sealed partial class GroupsListViewModel : ObservableObject
         }
         finally
         {
-            IsLoadingOwnedGroups = false;
-            IsLoadingMemberGroups = false;
+            _hasLoadedOnce = true;
+            OnPropertyChanged(nameof(ShowOwnedGroupsSkeleton));
+            OnPropertyChanged(nameof(ShowMemberGroupsSkeleton));
         }
     }
 

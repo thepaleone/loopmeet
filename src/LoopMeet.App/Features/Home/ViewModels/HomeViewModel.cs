@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Controls;
 using LoopMeet.App.Features.Meetups.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
@@ -39,6 +40,12 @@ public sealed partial class HomeViewModel(
     // The load in progress, shared by OnAppearing and pull to refresh so they never overlap:
     // two loads would both clear and refill UpcomingMeetups.
     private Task? _inFlightLoad;
+
+    // Set once the first load ends, however it ends, so the placeholders give way to the result.
+    private bool _hasLoadedOnce;
+
+    /// <summary>Placeholder meetup cards, shown only until the first load ends (019).</summary>
+    public bool ShowMeetupsSkeleton => LoadingPlaceholders.ShouldShow(_hasLoadedOnce, UpcomingMeetups.Count);
 
     [RelayCommand]
     private Task LoadAsync() => LoadOnceAsync();
@@ -102,6 +109,11 @@ public sealed partial class HomeViewModel(
             logger.LogError(ex, "Failed to load upcoming meetups.");
             HasUpcomingMeetups = false;
             ShowEmptyState = true;
+        }
+        finally
+        {
+            _hasLoadedOnce = true;
+            OnPropertyChanged(nameof(ShowMeetupsSkeleton));
         }
     }
 

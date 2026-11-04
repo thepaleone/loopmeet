@@ -3,6 +3,7 @@
     x:Class="LoopMeet.App.Features.Groups.Views.GroupsListPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:LoopMeet.App.Controls"
     x:Name="GroupsPage"
     Title="LoopMeet">
 
@@ -12,65 +13,9 @@
                 <VerticalStackLayout Padding="24" Spacing="12" Margin="0,0,0,80">
                     <Label Text="Groups" FontSize="18" FontAttributes="Bold" />
 
-                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingOwnedGroups}">
-                    <!-- Skeleton card 1 -->
-                    <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                            Padding="12,10" Margin="0,0,0,4">
-                        <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
-                        <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
-                            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                            </Border>
-                            <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
-                                <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
-                                </Border>
-                                <Border x:Name="OwnedShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <!-- Skeleton card 2 -->
-                    <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                            Padding="12,10" Margin="0,0,0,4">
-                        <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
-                        <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
-                            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                            </Border>
-                            <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
-                                <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
-                                </Border>
-                                <Border x:Name="OwnedShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <!-- Skeleton card 3 -->
-                    <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                            Padding="12,10" Margin="0,0,0,4">
-                        <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
-                        <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
-                            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                            </Border>
-                            <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
-                                <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
-                                </Border>
-                                <Border x:Name="OwnedShimmer3" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                            </Grid>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
+                <!-- Placeholders until the first load ends (019) -->
+                <controls:SkeletonList Variant="GroupCard" Count="3" IsActive="{Binding ShowOwnedGroupsSkeleton}" />
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding OwnedGroups}" Spacing="8">
-                    <VerticalStackLayout.Triggers>
-                        <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsLoadingOwnedGroups}" Value="True">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </VerticalStackLayout.Triggers>
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <Border
@@ -147,48 +92,9 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="8" IsVisible="{Binding IsLoadingMemberGroups}">
-                    <!-- Skeleton card 1 -->
-                    <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                            Padding="12,10" Margin="0,0,0,4">
-                        <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
-                        <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
-                            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                            </Border>
-                            <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
-                                <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
-                                </Border>
-                                <Border x:Name="MemberShimmer1" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                            </Grid>
-                        </Grid>
-                    </Border>
-                    <!-- Skeleton card 2 -->
-                    <Border Style="{StaticResource BubbleCardCompactBorderStyle}"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
-                            Padding="12,10" Margin="0,0,0,4">
-                        <Border.StrokeShape><RoundRectangle CornerRadius="14,18,16,20" /></Border.StrokeShape>
-                        <Grid ColumnDefinitions="54,*" ColumnSpacing="12" VerticalOptions="Center">
-                            <Border WidthRequest="48" HeightRequest="48" BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                <Border.StrokeShape><Ellipse /></Border.StrokeShape>
-                            </Border>
-                            <Grid Grid.Column="1" HeightRequest="14" VerticalOptions="Center">
-                                <Border BackgroundColor="#E2E8F0" StrokeThickness="0">
-                                    <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
-                                </Border>
-                                <Border x:Name="MemberShimmer2" BackgroundColor="#F8FAFC" Opacity="0.7" WidthRequest="80" HorizontalOptions="Start" />
-                            </Grid>
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
+                <!-- Placeholders until the first load ends (019) -->
+                <controls:SkeletonList Variant="GroupCard" Count="2" IsActive="{Binding ShowMemberGroupsSkeleton}" />
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding MemberGroups}" Spacing="8">
-                    <VerticalStackLayout.Triggers>
-                        <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding IsLoadingMemberGroups}" Value="True">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </VerticalStackLayout.Triggers>
                     <BindableLayout.ItemTemplate>
                         <DataTemplate>
                             <Border
