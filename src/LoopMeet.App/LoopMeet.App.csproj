@@ -83,7 +83,7 @@
 		<!-- Versions (shared by Android and iOS): the display version is semantic (major.minor.patch);
 		     ApplicationVersion is the store build number (Android versionCode, iOS CFBundleVersion), which
 		     must increase with every upload. Release builds pass it in: -p:ApplicationVersion=<n>. -->
-		<ApplicationDisplayVersion>0.1.4</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>0.1.5</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
