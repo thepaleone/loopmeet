@@ -76,6 +76,13 @@
                     Command="{Binding OpenNotificationSettingsCommand}" />
             </HorizontalStackLayout>
             <Label Text="{Binding StatusMessage}" IsVisible="{Binding ShowStatus}" />
+
+            <Label
+                Text="{Binding VersionText}"
+                FontSize="12"
+                HorizontalOptions="Center"
+                Margin="0,24,0,0"
+                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

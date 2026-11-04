@@ -32,6 +32,7 @@
     <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionConfirmation.cs" Link="Included\AccountDeletionConfirmation.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionSignal.cs" Link="Included\AccountDeletionSignal.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Services\AccountStatusHandler.cs" Link="Included\AccountStatusHandler.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Profile\AppVersionText.cs" Link="Included\AppVersionText.cs" />
   </ItemGroup>
 
   <ItemGroup>

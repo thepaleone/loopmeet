@@ -4,14 +4,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Services;
-using System.Diagnostics;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Extensions.Logging;
-#if MACCATALYST
-using ObjCRuntime;
-using UIKit;
-#endif
 
 namespace LoopMeet.App.Features.Groups.ViewModels;
 
@@ -24,9 +19,6 @@ public sealed partial class GroupsListViewModel : ObservableObject
     public ObservableCollection<GroupSummary> MemberGroups { get; } = new();
 
     [ObservableProperty]
-    private bool _isBusy;
-
-    [ObservableProperty]
     private bool _showEmptyState;
 
     [ObservableProperty]
@@ -34,6 +26,13 @@ public sealed partial class GroupsListViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isLoadingMemberGroups;
+
+    [ObservableProperty]
+    private bool _isRefreshing;
+
+    // The load in progress, shared by OnAppearing and pull to refresh: a pull mid-load waits for
+    // that load instead of stopping the spinner straight away.
+    private Task? _inFlightLoad;
 
     public GroupsListViewModel(
         GroupsApi groupsApi,
@@ -64,19 +63,34 @@ public sealed partial class GroupsListViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task LoadAsync()
+    private Task LoadAsync() => LoadOnceAsync();
+
+    /// <summary>Pull to refresh, as on group detail: the spinner stops however the load ends.</summary>
+    [RelayCommand]
+    private async Task RefreshAsync()
     {
-        if (IsBusy)
+        try
         {
-            return;
+            await LoadOnceAsync();
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+
+    private Task LoadOnceAsync()
+    {
+        if (_inFlightLoad is { IsCompleted: false })
+        {
+            return _inFlightLoad;
         }
 
-        await LoadCoreAsync();
+        return _inFlightLoad = LoadCoreAsync();
     }
 
     private async Task LoadCoreAsync()
     {
-        IsBusy = true;
         IsLoadingOwnedGroups = true;
         IsLoadingMemberGroups = true;
         try
@@ -109,15 +123,14 @@ public sealed partial class GroupsListViewModel : ObservableObject
                 OwnedGroups.Count,
                 MemberGroups.Count);
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
-            _logger.LogError(ex, "Failed to load groups tab list: API unavailable.");
-            await ShowApiUnavailableAndQuitAsync();
-        }
-        catch (TaskCanceledException ex)
-        {
-            _logger.LogError(ex, "Failed to load groups tab list: request timed out.");
-            await ShowApiUnavailableAndQuitAsync();
+            // Offline or timed out: keep whatever is listed so a pull to refresh can try again.
+            _logger.LogError(ex, "Failed to load groups tab list: API unreachable or timed out.");
+            await Shell.Current.DisplayAlertAsync(
+                "Couldn't load groups",
+                "Couldn't load your groups. Check your connection and try again.",
+                "OK");
         }
         catch (Refit.ApiException apiEx) when (apiEx.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
@@ -135,42 +148,9 @@ public sealed partial class GroupsListViewModel : ObservableObject
         }
         finally
         {
-            IsBusy = false;
             IsLoadingOwnedGroups = false;
             IsLoadingMemberGroups = false;
         }
-    }
-
-    private static Task ShowApiUnavailableAndQuitAsync()
-    {
-        return MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-#pragma warning disable CS0618
-            await Shell.Current.DisplayAlertAsync(
-                "Service Unavailable",
-                "We could not contact the LoopMeet service. Please try again later.",
-                "Quit");
-#pragma warning restore CS0618
-
-            Application.Current?.Quit();
-#if MACCATALYST
-            try
-            {
-                UIApplication.SharedApplication.PerformSelector(
-                    new Selector("terminateWithSuccess"),
-                    UIApplication.SharedApplication,
-                    0);
-            }
-            catch
-            {
-            }
-#endif
-            Environment.Exit(0);
-            await Task.Delay(200);
-#if !IOS
-            Process.GetCurrentProcess().Kill(true);
-#endif
-        });
     }
 
 }
