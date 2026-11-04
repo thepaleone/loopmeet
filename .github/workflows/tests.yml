@@ -29,6 +29,7 @@ jobs:
       infra_tests: ${{ steps.scope.outputs.infra_tests }}
       edge_functions: ${{ steps.scope.outputs.edge_functions }}
       database: ${{ steps.scope.outputs.database }}
+      web: ${{ steps.scope.outputs.web }}
       dotnet_projects: ${{ steps.dotnet.outputs.projects }}
 
     steps:
@@ -149,6 +150,28 @@ jobs:
       - name: Run edge-function tests
         run: deno test --allow-read=supabase/functions supabase/functions/
 
+  website-tests:
+    name: Run Website Tests
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint the website
+        run: deno lint web/
+
+      # The privacy policy test also reads 016's data-retention.md.
+      - name: Run website tests
+        run: deno test --allow-read=web,specs/016-account-deletion web/
+
   database-tests:
     name: Run Database Tests
     needs: changes
@@ -186,7 +209,7 @@ jobs:
   # directly would leave a docs-only PR waiting forever.
   tests-gate:
     name: Tests Gate
-    needs: [changes, test, edge-function-tests, database-tests]
+    needs: [changes, test, edge-function-tests, website-tests, database-tests]
     if: always()
     runs-on: ubuntu-latest
 
