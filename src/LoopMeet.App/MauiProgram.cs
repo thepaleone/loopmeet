@@ -86,6 +86,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SessionNoticeState>();
 		builder.Services.AddSingleton<SessionCoordinator>();
 		builder.Services.AddSingleton<ISessionTokenSource>(sp => sp.GetRequiredService<SessionCoordinator>());
+		builder.Services.AddSingleton<AppleAuthorizationRegistrar>();
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<AuthCoordinator>();
 		builder.Services.AddTransient<ApiAuthHandler>();

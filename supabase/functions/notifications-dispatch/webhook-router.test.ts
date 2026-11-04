@@ -97,6 +97,18 @@ Deno.test("deletes never notify", () => {
   assertEquals(resolveNotificationType(del), null);
 });
 
+// 016: purge_account_data deletes a user's invitations and meetups (and cascades from their
+// groups); those webhook events must not push to anyone.
+Deno.test("invitation deletes never notify", () => {
+  const del: WebhookPayload = {
+    type: "DELETE",
+    table: "invitations",
+    record: {},
+    old_record: { id: "i1", group_id: "g1", invited_user_id: "u1" },
+  };
+  assertEquals(resolveNotificationType(del), null);
+});
+
 Deno.test("plain meetup update still resolves to meetup.updated", () => {
   assertEquals(
     resolveNotificationType(meetupUpdate(upcoming, upcoming)),

@@ -12,11 +12,13 @@ public sealed class AuthService
     private const string OAuthRedirectUri = "loopmeet://auth-callback";
     private readonly SupabaseClient _client;
     private readonly ISessionTokenSource _tokenSource;
+    private readonly AppleAuthorizationRegistrar _appleAuthorizationRegistrar;
 
-    public AuthService(SupabaseClient client, ISessionTokenSource tokenSource)
+    public AuthService(SupabaseClient client, ISessionTokenSource tokenSource, AppleAuthorizationRegistrar appleAuthorizationRegistrar)
     {
         _client = client;
         _tokenSource = tokenSource;
+        _appleAuthorizationRegistrar = appleAuthorizationRegistrar;
     }
 
     public async Task<AuthSession> SignInWithEmailAsync(string email, string password)
@@ -98,6 +100,15 @@ public sealed class AuthService
 
         var session = await _client.Auth.SignInWithIdToken(Constants.Provider.Apple, idToken, rawNonce);
         var accessToken = session?.AccessToken;
+
+        var authorizationCode = credential.AuthorizationCode is { } codeBytes
+            ? System.Text.Encoding.UTF8.GetString(codeBytes.ToArray())
+            : null;
+        if (session is not null && !string.IsNullOrWhiteSpace(authorizationCode))
+        {
+            // Not awaited: storing the token for revocation at deletion must never slow or fail sign-in.
+            _ = _appleAuthorizationRegistrar.RegisterAsync(authorizationCode);
+        }
 
         var user = session?.User;
         var fullName = BuildAppleDisplayName(credential);

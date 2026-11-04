@@ -199,54 +199,54 @@
 
 ### Tests for User Story 4
 
-- [ ] T034 [P] [US4] Create `supabase/tests/database/account_deletion_purge.test.sql`, using the T023 fixture plus devices, delivery attempts, open events and an `apple_authorizations` row for A:
+- [X] T034 [P] [US4] Create `supabase/tests/database/account_deletion_purge.test.sql`, using the T023 fixture plus devices, delivery attempts, open events and an `apple_authorizations` row for A:
   - `purge_account_data(A)` leaves 0 rows for A in every table listed in data-model.md, and leaves H, C's data and B's other data intact.
   - A second call succeeds and changes nothing.
   - Deleting A from `auth.users` cascades away `account_deletions` and `apple_authorizations`.
   - `claim_due_account_purges` claims only due rows with a free lease, and sets `purging`, `claimed_at` and `attempts + 1`.
   - `record_account_purge_step` appends steps in order and records `last_error` while releasing the lease.
   - `authenticated` can't execute the claim, record or purge functions (FR-014, FR-017, FR-018, FR-019).
-- [ ] T035 [P] [US4] Create `supabase/functions/account-purge/purge-runner.test.ts` with fake `PurgePorts`. Cover:
+- [X] T035 [P] [US4] Create `supabase/functions/account-purge/purge-runner.test.ts` with fake `PurgePorts`. Cover:
   - **Order:** steps run in order on a fresh row.
   - **Resume:** a failure injected at each step resumes at that step on the next run.
   - **Done conditions:** OneSignal `404` counts as done. A storage listing that returns two pages is emptied.
   - **Apple:** with no Apple rows but an Apple identity, the run logs `apple_token_unavailable` and completes.
   - **Logging:** `account_purge_stuck` is logged when `attempts >= 24`. No logged line contains `@`.
   - **Summary and isolation:** the summary counts are correct, and one user's failure doesn't stop the others.
-- [ ] T036 [P] [US4] Create `supabase/functions/_shared/apple-auth.test.ts`:
+- [X] T036 [P] [US4] Create `supabase/functions/_shared/apple-auth.test.ts`:
   - `createClientSecret` produces an ES256 JWT with `kid`, `iss`, `aud=https://appleid.apple.com`, `sub` and a 300 s expiry, whose signature verifies against a P-256 key generated in the test.
   - The exchange and revoke requests send the documented form fields to the documented URLs (fake `fetch`).
   - Errors carry the HTTP status, not the body.
-- [ ] T037 [P] [US4] Create `tests/LoopMeet.App.Tests/Features/Auth/AppleAuthorizationSurfaceTests.cs`, source-inspection: `AuthService.SignInWithAppleAsync` passes `credential.AuthorizationCode` to `AppleAuthorizationRegistrar` after `SignInWithIdToken` succeeds, without awaiting it on the sign-in path, and the registrar catches and logs every exception.
-- [ ] T038 [P] [US4] Create `tests/LoopMeet.Api.Tests/Contract/PrivilegedAccessTests.cs`, source-inspection: no file under `src/LoopMeet.Api/` other than `Services/Configuration/` references `ServiceOrSecretKey` (FR-019).
+- [X] T037 [P] [US4] Create `tests/LoopMeet.App.Tests/Features/Auth/AppleAuthorizationSurfaceTests.cs`, source-inspection: `AuthService.SignInWithAppleAsync` passes `credential.AuthorizationCode` to `AppleAuthorizationRegistrar` after `SignInWithIdToken` succeeds, without awaiting it on the sign-in path, and the registrar catches and logs every exception.
+- [X] T038 [P] [US4] Create `tests/LoopMeet.Api.Tests/Contract/PrivilegedAccessTests.cs`, source-inspection: no file under `src/LoopMeet.Api/` other than `Services/Configuration/` references `ServiceOrSecretKey` (FR-019).
 
 ### Implementation for User Story 4
 
-- [ ] T039 [US4] Create `supabase/migrations/20261103120200_account_deletion_purge.sql`:
+- [X] T039 [US4] Create `supabase/migrations/20261103120200_account_deletion_purge.sql`:
   - **Table:** `apple_authorizations`, with RLS enabled and no policies.
   - **Functions:** `claim_due_account_purges(p_limit)` (`for update skip locked`, 15-minute lease), `record_account_purge_step(...)` and `purge_account_data(p_user_id)`, deleting in the order in data-model.md. Execute is granted to `service_role` only.
   - **Cron:** `cron.schedule('account-purge-hourly', '7 * * * *', …)`, using the same vault secrets as `20260515110000_schedule_reminders_every_5_minutes.sql`. Guard it so re-running the migration doesn't duplicate the job.
-- [ ] T040 [P] [US4] Create `supabase/functions/_shared/apple-auth.ts` with `createClientSecret`, `exchangeAuthorizationCode` and `revokeRefreshToken` (WebCrypto `importKey('pkcs8', …)` from the `.p8` PEM, ES256 via `sign({name:'ECDSA', hash:'SHA-256'})`, raw signature encoding), taking an injectable `fetch`.
-- [ ] T041 [US4] Create `supabase/functions/account-purge/purge-runner.ts`: `runPurge(ports, now)` and the `PurgePorts` interface from contracts/edge-functions.md, with the step order, recording, stop-on-failure per user and the logging events.
-- [ ] T042 [US4] Create `supabase/functions/account-purge/index.ts` and `deno.json`, wiring the real ports:
+- [X] T040 [P] [US4] Create `supabase/functions/_shared/apple-auth.ts` with `createClientSecret`, `exchangeAuthorizationCode` and `revokeRefreshToken` (WebCrypto `importKey('pkcs8', …)` from the `.p8` PEM, ES256 via `sign({name:'ECDSA', hash:'SHA-256'})`, raw signature encoding), taking an injectable `fetch`.
+- [X] T041 [US4] Create `supabase/functions/account-purge/purge-runner.ts`: `runPurge(ports, now)` and the `PurgePorts` interface from contracts/edge-functions.md, with the step order, recording, stop-on-failure per user and the logging events.
+- [X] T042 [US4] Create `supabase/functions/account-purge/index.ts` and `deno.json`, wiring the real ports:
   - Supabase `rpc` calls for claim, record and purge
   - storage `list` and `remove` on `AVATAR_BUCKET_NAME` under `{user_id}/`
   - `auth.admin.getUserById` for the Apple identity check and `auth.admin.deleteUser`, treating "not found" as done
   - the OneSignal `DELETE` by external id
   - the `apple-auth` revoke, plus deleting each revoked row
-- [ ] T043 [P] [US4] Create `supabase/functions/apple-authorization/handler.test.ts` (fake ports, `jsr:@std/assert@1`):
+- [X] T043 [P] [US4] Create `supabase/functions/apple-authorization/handler.test.ts` (fake ports, `jsr:@std/assert@1`):
   - a missing or invalid bearer token returns 401
   - a body with neither `authorizationCode` nor `refreshToken`+`clientId` returns 400
   - a code is exchanged, then upserted with `APPLE_CLIENT_ID`
   - a refresh token is upserted as is with its `clientId`
   - an Apple failure returns 502 `apple_exchange_failed`
   - no logged line contains a token or `@`
-- [ ] T044 [US4] Create `supabase/functions/apple-authorization/handler.ts`, `handleAppleAuthorization(request, ports)`, where `ports` are `getUser`, `exchangeCode` and `upsertAuthorization`. `index.ts` and `deno.json` only wire the real ports. The handler must:
+- [X] T044 [US4] Create `supabase/functions/apple-authorization/handler.ts`, `handleAppleAuthorization(request, ports)`, where `ports` are `getUser`, `exchangeCode` and `upsertAuthorization`. `index.ts` and `deno.json` only wire the real ports. The handler must:
   - Verify the bearer token with `getUser`.
   - Accept `{authorizationCode}`, which is exchanged, or `{refreshToken, clientId}`, used as is.
   - Upsert `apple_authorizations` on `(user_id, client_id)`.
   - Return `204`, `400`, `401` or `502`, and log as in the contract.
-- [ ] T045 [US4] Create `src/LoopMeet.App/Features/Auth/AppleAuthorizationRegistrar.cs`. `RegisterAsync(string authorizationCode)` calls `Supabase.Client.Functions.Invoke("apple-authorization", …)` with the current access token, and catches and logs failures. In `src/LoopMeet.App/Features/Auth/AuthService.cs`, inside `#if IOS || MACCATALYST`, after a successful `SignInWithIdToken`, start `_ = _appleAuthorizationRegistrar.RegisterAsync(code)` when `credential.AuthorizationCode` is present. Register the registrar in `src/LoopMeet.App/MauiProgram.cs`.
+- [X] T045 [US4] Create `src/LoopMeet.App/Features/Auth/AppleAuthorizationRegistrar.cs`. `RegisterAsync(string authorizationCode)` calls `Supabase.Client.Functions.Invoke("apple-authorization", …)` with the current access token, and catches and logs failures. In `src/LoopMeet.App/Features/Auth/AuthService.cs`, inside `#if IOS || MACCATALYST`, after a successful `SignInWithIdToken`, start `_ = _appleAuthorizationRegistrar.RegisterAsync(code)` when `credential.AuthorizationCode` is present. Register the registrar in `src/LoopMeet.App/MauiProgram.cs`.
 
 **Checkpoint**: US4 is complete. Quickstart rows 9–11 pass on staging (row 13 waits for iOS).
 
@@ -418,3 +418,31 @@ Each PR is merged to `main` only after its checkpoint passes. PR A–C may be de
   - **Fixed**: `MeetupCommandService.CreateAsync` didn't check the group. In a group hidden by RLS, the insert check rejected the row and the request failed with 500. It now returns 404 when `GetByIdAsync` finds no group. Regression test: `CreateInAGroupTheCallerCannotSeeReturnsNotFound`.
   - `create_membership_from_invitation` is security definer and bypasses RLS. A pending user could reach it only with an accepted invitation and no membership row, and the Api gate stops them first. It's unchanged.
 - **Checkpoint**: quickstart rows 4, 5 and 12 need the visibility migration on staging, an Api `staging/**` tag, and a redeploy of `notifications-dispatch` and `reminders-scheduler`.
+
+### US4 notes (PR C)
+
+- **T039**:
+  - `record_account_purge_step` rejects an unknown step with `22023`. Recording a step twice leaves one entry.
+  - A successful step doesn't clear `last_error`, so the value from the failure before is still there for diagnosis.
+  - The cron job is skipped on databases without the vault secrets (local, CI), as in the reminders migration.
+  - `supabase/config.toml` sets `verify_jwt = false` for both new functions. `account-purge` is triggered with the publishable key, as `reminders-scheduler` is. `apple-authorization` checks the caller's token itself with `auth.getUser`.
+- **T041**:
+  - `runPurge(ports)` takes no `now`, a deviation from contracts/edge-functions.md. Whether a row is due is decided in SQL with `now()`, so the runner had no use for it.
+  - Two log events beyond the contract: `account_purge_record_failed`, when recording a step throws (the lease expires and a later run resumes), and `account_purge_claim_failed`, when the claim fails (the run returns 500).
+  - The storage step stops with `storage_incomplete` after 50 list/remove rounds.
+  - Error codes are an HTTP status, a short code from the error object, or `exception`, never a message.
+- **T042**: OneSignal counts any `2xx` or `404` as done. `AVATAR_BUCKET_NAME` unset fails the step with `storage_bucket_unset` instead of skipping it.
+- **T044**:
+  - The ports also carry `nativeClientId` and `log`.
+  - A failed upsert returns `500 {"code":"store_failed"}`, which the contract doesn't list.
+  - Errors that aren't from Apple, such as network failures, log `status: "exception"` and return 502.
+- **T045**:
+  - The registrar logs only the exception type, never the code or token.
+  - The iOS build compiles with `-p:ValidateXcodeVersion=false`. Installed .NET for iOS 27.1 expects Xcode 27.1, and 27.2 is installed (the 013 tooling issue).
+- **Extra test**: `webhook-router.test.ts` asserts that invitation `DELETE` events never notify. Purge deletes invitations directly and by cascade.
+- **Checkpoint**:
+  - apply `20261103120200_account_deletion_purge.sql` on staging
+  - set the `APPLE_*` and `AVATAR_BUCKET_NAME` secrets; the purge works without the Apple ones as long as no `apple_authorizations` rows exist
+  - deploy `account-purge` and `apple-authorization`
+  - confirm the `account-purge-hourly` job
+  - run quickstart rows 9–11
