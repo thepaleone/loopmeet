@@ -21,8 +21,33 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  # Works out what this change needs built (.github/scripts/ci-scope.sh). Documentation-only
+  # changes need nothing; manual runs build everything.
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      build_backend: ${{ steps.scope.outputs.build_backend }}
+      build_app: ${{ steps.scope.outputs.build_app }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select builds
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: bash .github/scripts/ci-select.sh | tee -a "$GITHUB_OUTPUT"
+
   build-dotnet:
     name: Build API and Libraries
+    needs: changes
+    if: needs.changes.outputs.build_backend == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -65,6 +90,8 @@ jobs:
 
   build-maui-android:
     name: Compile MAUI App (Android)
+    needs: changes
+    if: needs.changes.outputs.build_app == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -95,3 +122,19 @@ jobs:
 
       - name: Compile MAUI app (Android)
         run: dotnet build src/LoopMeet.App/LoopMeet.App.csproj -f net10.0-android -t:Compile --configuration Release --no-restore
+
+  # The one check to require on main: it always reports, passing when every build this change
+  # needed passed and the rest were skipped.
+  build-gate:
+    name: Build Gate
+    needs: [changes, build-dotnet, build-maui-android]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check build results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$RESULTS" | jq -e 'all(.[]; .result == "success" or .result == "skipped")' > /dev/null
