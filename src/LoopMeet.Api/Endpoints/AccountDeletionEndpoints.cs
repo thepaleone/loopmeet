@@ -72,6 +72,28 @@ public static class AccountDeletionEndpoints
             })
             .RequireAuthorization();
 
+        app.MapDelete("/users/account-deletion", async (
+                CurrentUserService currentUser,
+                AccountDeletionService deletionService,
+                CancellationToken cancellationToken) =>
+            {
+                var userId = currentUser.UserId;
+                if (userId is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await deletionService.RestoreAsync(userId.Value, cancellationToken);
+                return result.Status == AccountDeletionCommandStatus.Success
+                    ? Results.Ok(deletionService.ToResponse(null))
+                    : Results.Json(new ErrorResponse
+                    {
+                        Code = "deletion_in_progress",
+                        Message = "Your account can no longer be restored."
+                    }, statusCode: StatusCodes.Status409Conflict);
+            })
+            .RequireAuthorization();
+
         return app;
     }
 }

@@ -201,6 +201,94 @@ public sealed class AccountDeletionEndpointsTests
         Assert.Equal(_userId.ToString(), ScalarText(repeat.Properties["UserId"]));
     }
 
+    [Fact]
+    public async Task RestoreCancelsAPendingDeletionAndIsIdempotent()
+    {
+        await RequestDeletionAsync("DELETE");
+
+        var first = await _client.DeleteAsync("/users/account-deletion");
+        var second = await _client.DeleteAsync("/users/account-deletion");
+
+        Assert.Equal(HttpStatusCode.OK, first.StatusCode);
+        Assert.Equal("{\"status\":\"none\"}", await first.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.OK, second.StatusCode);
+        Assert.Equal("{\"status\":\"none\"}", await second.Content.ReadAsStringAsync());
+        lock (_store.SyncRoot)
+        {
+            Assert.False(_store.AccountDeletions.ContainsKey(_userId));
+        }
+    }
+
+    [Fact]
+    public async Task RestoreAfterTheDeadlineReturnsConflict()
+    {
+        SeedDeletion(AccountDeletionStatus.Pending, _factory.Clock.UtcNow.AddMinutes(-1));
+
+        var response = await _client.DeleteAsync("/users/account-deletion");
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        Assert.Equal("deletion_in_progress", error!.Code);
+        Assert.Equal("Your account can no longer be restored.", error.Message);
+    }
+
+    [Fact]
+    public async Task RestoreWhilePurgingReturnsConflict()
+    {
+        SeedDeletion(AccountDeletionStatus.Purging, _factory.Clock.UtcNow.AddDays(-1));
+
+        var response = await _client.DeleteAsync("/users/account-deletion");
+
+        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        lock (_store.SyncRoot)
+        {
+            Assert.True(_store.AccountDeletions.ContainsKey(_userId));
+        }
+    }
+
+    [Fact]
+    public async Task RestoreUnblocksTheNextCallDespiteTheCachedPendingStatus()
+    {
+        SeedDeletion(AccountDeletionStatus.Pending, _factory.Clock.UtcNow.AddDays(20));
+        var blocked = await _client.GetAsync("/groups");
+        Assert.Equal(HttpStatusCode.Forbidden, blocked.StatusCode);
+
+        await _client.DeleteAsync("/users/account-deletion");
+        var after = await _client.GetAsync("/groups");
+
+        Assert.Equal(HttpStatusCode.OK, after.StatusCode);
+    }
+
+    [Fact]
+    public async Task RestoreLogsTheOutcomeByUserId()
+    {
+        await RequestDeletionAsync("DELETE");
+        await _client.DeleteAsync("/users/account-deletion");
+        SeedDeletion(AccountDeletionStatus.Purging, _factory.Clock.UtcNow.AddDays(-1));
+        await _client.DeleteAsync("/users/account-deletion");
+
+        var restored = Assert.Single(_factory.Logs.Events, e => e.MessageTemplate.Text.StartsWith("AccountDeletionRestored", StringComparison.Ordinal));
+        Assert.Equal(_userId.ToString(), ScalarText(restored.Properties["UserId"]));
+        var refused = Assert.Single(_factory.Logs.Events, e => e.MessageTemplate.Text.StartsWith("AccountDeletionRestoreRefused", StringComparison.Ordinal));
+        Assert.Equal(_userId.ToString(), ScalarText(refused.Properties["UserId"]));
+        Assert.Equal(LogEventLevel.Warning, refused.Level);
+    }
+
+    [Fact]
+    public async Task PastTheDeadlineAPendingRowReadsAsPurgingAndTheGateKeepsTheDate()
+    {
+        var deletesAt = _factory.Clock.UtcNow.AddMinutes(-1);
+        SeedDeletion(AccountDeletionStatus.Pending, deletesAt);
+
+        var status = await _client.GetFromJsonAsync<AccountDeletionStatusResponse>("/users/account-deletion");
+        var gated = await _client.GetAsync("/groups");
+
+        Assert.Equal("purging", status!.Status);
+        Assert.Equal(HttpStatusCode.Forbidden, gated.StatusCode);
+        var body = await gated.Content.ReadFromJsonAsync<AccountPendingDeletionResponse>();
+        Assert.Equal(deletesAt, body!.DeletesAt);
+    }
+
     private Task<HttpResponseMessage> RequestDeletionAsync(string? confirmation) =>
         _client.PostAsJsonAsync("/users/account-deletion", new AccountDeletionRequest { Confirmation = confirmation });
 
