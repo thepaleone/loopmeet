@@ -33,8 +33,41 @@ public sealed partial class HomeViewModel(
     [ObservableProperty]
     private bool _showEmptyState;
 
+    [ObservableProperty]
+    private bool _isRefreshing;
+
+    // The load in progress, shared by OnAppearing and pull to refresh so they never overlap:
+    // two loads would both clear and refill UpcomingMeetups.
+    private Task? _inFlightLoad;
+
     [RelayCommand]
-    private async Task LoadAsync()
+    private Task LoadAsync() => LoadOnceAsync();
+
+    /// <summary>Pull to refresh, as on group detail: the spinner stops however the load ends.</summary>
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        try
+        {
+            await LoadOnceAsync();
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+
+    private Task LoadOnceAsync()
+    {
+        if (_inFlightLoad is { IsCompleted: false })
+        {
+            return _inFlightLoad;
+        }
+
+        return _inFlightLoad = LoadCoreAsync();
+    }
+
+    private async Task LoadCoreAsync()
     {
         var cached = userProfileCache.GetCachedProfile();
         Title = cached is not null && !string.IsNullOrWhiteSpace(cached.DisplayName)
