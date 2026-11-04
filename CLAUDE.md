@@ -83,6 +83,7 @@ Api's `Supabase.Client` is constructed per-request, scoped, and impersonates the
 
 - Build/deploy Android staging: `dotnet build -c Staging -t:Run -f net10.0-android src/LoopMeet.App`, or `deploy/deploy-android.sh -c Debug|Release [-d <adb-serial>]` (this script disables AOT/trimming as a documented workaround for a `MauiApplication.n_onCreate` `UnsatisfiedLinkError` — don't re-enable them without addressing that first).
 - Tests: `dotnet test` against `tests/**/*.csproj` (CI sets fake `Supabase__*` env vars; see `.github/workflows/tests.yml`).
+- CI runs only the suites a change needs. `.github/scripts/ci-scope.sh` maps changed paths to suites, and docs (`*.md`, `specs/`, `.specify/`) select nothing. When a test starts reading files from another tree (as Api.Tests and Core.Tests read `supabase/functions`), add that path to the map and a case to `ci-scope.test.sh` (`bash .github/scripts/ci-scope.test.sh`), or CI will skip the test when those files change. `Tests Gate` and `Build Gate` always report; they are the checks to mark required.
 - Api container: `docker-compose.yml` requires `SUPABASE__URL`, `SUPABASE__ANONORPUBLISHABLEKEY`, `SUPABASE__SERVICEORSECRETKEY`, `SUPABASE__JWTISSUER`, `GOOGLE__PLACESAPIKEY` — fails fast if unset.
 
 <!-- MANUAL ADDITIONS END -->
