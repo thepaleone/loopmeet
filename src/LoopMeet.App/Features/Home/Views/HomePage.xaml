@@ -4,6 +4,7 @@
     x:Name="HomePageRoot"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:LoopMeet.App.Controls"
     Title="Home">
 
     <RefreshView Command="{Binding RefreshCommand}" IsRefreshing="{Binding IsRefreshing}">
@@ -32,6 +33,9 @@
                     </Border>
                     <Label Text="{Binding Title}" FontSize="24" FontAttributes="Bold" VerticalOptions="Center" />
                 </HorizontalStackLayout>
+
+                <!-- Placeholders until the first load ends (019) -->
+                <controls:SkeletonList Variant="HomeMeetupCard" Count="3" IsActive="{Binding ShowMeetupsSkeleton}" />
 
                 <!-- Upcoming Meetups -->
                 <VerticalStackLayout
