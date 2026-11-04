@@ -56,9 +56,12 @@ public sealed class MeetupQueryService
         }) ?? new MeetupsResponse();
     }
 
+    /// <summary>The per-user Home list key; MeetupCommandService clears it for every member on a change.</summary>
+    public static string HomeCacheKey(Guid userId) => $"home-meetups:{userId}";
+
     public async Task<UpcomingMeetupsResponse> GetUpcomingForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var cacheKey = $"home-meetups:{userId}";
+        var cacheKey = HomeCacheKey(userId);
         _logger.LogInformation("Loading upcoming meetups for user {UserId}", userId);
         return await _cacheService.GetOrSetAsync(cacheKey, CacheTtl, async () =>
         {
