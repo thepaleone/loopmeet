@@ -194,14 +194,15 @@ select is((select count(*)::int from public.notification_delivery_attempts where
 select is((select count(*)::int from public.notification_open_events where user_id = '00000000-0000-0000-0000-00000000000a'), 0, 'A''s open events are gone');
 select is((select count(*)::int from public.apple_authorizations where user_id = '00000000-0000-0000-0000-00000000000a'), 0, 'A''s Apple authorizations are gone');
 
--- Everyone else's data stays.
+-- Everyone else's data stays. Reads are limited to the fixture's ids so rows already in a
+-- local database don't affect the result.
 select set_eq(
-    $$ select id from public.groups $$,
+    $$ select id from public.groups where id::text like '00000000-0000-0000-0000-%' $$,
     $$ values ('00000000-0000-0000-0000-0000000000c1'::uuid), ('00000000-0000-0000-0000-0000000000d1'::uuid) $$,
     'H and K remain'
 );
 select set_eq(
-    $$ select group_id, member_user_id from public.memberships $$,
+    $$ select group_id, member_user_id from public.memberships where group_id::text like '00000000-0000-0000-0000-%' $$,
     $$ values
         ('00000000-0000-0000-0000-0000000000c1'::uuid, '00000000-0000-0000-0000-00000000000c'::uuid),
         ('00000000-0000-0000-0000-0000000000d1'::uuid, '00000000-0000-0000-0000-00000000000d'::uuid),
@@ -209,20 +210,20 @@ select set_eq(
     'the other memberships remain'
 );
 select set_eq(
-    $$ select id from public.meetups $$,
+    $$ select id from public.meetups where id::text like '00000000-0000-0000-0000-%' $$,
     $$ values ('00000000-0000-0000-0000-0000000001cc'::uuid), ('00000000-0000-0000-0000-0000000001d1'::uuid) $$,
     'C''s and D''s meetups remain'
 );
 select set_eq(
-    $$ select id from public.invitations $$,
+    $$ select id from public.invitations where id::text like '00000000-0000-0000-0000-%' $$,
     $$ values ('00000000-0000-0000-0000-0000000002dc'::uuid) $$,
     'D''s invitation to C remains'
 );
-select is((select count(*)::int from public.user_profiles), 3, 'the other profiles remain');
+select is((select count(*)::int from public.user_profiles where id::text like '00000000-0000-0000-0000-%'), 3, 'the other profiles remain');
 select is((select count(*)::int from public.user_devices where user_id = '00000000-0000-0000-0000-00000000000b'), 1, 'B''s device remains');
 select is((select count(*)::int from public.notification_delivery_attempts where user_id = '00000000-0000-0000-0000-00000000000b'), 1, 'B''s delivery attempt remains');
 select is((select count(*)::int from public.notification_open_events where user_id = '00000000-0000-0000-0000-00000000000b'), 1, 'B''s open event remains');
-select is((select count(*)::int from public.notification_events), 1, 'notification events, which aren''t keyed by user, remain');
+select is((select count(*)::int from public.notification_events where id::text like '00000000-0000-0000-0000-%'), 1, 'notification events, which aren''t keyed by user, remain');
 select is((select count(*)::int from public.account_deletions where user_id = '00000000-0000-0000-0000-00000000000a'), 1, 'the deletion row survives until the auth step');
 
 -- Idempotent: a second run succeeds and changes nothing.
