@@ -131,6 +131,28 @@ public sealed class AccountDeletionService
         return new AccountDeletionCommandResult(AccountDeletionCommandStatus.Success, deletion);
     }
 
+    /// <summary>
+    /// Cancels a pending deletion. Idempotent: with nothing pending it succeeds too. Refused once
+    /// the deletion date has passed or purging has started.
+    /// </summary>
+    public async Task<AccountDeletionCommandResult> RestoreAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        var result = await _deletionRepository.RestoreAsync(cancellationToken);
+        await _cacheService.RemoveAsync(CacheKey(userId));
+
+        switch (result)
+        {
+            case AccountRestoreResult.DeletionInProgress:
+                _logger.LogWarning("AccountDeletionRestoreRefused for {UserId}: deletion in progress", userId);
+                return new AccountDeletionCommandResult(AccountDeletionCommandStatus.DeletionInProgress, null);
+            case AccountRestoreResult.Restored:
+                _logger.LogInformation("AccountDeletionRestored for {UserId}", userId);
+                break;
+        }
+
+        return new AccountDeletionCommandResult(AccountDeletionCommandStatus.Success, null);
+    }
+
     public AccountDeletionStatusResponse ToResponse(AccountDeletion? deletion)
     {
         return EffectiveStatus(deletion, _timeProvider.GetUtcNow()) switch

@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:auth="clr-namespace:LoopMeet.App.Features.Auth.Views"
+    xmlns:account="clr-namespace:LoopMeet.App.Features.Account.Views"
     xmlns:home="clr-namespace:LoopMeet.App.Features.Home.Views"
     xmlns:groups="clr-namespace:LoopMeet.App.Features.Groups.Views"
     xmlns:inv="clr-namespace:LoopMeet.App.Features.Invitations.Views"
@@ -23,6 +24,12 @@
         Title="Login"
         ContentTemplate="{DataTemplate auth:LoginPage}"
         Route="login" />
+
+    <!-- 016: a signed-in account scheduled for deletion can only restore or sign out. -->
+    <ShellContent
+        Title="Account deletion"
+        ContentTemplate="{DataTemplate account:PendingDeletionPage}"
+        Route="pending-deletion" />
 
     <TabBar>
         <Tab

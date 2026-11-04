@@ -23,11 +23,17 @@ public interface IUsersApi
     [Post("/users/avatar")]
     Task<AuthModels.UserProfileResponse> UploadAvatarAsync([AliasAs("image")] StreamPart image);
 
+    [Get("/users/account-deletion")]
+    Task<AccountModels.AccountDeletionStatusResponse> GetAccountDeletionAsync();
+
     [Get("/users/account-deletion/preview")]
     Task<AccountModels.AccountDeletionPreviewResponse> GetAccountDeletionPreviewAsync();
 
     [Post("/users/account-deletion")]
     Task<AccountModels.AccountDeletionStatusResponse> RequestAccountDeletionAsync([Body] AccountModels.AccountDeletionRequest request);
+
+    [Delete("/users/account-deletion")]
+    Task<AccountModels.AccountDeletionStatusResponse> RestoreAccountAsync();
 }
 
 public sealed class UsersApi
@@ -60,6 +66,10 @@ public sealed class UsersApi
 
     public Task<AccountModels.AccountDeletionStatusResponse> RequestAccountDeletionAsync(string confirmation) =>
         _api.RequestAccountDeletionAsync(new AccountModels.AccountDeletionRequest { Confirmation = confirmation });
+
+    public Task<AccountModels.AccountDeletionStatusResponse> GetAccountDeletionAsync() => _api.GetAccountDeletionAsync();
+
+    public Task<AccountModels.AccountDeletionStatusResponse> RestoreAccountAsync() => _api.RestoreAccountAsync();
 
     private static ProfileModels.UserProfileResponse Map(AuthModels.UserProfileResponse response)
     {

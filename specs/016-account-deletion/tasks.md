@@ -260,19 +260,19 @@
 
 ### Tests for User Story 3
 
-- [ ] T046 [P] [US3] Add restore tests to `tests/LoopMeet.Api.Tests/Endpoints/AccountDeletionEndpointsTests.cs`:
+- [X] T046 [P] [US3] Add restore tests to `tests/LoopMeet.Api.Tests/Endpoints/AccountDeletionEndpointsTests.cs`:
   - `DELETE /users/account-deletion` returns 200 `none`, and again when nothing is pending.
   - It returns 409 `deletion_in_progress` once the clock passes `deletesAt`, and while the status is purging.
   - After a restore, the next `/groups` call succeeds immediately (gate cache invalidated).
   - The restore writes `AccountDeletionRestored` or `AccountDeletionRestoreRefused` with `UserId`.
   - With the clock past `deletesAt` but the stored status still `pending`, `GET /users/account-deletion` returns `purging`, and the gate's 403 still carries `deletesAt`.
-- [ ] T047 [P] [US3] Create `tests/LoopMeet.App.Tests/Services/AccountStatusHandlerTests.cs`:
+- [X] T047 [P] [US3] Create `tests/LoopMeet.App.Tests/Services/AccountStatusHandlerTests.cs`:
   - A 403 whose body code is `account_pending_deletion` raises `AccountDeletionSignal.PendingDeletion` with the parsed `deletesAt`.
   - Other 403s, 401 and 200 raise nothing.
   - The response returned is the original, unchanged.
 
   Link `src/LoopMeet.App/Services/AccountStatusHandler.cs` and `src/LoopMeet.App/Features/Account/AccountDeletionSignal.cs` in the test csproj.
-- [ ] T048 [P] [US3] Create `tests/LoopMeet.App.Tests/Features/Account/PendingDeletionSurfaceTests.cs`, source-inspection:
+- [X] T048 [P] [US3] Create `tests/LoopMeet.App.Tests/Features/Account/PendingDeletionSurfaceTests.cs`, source-inspection:
   - `ApiClient.cs` adds `AccountStatusHandler` after `ApiAuthHandler`.
   - `ApiAuthHandler.cs` still contains no `GoToAsync`.
   - `AppShell.xaml` declares a `pending-deletion` `ShellContent`.
@@ -282,21 +282,21 @@
 
 ### Implementation for User Story 3
 
-- [ ] T049 [US3] Add `RestoreAsync` to `src/LoopMeet.Api/Services/Accounts/AccountDeletionService.cs` (invalidate the cache key; log the outcome) and `DELETE /users/account-deletion` to `src/LoopMeet.Api/Endpoints/AccountDeletionEndpoints.cs` (200 or 409 `ErrorResponse`).
-- [ ] T050 [P] [US3] Create these MAUI-free files:
+- [X] T049 [US3] Add `RestoreAsync` to `src/LoopMeet.Api/Services/Accounts/AccountDeletionService.cs` (invalidate the cache key; log the outcome) and `DELETE /users/account-deletion` to `src/LoopMeet.Api/Endpoints/AccountDeletionEndpoints.cs` (200 or 409 `ErrorResponse`).
+- [X] T050 [P] [US3] Create these MAUI-free files:
   - `src/LoopMeet.App/Features/Account/AccountDeletionSignal.cs`: a singleton with `event Action<DateTimeOffset>? PendingDeletion` and `Raise`.
   - `src/LoopMeet.App/Services/AccountStatusHandler.cs`: a `DelegatingHandler` that, on a 403, buffers and parses the body's `code` and `deletesAt` and raises the signal.
 
   Add `.AddHttpMessageHandler<AccountStatusHandler>()` after `ApiAuthHandler` in `src/LoopMeet.App/Services/ApiClient.cs`, and register both classes in `MauiProgram.cs`.
-- [ ] T051 [US3] Create `src/LoopMeet.App/Features/Account/AccountDeletionGate.cs`. It subscribes to the signal. On the first signal of an episode it calls `MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync($"//pending-deletion?deletesAt=…"))`, and ignores repeat signals until `Reset()`. Resolve it at app start in `MauiProgram.cs` so it subscribes before the first Api call.
-- [ ] T052 [US3] Create `src/LoopMeet.App/Features/Account/ViewModels/PendingDeletionViewModel.cs` and `Views/PendingDeletionPage.xaml(.cs)`:
+- [X] T051 [US3] Create `src/LoopMeet.App/Features/Account/AccountDeletionGate.cs`. It subscribes to the signal. On the first signal of an episode it calls `MainThread.InvokeOnMainThreadAsync(() => Shell.Current.GoToAsync($"//pending-deletion?deletesAt=…"))`, and ignores repeat signals until `Reset()`. Resolve it at app start in `MauiProgram.cs` so it subscribes before the first Api call.
+- [X] T052 [US3] Create `src/LoopMeet.App/Features/Account/ViewModels/PendingDeletionViewModel.cs` and `Views/PendingDeletionPage.xaml(.cs)`:
   - The page shows "Your account is scheduled for deletion on {local date}" and only two buttons.
   - `RestoreAsync` calls `RestoreAccountAsync`, then `AccountDeletionGate.Reset()`, then navigates to `SignedInTabs.HomeShellPath`. A 409 shows "Your account can no longer be restored." and then signs out.
   - `SignOutAsync` calls `Reset()` and then `SessionCoordinator.SignOutAsync(SignOutReason.UserInitiated)`.
   - When the status is `purging`, the page shows "Your account is being deleted." with only Sign out (`IsRestoreAvailable = false`).
 
   Add the `pending-deletion` `ShellContent` to `src/LoopMeet.App/AppShell.xaml` alongside `login`, hidden from the tab bar, and register the page and view model in `MauiProgram.cs`.
-- [ ] T053 [US3] In `src/LoopMeet.App/Features/Auth/ViewModels/LoginViewModel.cs`, the email, Google and Apple sign-in paths catch an `ApiException` whose body code is `account_pending_deletion` (helper `AccountStatusHandler.IsPendingDeletion(ApiException)`) before their generic `catch`. They return without an error message or navigation, because the gate has already navigated. Add the assertion to `PendingDeletionSurfaceTests.cs` (T048).
+- [X] T053 [US3] In `src/LoopMeet.App/Features/Auth/ViewModels/LoginViewModel.cs`, the email, Google and Apple sign-in paths catch an `ApiException` whose body code is `account_pending_deletion` (helper `AccountStatusHandler.IsPendingDeletion(ApiException)`) before their generic `catch`. They return without an error message or navigation, because the gate has already navigated. Add the assertion to `PendingDeletionSurfaceTests.cs` (T048).
 
 **Checkpoint**: All stories are complete. Quickstart rows 1–12 pass on Android staging.
 
@@ -304,7 +304,7 @@
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T054 Write `specs/016-account-deletion/data-retention.md` (FR-021):
+- [X] T054 Write `specs/016-account-deletion/data-retention.md` (FR-021):
   - The grace period, and what is hidden during it.
   - Exactly what is deleted, and when: within 1 hour of the date, at most 24 hours.
   - That replaced avatars stay in storage until account deletion.
@@ -312,13 +312,13 @@
   - The provider-held copies, with actual values read from the dashboards: the Supabase plan's backup and PITR window, Supabase log retention, DigitalOcean App Platform log retention, and OneSignal's asynchronous deletion.
 
   This document is the source text for the 017 privacy policy.
-- [ ] T055 [P] Add Known-gotchas entries to `CLAUDE.md`:
+- [X] T055 [P] Add Known-gotchas entries to `CLAUDE.md`:
   - The 30-day value lives in SQL (`request_account_deletion`) and in `AccountDeletionPolicy`, and tests pin both.
   - Edge functions must resolve recipients from `active_memberships`, never `memberships`.
   - New RLS policies must AND `private.account_is_active` / `private.group_is_active`.
   - `supabase test db` needs `DOCKER_HOST` pointed at podman locally.
-- [ ] T056 [P] Run `deno lint supabase/functions/`, `deno test supabase/functions/`, `supabase test db` and the full `dotnet test`. Compare against the T001–T003 baselines in Notes. No new warnings.
-- [ ] T057 Deploy to staging per the quickstart.md checklist (migrations, secrets including `AVATAR_BUCKET_NAME`, functions, cron check, an Api `staging/**` tag, an app build) and fill in the bucket-name table.
+- [X] T056 [P] Run `deno lint supabase/functions/`, `deno test supabase/functions/`, `supabase test db` and the full `dotnet test`. Compare against the T001–T003 baselines in Notes. No new warnings.
+- [X] T057 Deploy to staging per the quickstart.md checklist (migrations, secrets including `AVATAR_BUCKET_NAME`, functions, cron check, an Api `staging/**` tag, an app build) and fill in the bucket-name table.
 - [ ] T058 Run quickstart.md rows 1–12 on Android staging and record the results. Row 13 (iOS Apple revocation) stays open until 013 can be tested on a device. Record the Google Play closed-testing review outcome for the delete-account path (SC-007).
 
 ---
@@ -446,3 +446,34 @@ Each PR is merged to `main` only after its checkpoint passes. PR A–C may be de
   - deploy `account-purge` and `apple-authorization`
   - confirm the `account-purge-hourly` job
   - run quickstart rows 9–11
+
+### US3 + Polish notes (PR D)
+
+- **T046/T049**:
+  - Restore always clears the gate cache entry, refused or not.
+  - `RestoreAsync` returns the same `none` body whether a deletion was removed or nothing was pending.
+  - `AccountDeletionRestoreRefused` is logged at warning level.
+- **T050/T053**:
+  - `AccountStatusHandler.IsPendingDeletion` takes the body string (`ApiException.Content`) rather than an `ApiException`. That keeps Refit out of the MAUI-free handler, and the test project needs no Refit package.
+  - The handler buffers the 403 body so Refit can still read it.
+- **T051**:
+  - The gate passes `deletesAt` as a `GoToAsync` parameter dictionary (the CLAUDE.md navigation convention) instead of a query string.
+  - A failed navigation resets the gate so the next 403 retries.
+- **T052**:
+  - The page reloads `GET /users/account-deletion` each time it appears. Past the deletion date the account reads as `purging`, and only Sign out is shown.
+  - After a restore, the view model caches the profile and runs `HandleSuccessfulSignInAsync` before going home, because sign-in stopped at the 403 before doing either. Both are best effort.
+  - Back is disabled on the page.
+- **T054**: `data-retention.md` has the provider values from the dashboards: Supabase backups 7 days, Supabase logs 7 days, DigitalOcean App Platform logs not stored.
+  - `ShowPII` was on in every environment, so Api token-validation logs could contain an email. It's now set only in Development, and `LoggingPrivacyTests` checks that.
+- **T056**:
+  - All suites pass: pgTAP 101, Deno 69 with lint clean, Api 103, App 165, Core 29, Infrastructure 1.
+  - `account_deletion_purge.test.sql`'s "remains" checks now read only the fixture's ids. Rows already in a local database made the profile count fail.
+  - Locally, `supabase test db` failed until it ran with an empty `DOCKER_CONFIG`: the gcloud credential helper's token had expired. This is environmental.
+- **Builds**: Android, and the iOS simulator with `--artifacts-path` set to a scratch folder so the project's `obj` isn't touched.
+- **Checkpoint**:
+  - Rows 6–8 need an Api `staging/**` tag (for the restore endpoint) and an app build.
+  - They also need a fresh test account, because A was permanently deleted in row 9.
+- **T057/T058**:
+  - Staging has every migration, both new edge functions, `AVATAR_BUCKET_NAME=avatars`, the `account-purge-hourly` cron job, the Api and app 0.1.3.
+  - Quickstart rows 1–12 pass on Android staging (2026-11-04). Row 11 first exposed an existing email sign-up crash, fixed in #23.
+  - T058 stays open for row 13 (iOS Apple revocation, which needs the Apple secrets and 013) and for the Google Play review outcome of the delete-account path (SC-007).

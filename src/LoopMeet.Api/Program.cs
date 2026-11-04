@@ -171,7 +171,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         // JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
     });
 builder.Services.AddAuthorization();
-Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+// Token details in validation errors can include an email; data-retention.md promises Api logs never do.
+if (isDevelopment)
+{
+    Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+}
 
 // Fail at startup, not on every meetup request, if the host has no IANA zone data
 // (e.g. an Alpine image without tzdata): MeetupLifecycle needs it to classify meetups.

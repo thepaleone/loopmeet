@@ -30,6 +30,8 @@
     <Compile Include="..\..\src\LoopMeet.App\Services\ApiAuthHandler.cs" Link="Included\ApiAuthHandler.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Meetups\MeetupOrganizerText.cs" Link="Included\MeetupOrganizerText.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionConfirmation.cs" Link="Included\AccountDeletionConfirmation.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionSignal.cs" Link="Included\AccountDeletionSignal.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Services\AccountStatusHandler.cs" Link="Included\AccountStatusHandler.cs" />
   </ItemGroup>
 
   <ItemGroup>
