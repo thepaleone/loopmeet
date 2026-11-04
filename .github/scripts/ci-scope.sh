@@ -8,11 +8,12 @@
 #   LoopMeet.Api.Tests   reads src/LoopMeet.Api and supabase/functions (source-inspection tests)
 #   LoopMeet.Core.Tests  reads supabase/functions/_shared/meetup-lifecycle.cases.json
 #   LoopMeet.App.Tests   compiles and reads files from src/LoopMeet.App
+#   web (deno test)      reads web/ and specs/016-account-deletion/data-retention.md (privacy policy check)
 # Documentation (*.md, specs/, .specify/) selects nothing. Any path not listed below selects
 # everything, so a new kind of file can't silently skip CI.
 set -euo pipefail
 
-keys="api_tests app_tests core_tests infra_tests edge_functions database build_backend build_app"
+keys="api_tests app_tests core_tests infra_tests edge_functions database build_backend build_app web"
 # Space-delimited set rather than an associative array, so it also runs on macOS's bash 3.2.
 selected=" "
 
@@ -33,6 +34,11 @@ else
   while IFS= read -r path || [[ -n "$path" ]]; do
     [[ -z "$path" ]] && continue
     case "$path" in
+      specs/016-account-deletion/data-retention.md)
+        # The privacy policy test checks the policy against this file.
+        select_keys web ;;
+      web/*)
+        select_keys web ;;
       *.md | specs/* | .specify/*)
         ;;
       .github/workflows/deploy-staging.yml | deploy/* | .gitignore | .gitattributes | .vscode/* | .idea/* | docker-compose.yml)

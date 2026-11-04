@@ -4,7 +4,7 @@
 set -euo pipefail
 
 script="$(dirname "$0")/ci-scope.sh"
-all="api_tests app_tests core_tests infra_tests edge_functions database build_backend build_app"
+all="api_tests app_tests core_tests infra_tests edge_functions database build_backend build_app web"
 failures=0
 
 check() {
@@ -36,6 +36,9 @@ check "edge function" "supabase/functions/account-purge/index.ts" "edge_function
 check "shared lifecycle cases" "supabase/functions/_shared/meetup-lifecycle.cases.json" "edge_functions api_tests core_tests"
 check "migration" "supabase/migrations/20261103120200_account_deletion_purge.sql" "database"
 check "pgTAP test" "supabase/tests/database/account_deletion_purge.test.sql" "database"
+check "website" "web/public/index.html\nweb/tests/pages.test.js" "web"
+check "website docs still run its tests" "web/data-safety.md" "web"
+check "data retention feeds the privacy policy test" "specs/016-account-deletion/data-retention.md" "web"
 check "tests workflow" ".github/workflows/tests.yml" "$all"
 check "this script" ".github/scripts/ci-scope.sh" "$all"
 check "solution file" "LoopMeet.slnx" "$all"

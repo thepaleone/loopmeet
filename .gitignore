@@ -89,3 +89,6 @@ loopmeet-production-firebase-adminsdk-fbsvc-e8d81bec57.json
 *.keystore
 *.jks
 artifacts/
+
+# Apple private keys (Sign in with Apple / APNs). Never commit.
+*.p8
