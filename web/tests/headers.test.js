@@ -1,7 +1,7 @@
 import { assert, assertEquals, assertMatch } from "jsr:@std/assert@1";
 import { readPublic } from "./site.js";
 
-// Cloudflare Pages _headers: a path line, then indented "Name: value" lines.
+// Cloudflare _headers (Workers static assets): a path line, then indented "Name: value" lines.
 const parseHeaders = (text) => {
   const rules = new Map();
   let current = null;

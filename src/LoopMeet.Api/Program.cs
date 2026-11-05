@@ -1,4 +1,5 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Cors;
 using LoopMeet.Api.Services;
 using LoopMeet.Api.Services.Accounts;
 using LoopMeet.Api.Services.Auth;
@@ -171,6 +172,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         // JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
     });
 builder.Services.AddAuthorization();
+
+// The website's Account page calls the Api from a browser (017 contracts/site.md). Only its origins
+// get CORS headers; bearer tokens, never cookies, so credentials stay off.
+builder.Services.AddCors();
+builder.Services.AddOptions<Microsoft.AspNetCore.Cors.Infrastructure.CorsOptions>()
+    .Configure<IConfiguration>((options, configuration) =>
+    {
+        var siteOrigins = SiteOrigins.Parse(configuration["Cors:AllowedOrigins"]);
+        options.AddPolicy(SiteOrigins.PolicyName, policy => policy
+            .SetIsOriginAllowed(origin => SiteOrigins.IsAllowed(origin, siteOrigins))
+            .WithMethods("GET", "POST", "DELETE")
+            .WithHeaders("Authorization", "Content-Type"));
+    });
+
 // Token details in validation errors can include an email; data-retention.md promises Api logs never do.
 if (isDevelopment)
 {
@@ -198,6 +213,8 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Before authentication, so preflights short-circuit and 401s still carry the headers.
+app.UseCors(SiteOrigins.PolicyName);
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();

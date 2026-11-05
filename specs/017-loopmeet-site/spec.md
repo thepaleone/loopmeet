@@ -200,7 +200,7 @@ A visitor lands on loopmeet.io from a store listing, a search or an invitation. 
 
 ## Assumptions
 
-- **Domain and hosting:** in this spec, "loopmeet.io" means the site's public address. The site launches on its Cloudflare Pages address, and a custom domain (likely `account.loopmeet.io`) is pointed at it afterwards. That changes only configuration. The site's source lives in `web/` in this repo, and previews are built for branches and pull requests.
+- **Domain and hosting:** in this spec, "loopmeet.io" means the site's public address. The site is served by Cloudflare at `account.loopmeet.io` (it was planned for Cloudflare Pages and launched as a Worker with static assets, which serves the same files). The site's source lives in `web/` in this repo, and previews are built for branches and pull requests.
 - **One backend:** the backend used so far (called staging until now) is promoted to production. The site and the app share it, and no separate staging backend exists. Renaming the app's build configurations and deploy tags is outside this feature.
 - **Apple on the web:** this needs an Apple web sign-in identifier (a Services ID) and its return addresses. These come with the Apple details already being gathered for 016, and the Account page offers Apple once they're configured.
 - **Store links:** Home links only to listings that are live: Google Play now, the App Store after 013.

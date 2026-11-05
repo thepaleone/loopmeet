@@ -4,7 +4,7 @@
 
 ## Summary
 
-A four-page static site, Home, Privacy, Support and Account, in `web/public/`, served by Cloudflare Pages with no build step.
+A four-page static site, Home, Privacy, Support and Account, in `web/public/`, served as static assets by a Cloudflare Worker with no build step.
 
 - **Account page:** signs in with Supabase Auth in the browser, then calls 016's existing account-deletion endpoints as the user. After an Apple sign-in, it hands Apple's refresh token to 016's `apple-authorization`.
 - **Privacy policy:** rewritten from 016's `data-retention.md` and the app's real data use.
@@ -24,7 +24,7 @@ The site and its previews use the one existing backend, promoted to production (
 | **Site** | HTML5, one CSS file, ES-module JavaScript with no framework and no build. `@supabase/supabase-js` 2.x UMD, vendored and pinned (research D3). |
 | **Api** | C# 13 / .NET 10 minimal API. The built-in ASP.NET Core CORS middleware, so no new packages. |
 | **Edge function** | TypeScript on Deno 2.x. `apple-authorization` gets CORS handling. |
-| **Hosting** | Cloudflare Pages, project `loopmeet`, output `web/public`, production branch `main`, previews per branch. |
+| **Hosting** | Cloudflare Worker `loopmeet-account` with static assets from `web/public`, at `account.loopmeet.io`. Production branch `main`, previews per branch at `<branch>-loopmeet-account.joelgray.workers.dev` (research D11). |
 | **Testing** | `deno test` and `deno lint` for the site (`web/tests/`). xUnit with `WebApplicationFactory` for the Api's CORS. `deno test` for the edge function's CORS. A quickstart for real sign-in on each provider and a delete-and-restore with a test account. |
 | **Performance** | Static pages under 50 KB each, excluding the vendored library, which loads only on `/account/`. That meets SC-004's under-2-seconds-on-mobile goal. |
 | **Constraints** | `script-src 'self'`, and no third-party requests from the browser other than Supabase and the Api. Home, Privacy and Support load no JavaScript. |
@@ -35,7 +35,7 @@ The site and its previews use the one existing backend, promoted to production (
 
 ```text
 web/
-├── public/                         # Cloudflare Pages output directory, served as is
+├── public/                         # the Worker's static assets, served as is
 │   ├── index.html                  # Home
 │   ├── privacy/index.html          # Privacy policy
 │   ├── support/index.html          # Support and FAQ
@@ -112,17 +112,20 @@ Section 8 says LoopMeet isn't directed at children under 13, as the Play and App
 ### Api CORS (`src/LoopMeet.Api/Program.cs`)
 
 ```csharp
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
-builder.Services.AddCors(options => options.AddPolicy("Site", policy => policy
-    .WithOrigins(allowedOrigins)
-    .SetIsOriginAllowedToAllowWildcardSubdomains()
-    .WithMethods("GET", "POST", "DELETE")
-    .WithHeaders("Authorization", "Content-Type")));
+builder.Services.AddCors();
+builder.Services.AddOptions<CorsOptions>().Configure<IConfiguration>((options, configuration) =>
+{
+    var siteOrigins = SiteOrigins.Parse(configuration["Cors:AllowedOrigins"]);   // one comma-separated string
+    options.AddPolicy(SiteOrigins.PolicyName, policy => policy
+        .SetIsOriginAllowed(origin => SiteOrigins.IsAllowed(origin, siteOrigins))
+        .WithMethods("GET", "POST", "DELETE")
+        .WithHeaders("Authorization", "Content-Type"));
+});
 // …
 app.UseCors("Site");   // after the correlation-id middleware, before UseAuthentication
 ```
 
-`AccountDeletionGateMiddleware` and authentication run after CORS, so a 401 still carries the CORS headers and the page can tell a lost session from a network failure. Origins come from configuration (contracts/site.md), and DO App Platform can override them with `Cors__AllowedOrigins__N`.
+`SiteOrigins.IsAllowed` (`src/LoopMeet.Api/Cors/SiteOrigins.cs`) is the matcher from research D6. `AccountDeletionGateMiddleware` and authentication run after CORS, so a 401 still carries the CORS headers and the page can tell a lost session from a network failure. Origins come from configuration (contracts/site.md), and DO App Platform can override them with `Cors__AllowedOrigins`. The policy reads configuration when it's resolved, not while the builder is set up, so test hosts and environment overrides apply.
 
 ### `apple-authorization` CORS
 

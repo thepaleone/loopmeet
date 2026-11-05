@@ -3,6 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { exchangeAuthorizationCode, readAppleEnv } from "../_shared/apple-auth.ts";
 import { handleAppleAuthorization } from "./handler.ts";
+import { parseOrigins, withCors } from "./cors.ts";
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? "",
@@ -11,7 +12,10 @@ const supabase = createClient(
 
 const appleEnv = readAppleEnv();
 
-Deno.serve((request) =>
+// The website's origins (017): the Account page calls this after a web Sign in with Apple.
+const siteOrigins = parseOrigins(Deno.env.get("SITE_ORIGINS") ?? "");
+
+Deno.serve(withCors((request) =>
   handleAppleAuthorization(request, {
     async getUser(jwt) {
       const { data, error } = await supabase.auth.getUser(jwt);
@@ -28,5 +32,4 @@ Deno.serve((request) =>
     log(level, message, fields) {
       console.log(JSON.stringify({ level, message, ...fields }));
     },
-  })
-);
+  }), siteOrigins));

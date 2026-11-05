@@ -89,9 +89,9 @@
   - deleting your account in the app or on the web
   - what happens during the 30 days and how to restore
   - contact
-- [ ] T016 Run `deno lint web/` and `deno test --allow-read=web,specs/016-account-deletion web/`. Then do the quickstart's PR A setup and checks 1–6 on the preview.
+- [X] T016 Run `deno lint web/` and `deno test --allow-read=web,specs/016-account-deletion web/`. Then do the quickstart's PR A setup and checks 1–6 on the preview.
   - [X] Lint and the 34 website tests pass. Every page loads from a local server, with the largest at 12 KB. Screenshots at 1280, 390 and 320 px, light and dark, show no sideways scroll.
-  - [ ] Cloudflare setup and quickstart checks 1–6 on the preview (you).
+  - [X] Cloudflare setup and quickstart checks 1–6 (you). Merged as #29 and deployed, with the static pages and the privacy policy content verified.
 
 **Checkpoint: PR A.** Commit, push and open the PR. Once it's merged, Play can use the privacy URL.
 
@@ -99,20 +99,22 @@
 
 ### Backend: CORS
 
-- [ ] T017 [P] [US1] Create `tests/LoopMeet.Api.Tests/Cors/SiteCorsTests.cs`, using `WebApplicationFactory<Program>` with `Cors:AllowedOrigins` set to `https://site.test` and `https://*.preview.test`:
+- [X] T017 [P] [US1] Create `tests/LoopMeet.Api.Tests/Cors/SiteCorsTests.cs`, using `WebApplicationFactory<Program>` with `Cors:AllowedOrigins` set to `https://site.test` and `https://*-preview.test`:
   - **Allowed preflight:** an `OPTIONS /users/account-deletion` from `https://site.test` with `Access-Control-Request-Method: POST` returns 204, with `Access-Control-Allow-Origin: https://site.test`, and `authorization` and `content-type` allowed.
-  - **Wildcard previews:** `https://abc.preview.test` is allowed.
+  - **Wildcard previews:** `https://main-preview.test` is allowed.
+  - **Matcher cases:** `SiteOrigins.IsAllowed` passes every case in `supabase/functions/apple-authorization/site-origins.cases.json` (`tests/LoopMeet.Api.Tests/Cors/SiteOriginsTests.cs`).
   - **Disallowed origin:** `https://evil.test` gets no `Access-Control-Allow-Origin`.
   - **401s:** an unauthenticated `GET /users/account-deletion` from an allowed origin returns 401 with `Access-Control-Allow-Origin`.
   - **No credentials:** no response includes `Access-Control-Allow-Credentials`.
   - **No `Origin` header:** a request without one behaves as today.
-- [ ] T018 [US1] Implement T017:
-  - In `src/LoopMeet.Api/Program.cs`, add `AddCors` with the `Site` policy, and `app.UseCors("Site")` before `UseAuthentication`.
-  - In `src/LoopMeet.Api/appsettings.json`, set `Cors:AllowedOrigins` to `["https://loopmeet.pages.dev", "https://*.loopmeet.pages.dev"]`.
-  - In `appsettings.Development.json`, set `["http://localhost:4507"]`.
-- [ ] T019 [P] [US1] Create `supabase/functions/apple-authorization/cors.test.ts`, testing `parseOrigins` and `corsHeadersFor`:
-  - exact match
-  - a `*.` wildcard match on one label, which rejects the bare parent and a two-label prefix
+- [X] T018 [US1] Implement T017:
+  - Create `src/LoopMeet.Api/Cors/SiteOrigins.cs` with `IsAllowed(origin, patterns)`.
+  - In `src/LoopMeet.Api/Program.cs`, add `AddCors` with the `Site` policy using `SetIsOriginAllowed`, and `app.UseCors("Site")` before `UseAuthentication`.
+  - In `src/LoopMeet.Api/appsettings.json`, set `Cors:AllowedOrigins` to `"https://account.loopmeet.io, https://loopmeet-account.joelgray.workers.dev, https://*-loopmeet-account.joelgray.workers.dev"`, one string so overrides replace it whole.
+  - `supabase/functions/*` already selects the Api tests in `.github/scripts/ci-scope.sh`; add a `ci-scope.test.sh` case for `site-origins.cases.json` so it stays that way.
+  - In `appsettings.Development.json`, set `"http://localhost:4507"`.
+- [X] T019 [P] [US1] Create `supabase/functions/apple-authorization/cors.test.ts`, testing `parseOrigins` and `corsHeadersFor`:
+  - every case in `site-origins.cases.json`, created here: exact match, case, a `*` prefix in the first label, and rejections of the bare host, a dotted prefix, another port, `http` for an `https` entry, and a suffix attack (`…workers.dev.evil.test`)
   - a disallowed origin gives `null`
   - an empty list allows nothing
   - the allowed headers include `apikey` and `x-client-info`
@@ -121,12 +123,12 @@
   - an `OPTIONS` from an allowed origin gives 204 with the headers
   - a `POST` from an allowed origin gets the handler's response plus the headers
   - a request without `Origin` gets the handler's response unchanged
-- [ ] T020 [US1] Implement T019:
+- [X] T020 [US1] Implement T019:
   - Create `supabase/functions/apple-authorization/cors.ts`, exporting `parseOrigins`, `corsHeadersFor` and `withCors(handler, allowed)`.
   - In `index.ts`, wrap `handleAppleAuthorization` with `withCors(…, parseOrigins(Deno.env.get("SITE_ORIGINS") ?? ""))`.
 
   Run `deno lint supabase/functions/` and `deno test --allow-read=supabase/functions supabase/functions/`.
-- [ ] T021 [P] [US1] In `supabase/config.toml`, add `http://localhost:4507/account/` to `additional_redirect_urls`.
+- [X] T021 [P] [US1] In `supabase/config.toml`, add `http://localhost:4507/account/` to `additional_redirect_urls`.
 
 ### Site: Account page
 

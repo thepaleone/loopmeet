@@ -4,31 +4,24 @@ There's one backend, the one the app uses (research D1). Every Account-page chec
 
 ## One-time setup
 
-### Cloudflare Pages (PR A)
+### Cloudflare (PR A)
 
-1. In Cloudflare, go to **Workers & Pages → Create → Pages → Connect to Git**, choose this repo, and name the project `loopmeet`.
-
-   | Setting | Value |
-   | --- | --- |
-   | Production branch | `main` |
-   | Framework preset | None |
-   | Build command | *(empty)* |
-   | Build output directory | `web/public` |
-
-2. In **Settings → Builds → Build watch paths**, include `web/*`, so branches that touch only the app don't deploy previews.
-3. The custom domain comes after launch (see **Custom domain** below). Until then, the live site is `https://loopmeet.pages.dev`.
-4. If the `loopmeet` project name was taken, note the `*.pages.dev` host you got. It goes into CORS and the redirect URLs below in place of `loopmeet.pages.dev`.
+The site is a Worker, `loopmeet-account`, serving `web/public` as static assets (research D11).
 
 | Setting | Value | Checked |
 | --- | --- | --- |
-| Pages host | `loopmeet.pages.dev` | |
-| Custom domain | likely `account.loopmeet.io` | |
+| Worker address | `https://loopmeet-account.joelgray.workers.dev` | ✓ |
+| Custom domain | `https://account.loopmeet.io` | ✓ |
+| Production branch | `main` | ✓ |
+| Builds for non-production branches | on, so PR B's branch gets `https://<branch>-loopmeet-account.joelgray.workers.dev` | ✓ |
+| Preview URLs (**Settings → Domains & Routes**) | enabled | ✓ |
+| Build watch paths | include `web/**` | ✓ |
 
 ### Backend (PR B)
 
-1. **Supabase → Authentication → URL Configuration → Redirect URLs**: add `https://loopmeet.pages.dev/account/` and `https://*.loopmeet.pages.dev/account/`. Leave the Site URL as it is.
-2. **Supabase secrets**: `supabase secrets set SITE_ORIGINS="https://loopmeet.pages.dev,https://*.loopmeet.pages.dev"`, then `supabase functions deploy apple-authorization`.
-3. **The Api**: deploy a build that includes PR B (`staging/**` tag). `Cors:AllowedOrigins` comes from `appsettings.json`, so it needs no new environment variable unless the Pages host differs.
+1. **Supabase → Authentication → URL Configuration → Redirect URLs**: add `https://account.loopmeet.io/account/`, `https://loopmeet-account.joelgray.workers.dev/account/` and `https://*-loopmeet-account.joelgray.workers.dev/account/`. Leave the Site URL as it is.
+2. **Supabase secrets**: `supabase secrets set SITE_ORIGINS="https://account.loopmeet.io,https://loopmeet-account.joelgray.workers.dev,https://*-loopmeet-account.joelgray.workers.dev"`, then `supabase functions deploy apple-authorization`.
+3. **The Api**: deploy a build that includes PR B (`staging/**` tag). `Cors:AllowedOrigins` comes from `appsettings.json`, so it needs no new environment variable unless a host changes.
 4. **`web/public/js/config.js`**: fill in the Supabase URL, the publishable key and the Api base URL, which is the same one the app's builds use.
 
 ### Apple on the web (PR B, or later)
@@ -63,12 +56,12 @@ Pointing the local site at local Supabase means editing `config.js` locally. Don
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
-| 1 | Open the preview URL on a phone, then on a desktop. Visit Home, Privacy and Support. | Each reads well at both sizes, and the header and footer link to all four pages (FR-001, FR-003). | |
-| 2 | Turn off JavaScript in the browser and reload the three pages. | They read fully (FR-002). | |
-| 3 | On a phone over mobile data, load Home cold. | It's readable in under 2 seconds (SC-004). | |
-| 4 | Compare Privacy, side by side, with the Play Data safety form, using `web/data-safety.md`. | No category or processor is missing or contradicts the form (SC-003). | |
-| 5 | Switch the device to dark mode. | Pages stay readable with good contrast. | |
-| 6 | After merge, open `https://loopmeet.pages.dev/privacy/` and `https://loopmeet.pages.dev/delete-account`. | The policy loads, and `/delete-account` lands on `/account/`. | |
+| 1 | Open the preview URL on a phone, then on a desktop. Visit Home, Privacy and Support. | Each reads well at both sizes, and the header and footer link to all four pages (FR-001, FR-003). | Pass |
+| 2 | Turn off JavaScript in the browser and reload the three pages. | They read fully (FR-002). | Pass |
+| 3 | On a phone over mobile data, load Home cold. | It's readable in under 2 seconds (SC-004). | Pass |
+| 4 | Compare Privacy, side by side, with the Play Data safety form, using `web/data-safety.md`. | No category or processor is missing or contradicts the form (SC-003). | Pass |
+| 5 | Switch the device to dark mode. | Pages stay readable with good contrast. | Pass |
+| 6 | After merge, open `https://account.loopmeet.io/privacy/` and `https://account.loopmeet.io/delete-account`. | The policy loads, and `/delete-account` lands on `/account/`. | Pass |
 
 ### PR B: Account page (test accounts only)
 
@@ -98,17 +91,12 @@ Pointing the local site at local Supabase means editing `config.js` locally. Don
 | 23 | Check the database: `select client_id from apple_authorizations where user_id = '<T3>';`. | There's a row with `client_id = io.loopmeet.web`, and the function logs show `apple_authorization_stored` (FR-011). | |
 | 24 | Request deletion as T3, then force the purge (016 quickstart). | LoopMeet disappears from T3's Apple ID → Sign in with Apple list. | |
 
-### Custom domain, after launch
+### Live site, after PR B merges
 
-Pointing the domain at Cloudflare (likely `account.loopmeet.io`) changes only configuration:
-
-1. **Cloudflare:** in the Pages project, go to **Custom domains** and add the domain.
-2. **Api:** add `https://<domain>` to `Cors:AllowedOrigins` in `appsettings.json` (or set `Cors__AllowedOrigins__2` on DO App Platform), then deploy.
-3. **Edge function:** add `https://<domain>` to `SITE_ORIGINS` with `supabase secrets set`, then redeploy `apple-authorization`.
-4. **Supabase:** add `https://<domain>/account/` to Redirect URLs.
+Checks 7–21 run on PR B's preview. These repeat the key ones on the live hosts.
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
-| 25 | Open `https://<domain>/` and `https://<domain>/privacy/`. | Both load over HTTPS. | |
-| 26 | Repeat checks 7, 15 and 22 on `https://<domain>/account/`. | Sign-in returns to the domain, and the status loads, so CORS allows the domain. | |
-| 27 | Open `https://loopmeet.pages.dev/account/`. | It still works. | |
+| 25 | Open `https://account.loopmeet.io/account/` in a private window. | The sign-in options show, and the response has `Cache-Control: no-store`. | |
+| 26 | Repeat checks 7, 15 and 22 on `https://account.loopmeet.io/account/`. | Sign-in returns to the domain, and the status loads, so CORS allows the domain. | |
+| 27 | Repeat check 7 on `https://loopmeet-account.joelgray.workers.dev/account/`. | It works there too. | |
