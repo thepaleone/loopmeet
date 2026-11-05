@@ -349,3 +349,80 @@ details[open] summary {
 code {
   overflow-wrap: anywhere;
 }
+
+/* Account page */
+
+.account section {
+  margin-top: 1.5rem;
+}
+
+.account h2:focus {
+  outline: none;
+}
+
+.message:empty {
+  display: none;
+}
+
+.message {
+  padding: 0.85rem 1.1rem;
+  background: var(--band);
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 1rem;
+  max-width: 24rem;
+}
+
+.field label {
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--muted);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+button.button {
+  border: 2px solid transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.button-secondary {
+  background: transparent;
+  border-color: var(--muted);
+  color: var(--text);
+}
+
+.button-danger {
+  background: var(--danger);
+  color: var(--bg);
+}
+
+button.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.divider {
+  margin: 1.5rem 0 0;
+  color: var(--muted);
+}

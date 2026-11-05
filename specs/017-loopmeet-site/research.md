@@ -121,7 +121,7 @@ The **Site URL** is left alone, because the app's email confirmation links depen
 
 ## D9. Tests run under Deno, which CI already has
 
-**Decision**: The site's tests are `deno test` files in `web/tests/`, linted with `deno lint web/`. They import with `jsr:` specifiers, as the edge-function tests do.
+**Decision**: The site's tests are `deno test` files in `web/tests/`, linted with `deno lint --ignore=web/public/vendor web/` (the vendored library is minified third-party code). They import with `jsr:` specifiers, as the edge-function tests do.
 
 | Test file | What it checks |
 | --- | --- |
@@ -142,7 +142,7 @@ The **Site URL** is left alone, because the app's email confirmation links depen
 
 ## D10. CI scope
 
-**Decision**: A new `web` key in `.github/scripts/ci-scope.sh`, with a `Run Website Tests` job (`deno lint web/` then `deno test --allow-read=web,specs/016-account-deletion web/`). The Tests Gate checks it too.
+**Decision**: A new `web` key in `.github/scripts/ci-scope.sh`, with a `Run Website Tests` job (`deno lint --ignore=web/public/vendor web/` then `deno test --allow-read=web,specs/016-account-deletion web/`). The Tests Gate checks it too.
 
 | Paths | Selects |
 | --- | --- |

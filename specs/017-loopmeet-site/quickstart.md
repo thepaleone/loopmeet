@@ -45,7 +45,7 @@ The site is a Worker, `loopmeet-account`, serving `web/public` as static assets 
 
 ```bash
 deno run --allow-net --allow-read jsr:@std/http@1/file-server web/public --port 4507
-deno lint web/ && deno test --allow-read=web,specs/016-account-deletion web/
+deno lint --ignore=web/public/vendor web/ && deno test --allow-read=web,specs/016-account-deletion web/
 ```
 
 Pointing the local site at local Supabase means editing `config.js` locally. Don't commit that change.
