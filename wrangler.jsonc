@@ -1,4 +1,4 @@
-// The loopmeet.io site (017 research D11): a Worker with static assets and no script.
+// The loopmeet.io site (017 research D11): a Worker serving web/public as static assets, no script.
 // Workers Builds deploys main with `wrangler deploy` and other branches with `wrangler preview`,
 // which requires the previews block even when it's empty.
 {
