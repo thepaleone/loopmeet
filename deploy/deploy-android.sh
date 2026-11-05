@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-DEVICE="adb-4A301FDAS002ED-5gZyL4._adb-tls-connect._tcp"
+DEVICE="adb-67020DLDV00B0K-AovzuD._adb-tls-connect._tcp"
 CONFIGURATION="Release"
 
 usage() {
