@@ -34,6 +34,7 @@ check "core source reaches every backend suite" "src/LoopMeet.Core/Meetups/Meetu
 check "infrastructure source" "src/LoopMeet.Infrastructure/Repositories/GroupRepository.cs" "infra_tests api_tests build_backend"
 check "edge function" "supabase/functions/account-purge/index.ts" "edge_functions api_tests"
 check "shared lifecycle cases" "supabase/functions/_shared/meetup-lifecycle.cases.json" "edge_functions api_tests core_tests"
+check "site origin cases feed the Api tests" "supabase/functions/apple-authorization/site-origins.cases.json" "edge_functions api_tests"
 check "migration" "supabase/migrations/20261103120200_account_deletion_purge.sql" "database"
 check "pgTAP test" "supabase/tests/database/account_deletion_purge.test.sql" "database"
 check "website" "web/public/index.html\nweb/tests/pages.test.js" "web"

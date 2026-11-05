@@ -63,11 +63,11 @@ The deletion endpoints are exempt from the Api's pending-deletion gate. The site
 
 ```json
 "Cors": {
-  "AllowedOrigins": ["https://loopmeet.pages.dev", "https://*.loopmeet.pages.dev"]
+  "AllowedOrigins": "https://account.loopmeet.io, https://loopmeet-account.joelgray.workers.dev, https://*-loopmeet-account.joelgray.workers.dev"
 }
 ```
 
-When the custom domain is chosen (likely `https://account.loopmeet.io`), it's added to this list and to `SITE_ORIGINS`. `appsettings.Development.json` uses `["http://localhost:4507"]`. The setting can be overridden by environment variables, `Cors__AllowedOrigins__0` and so on.
+An entry may hold one `*` in its first host label, matching one or more of `a-z`, `0-9` and `-`, never a dot (research D6). Matching ignores case and is otherwise exact: scheme, host and port. `supabase/functions/apple-authorization/site-origins.cases.json` pins the rule for both implementations. The value is one comma-separated string, the same format as `SITE_ORIGINS`, so an override replaces the whole list. (A JSON array would merge by index, and an override of entry 0 would quietly keep the rest.) `appsettings.Development.json` sets `"http://localhost:4507"`, and DO App Platform can override the list with the `Cors__AllowedOrigins` environment variable.
 
 | Request | Response |
 | --- | --- |
@@ -79,7 +79,7 @@ When the custom domain is chosen (likely `https://account.loopmeet.io`), it's ad
 
 ### `apple-authorization`: the `SITE_ORIGINS` secret
 
-The secret holds the same list, comma-separated. An entry may contain one `*.` label.
+The secret holds the same list, comma-separated, with the same `*` rule as the Api.
 
 | Request | Response |
 | --- | --- |

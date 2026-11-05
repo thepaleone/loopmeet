@@ -16,7 +16,7 @@ Each decision lists what was chosen, why, and what was rejected.
 
 ## D2. Plain static files, no build step
 
-**Decision**: Hand-written HTML, one stylesheet and ES modules in `web/public/`, which is the Cloudflare Pages output directory. Pages runs no build command. Each page is a folder with an `index.html` (`privacy/index.html`), so the same URLs work on Pages and on any local static server.
+**Decision**: Hand-written HTML, one stylesheet and ES modules in `web/public/`, which the Cloudflare Worker serves as static assets. There's no build step. Each page is a folder with an `index.html` (`privacy/index.html`), so the same URLs work on Cloudflare and on any local static server.
 
 **Rationale**: It's what was chosen for 017: four pages, three of them static text. Nothing needs compiling, and there's no npm toolchain to maintain or audit.
 
@@ -69,26 +69,27 @@ Each decision lists what was chosen, why, and what was rejected.
 
 **Decision**:
 
-- **Api**: a named ASP.NET Core CORS policy, `Site`, built from the `Cors:AllowedOrigins` configuration array. It's applied with `app.UseCors("Site")` after the correlation-id middleware and before `UseAuthentication`, so preflights and the 401 and 403 responses carry the headers.
+- **Api**: a named ASP.NET Core CORS policy, `Site`, built from `Cors:AllowedOrigins`, one comma-separated string like `SITE_ORIGINS`. It's applied with `app.UseCors("Site")` after the correlation-id middleware and before `UseAuthentication`, so preflights and the 401 and 403 responses carry the headers.
   - **Methods:** `GET`, `POST`, `DELETE`.
   - **Headers:** `Authorization`, `Content-Type`.
   - **Credentials:** none (bearer tokens, no cookies).
-  - **Wildcards:** `SetIsOriginAllowedToAllowWildcardSubdomains()` admits `https://*.loopmeet.pages.dev` for previews.
-- **`apple-authorization`**: a small CORS helper in the function's folder, which only it uses. It reads the same list from the `SITE_ORIGINS` secret, comma-separated, where an entry may use one `*.` wildcard label.
+  - **Previews:** an origin entry may hold one `*` in its first host label, which matches one or more letters, digits or dashes and never a dot. `https://*-loopmeet-account.joelgray.workers.dev` admits `https://main-loopmeet-account.joelgray.workers.dev` but not the bare host, `https://a.b-loopmeet-account.joelgray.workers.dev`, or any other domain. The policy uses `SetIsOriginAllowed` with this matcher, because the built-in `SetIsOriginAllowedToAllowWildcardSubdomains` only understands `*.host`, and Worker previews sit beside the Worker's host, not under it.
+- **`apple-authorization`**: a small CORS helper in the function's folder, which only it uses. It reads the same list from the `SITE_ORIGINS` secret, comma-separated, with the same matching rule.
+- **One rule, two places:** the matcher exists in C# and TypeScript. Both test suites read `supabase/functions/apple-authorization/site-origins.cases.json`, so they can't drift (the pattern 012 uses for `meetup-lifecycle.cases.json`).
   - **Matching origin:** `OPTIONS` returns 204 with the CORS headers, and every response from the function echoes the origin.
   - **Other origins:** get no CORS headers, and the function answers exactly as today.
   - **No `Origin` header:** the native app sends none, and its behaviour is unchanged.
 
 | Origin | Why |
 | --- | --- |
-| `https://loopmeet.pages.dev` | the live site until the custom domain is set up |
-| `https://*.loopmeet.pages.dev` | Pages previews (`<branch>.` and `<hash>.loopmeet.pages.dev`) |
-| the custom domain, likely `https://account.loopmeet.io` | added when it's pointed at the project, after launch |
+| `https://account.loopmeet.io` | the live site |
+| `https://loopmeet-account.joelgray.workers.dev` | the Worker's own address, which also serves the production site |
+| `https://*-loopmeet-account.joelgray.workers.dev` | Worker previews: `<branch>-` and `<version>-loopmeet-account.joelgray.workers.dev` |
 | `http://localhost:4507` | local development only (`appsettings.Development.json`, local `.env`) |
 
 - **What CORS does here:** other websites can't call the Api from a visitor's browser (FR-021). It doesn't add authentication, which is still the bearer token.
 - **Previews:** any branch pushed to this repo gets a preview origin. Only people who can push can create one.
-- **Configuration:** the Pages project is named `loopmeet`. If that name is taken, the `pages.dev` host changes, and so does only this configuration.
+- **Configuration:** the hosts come from the Worker's name (`loopmeet-account`) and the account's `workers.dev` subdomain (`joelgray`). Renaming either changes only this configuration. Only Workers in this Cloudflare account can use `joelgray.workers.dev`.
 
 **Rejected**: `AllowAnyOrigin`, which FR-021 forbids. Proxying the Api through Cloudflare to avoid CORS, which adds a moving part for no gain.
 
@@ -110,9 +111,9 @@ Until `appleWebClientId` is set, the Account page hides the Apple button, so the
 
 **Decision**: Add these to the Supabase project's Auth → URL Configuration → Redirect URLs:
 
-- `https://loopmeet.pages.dev/account/`
-- the custom domain's `/account/`, once it exists
-- `https://*.loopmeet.pages.dev/account/`
+- `https://account.loopmeet.io/account/`
+- `https://loopmeet-account.joelgray.workers.dev/account/`
+- `https://*-loopmeet-account.joelgray.workers.dev/account/` (Supabase's `*` doesn't cross a `.` or `/`)
 
 Add `http://localhost:4507/account/` to `additional_redirect_urls` in `supabase/config.toml`.
 
@@ -120,7 +121,7 @@ The **Site URL** is left alone, because the app's email confirmation links depen
 
 ## D9. Tests run under Deno, which CI already has
 
-**Decision**: The site's tests are `deno test` files in `web/tests/`, linted with `deno lint web/`. They import with `jsr:` specifiers, as the edge-function tests do.
+**Decision**: The site's tests are `deno test` files in `web/tests/`, linted with `deno lint --ignore=web/public/vendor web/` (the vendored library is minified third-party code). They import with `jsr:` specifiers, as the edge-function tests do.
 
 | Test file | What it checks |
 | --- | --- |
@@ -141,7 +142,7 @@ The **Site URL** is left alone, because the app's email confirmation links depen
 
 ## D10. CI scope
 
-**Decision**: A new `web` key in `.github/scripts/ci-scope.sh`, with a `Run Website Tests` job (`deno lint web/` then `deno test --allow-read=web,specs/016-account-deletion web/`). The Tests Gate checks it too.
+**Decision**: A new `web` key in `.github/scripts/ci-scope.sh`, with a `Run Website Tests` job (`deno lint --ignore=web/public/vendor web/` then `deno test --allow-read=web,specs/016-account-deletion web/`). The Tests Gate checks it too.
 
 | Paths | Selects |
 | --- | --- |
@@ -150,19 +151,22 @@ The **Site URL** is left alone, because the app's email confirmation links depen
 
 The data-retention rule has to come before the `*.md` documentation rule, because the policy test reads that file (the CLAUDE.md gotcha about cross-tree reads). Cases for both rules go into `ci-scope.test.sh`.
 
-## D11. Cloudflare Pages configuration
+## D11. Cloudflare Worker configuration
 
-**Decision**: Connect the GitHub repo to a Pages project named `loopmeet`.
+**Decision**: The GitHub repo is connected to a Worker, `loopmeet-account`, that serves `web/public` as static assets with no Worker script. (It was planned as a Pages project. A Worker with static assets serves the same files and reads the same `_headers` and `_redirects`.)
 
 | Setting | Value |
 | --- | --- |
 | Production branch | `main` |
-| Build command | none |
-| Output directory | `web/public` |
-| Build watch paths | include `web/*` |
-| Custom domain | added after launch, likely `account.loopmeet.io` |
+| Static assets | `web/public` |
+| Address | `https://loopmeet-account.joelgray.workers.dev` |
+| Custom domain | `https://account.loopmeet.io` |
+| Preview URLs | on, with builds for non-production branches, so a branch deploys to `<branch>-loopmeet-account.joelgray.workers.dev` |
+| Build watch paths | include `web/**` and `wrangler.jsonc` |
+| Wrangler config | `wrangler.jsonc` at the repo root: name, `assets.directory`, and an empty `previews` block, which `wrangler preview` requires for branch builds |
 
 - **Build watch paths** keep app-only branches from deploying previews.
+- **No Worker script:** Cloudflare applies `_headers` only to static-asset responses, so adding a script later means setting the headers there.
 - **`web/public/_headers`** sets security headers on every page, plus `Cache-Control: no-store` on `/account/*`.
 - **`web/public/_redirects`** sends `/delete-account` to `/account/`, a short URL for store forms.
 

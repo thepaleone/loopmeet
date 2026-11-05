@@ -82,3 +82,53 @@ Deno.test("Support: explains both ways to delete an account, the 30 days, and th
   assertMatch(text, /Restore account/);
   assertMatch(html, /href="mailto:info@palehorse\.net"/);
 });
+
+Deno.test("Account: loads only the vendored library and account.js, with no inline scripts (CSP)", () => {
+  const scripts = byName.Account.html.match(/<script\b[^>]*>[\s\S]*?<\/script>/g) ?? [];
+  assertEquals(scripts, [
+    '<script src="/vendor/supabase.js" defer></script>',
+    '<script type="module" src="/js/account.js"></script>',
+  ]);
+});
+
+Deno.test("Account: without JavaScript, explains the app and email routes (FR-002)", () => {
+  const noscript = firstMatch(byName.Account.html, /<noscript>[\s\S]*?<\/noscript>/);
+  assert(noscript, "missing <noscript>");
+  assertMatch(textOf(noscript), /Profile → Delete Account/);
+  assertMatch(noscript, /href="mailto:info@palehorse\.net"/);
+});
+
+Deno.test("Account: has a hidden section with a focusable heading for every view", () => {
+  const { html } = byName.Account;
+  for (const view of ["loading", "signed-out", "active", "confirm", "scheduled", "purging", "error"]) {
+    const section = firstMatch(html, new RegExp(`<section data-view="${view}" hidden>[\\s\\S]*?</section>`));
+    assert(section, `missing hidden section for ${view}`);
+    assertMatch(section, /<h2 tabindex="-1">/, view);
+  }
+  assertMatch(html, /id="account-message"[^>]*aria-live="polite"/);
+});
+
+Deno.test("Account: every input has a label, and the DELETE field isn't autofilled", () => {
+  const { html } = byName.Account;
+  for (const [, id] of html.matchAll(/<input id="([^"]+)"/g)) {
+    assertMatch(html, new RegExp(`<label for="${id}">`), id);
+  }
+  assertMatch(html, /<input id="confirm-text"[^>]*autocomplete="off"/);
+  assertMatch(html, /<input id="sign-in-email"[^>]*autocomplete="email"/);
+  assertMatch(html, /<input id="sign-in-password"[^>]*autocomplete="current-password"/);
+  assertMatch(html, /data-action="confirm" disabled>/);
+  assertMatch(html, /data-provider="apple" hidden>/);
+});
+
+Deno.test("Account: each view offers only its own actions (US3)", () => {
+  const { html } = byName.Account;
+  const actionsIn = (view) => {
+    const section = firstMatch(html, new RegExp(`<section data-view="${view}" hidden>[\\s\\S]*?</section>`));
+    return [...section.matchAll(/data-action="([^"]+)"/g)].map((match) => match[1]);
+  };
+  assertEquals(actionsIn("active"), ["delete", "sign-out"]);
+  assertEquals(actionsIn("confirm"), ["confirm", "cancel"]);
+  assertEquals(actionsIn("scheduled"), ["restore", "sign-out"]);
+  assertEquals(actionsIn("purging"), ["sign-out"]);
+  assertEquals(actionsIn("error"), ["retry", "sign-out"]);
+});

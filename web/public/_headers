@@ -1,4 +1,4 @@
-# Cloudflare Pages response headers. connect-src must list config.js's supabaseUrl and apiBaseUrl
+# Cloudflare response headers (Workers static assets). connect-src must list config.js's supabaseUrl and apiBaseUrl
 # (headers.test.js checks this).
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self' https://cswfsnikasaorexwhsas.supabase.co https://api-staging.loopmeet.io; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'

@@ -166,7 +166,7 @@ jobs:
           deno-version: v2.x
 
       - name: Lint the website
-        run: deno lint web/
+        run: deno lint --ignore=web/public/vendor web/
 
       # The privacy policy test also reads 016's data-retention.md.
       - name: Run website tests
