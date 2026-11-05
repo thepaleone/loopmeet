@@ -162,7 +162,8 @@ The data-retention rule has to come before the `*.md` documentation rule, becaus
 | Address | `https://loopmeet-account.joelgray.workers.dev` |
 | Custom domain | `https://account.loopmeet.io` |
 | Preview URLs | on, with builds for non-production branches, so a branch deploys to `<branch>-loopmeet-account.joelgray.workers.dev` |
-| Build watch paths | include `web/**` |
+| Build watch paths | include `web/**` and `wrangler.jsonc` |
+| Wrangler config | `wrangler.jsonc` at the repo root: name, `assets.directory`, and an empty `previews` block, which `wrangler preview` requires for branch builds |
 
 - **Build watch paths** keep app-only branches from deploying previews.
 - **No Worker script:** Cloudflare applies `_headers` only to static-asset responses, so adding a script later means setting the headers there.
