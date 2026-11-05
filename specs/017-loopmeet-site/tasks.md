@@ -186,8 +186,8 @@
   - The privacy policy and `web/data-safety.md` must change with `data-retention.md`.
   - The Supabase Apple Secret Key for the web expires after at most 6 months.
 - [X] T034 Run the full suites CI selects for this branch locally: site, Api tests, and edge functions.
-- [ ] T035 Do the quickstart's PR B backend setup, then checks 7–21, on a preview with test accounts. Checks 22–24 run once the Apple web setup is done.
-- [ ] T036 **Checkpoint: PR B.** Commit, push and open the PR. The custom domain (quickstart checks 25–27) and pointing Play at its URLs follow after merge.
+- [X] T035 Do the quickstart's PR B backend setup, then checks 7–21, on a preview with test accounts. Checks 22–24 run once the Apple web setup is done.
+- [X] T036 **Checkpoint: PR B.** Commit, push and open the PR. The custom domain (quickstart checks 25–27) and pointing Play at its URLs follow after merge.
 
 ## Dependencies
 

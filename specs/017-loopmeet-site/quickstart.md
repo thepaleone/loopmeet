@@ -67,21 +67,21 @@ Pointing the local site at local Supabase means editing `config.js` locally. Don
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
-| 7 | Sign in with the email and password of test account **T1**. | The page shows T1's email and "not scheduled" (US1-1). | |
-| 8 | Delete account. Type `delete`, then `DELETE`. | The button stays disabled for `delete` and enables only for `DELETE`. Owned groups show with member counts, and the date is 30 days out (US1-2). | |
-| 9 | Confirm. | The page shows the date. In the app, signing in as T1 shows the scheduled-deletion screen, and another member no longer sees T1's groups (US1-3, SC-002). | |
-| 10 | Reload the Account page. | It shows the scheduled view with the same date. Reloading didn't cancel it (US1-4). | |
-| 11 | Restore account. | The page shows active. In the app, T1 and their groups are back for everyone (US3-1). | |
-| 12 | Request deletion in the **app** as T1, then sign in on the web. | The scheduled view shows, with the app's date (US3, FR-010). | |
-| 13 | Sign out. | The page returns to sign-in. In DevTools → Application, `sessionStorage` has no Supabase keys, and `localStorage` has none (FR-012). | |
-| 14 | Sign in with a wrong password, then cancel a Google sign-in. | Short, specific messages, and nothing changes (US1-5, FR-013). | |
-| 15 | Sign in with **Google** as test account T2. | It returns to `/account/` on the same host, preview or live (FR-022), and shows T2's email. | |
-| 16 | On a preview URL, repeat check 15. | It returns to the preview's own `/account/`. | |
-| 17 | Turn off the network and choose Delete account. | "Couldn't reach LoopMeet…" shows, with no raw error. | |
-| 18 | In the browser console on another site, for example `example.com`, run `fetch("<api>/users/account-deletion")`. | The browser blocks it with a CORS error (FR-021, SC-006). | |
-| 19 | Turn off JavaScript and open `/account/`. | It says JavaScript is needed and gives `info@palehorse.net` for deletion requests. | |
-| 20 | Time checks 7–9 from opening the live site. | Under 2 minutes (SC-001). | |
-| 21 | Once the custom domain works (rows 25–27), set Play Console's account-deletion URL to `https://<domain>/account/` and the privacy policy URL to `https://<domain>/privacy/`. | Play accepts both (SC-005). | |
+| 7 | Sign in with the email and password of test account **T1**. | The page shows T1's email and "not scheduled" (US1-1). | Pass |
+| 8 | Delete account. Type `delete`, then `DELETE`. | The button stays disabled for `delete` and enables only for `DELETE`. Owned groups show with member counts, and the date is 30 days out (US1-2). | Pass |
+| 9 | Confirm. | The page shows the date. In the app, signing in as T1 shows the scheduled-deletion screen, and another member no longer sees T1's groups (US1-3, SC-002). | Pass |
+| 10 | Reload the Account page. | It shows the scheduled view with the same date. Reloading didn't cancel it (US1-4). | Pass |
+| 11 | Restore account. | The page shows active. In the app, T1 and their groups are back for everyone (US3-1). | Pass |
+| 12 | Request deletion in the **app** as T1, then sign in on the web. | The scheduled view shows, with the app's date (US3, FR-010). | Pass |
+| 13 | Sign out. | The page returns to sign-in. In DevTools → Application, `sessionStorage` has no Supabase keys, and `localStorage` has none (FR-012). | Pass |
+| 14 | Sign in with a wrong password, then cancel a Google sign-in. | Short, specific messages, and nothing changes (US1-5, FR-013). | Pass |
+| 15 | Sign in with **Google** as test account T2. | It returns to `/account/` on the same host, preview or live (FR-022), and shows T2's email. | Pass |
+| 16 | On a preview URL, repeat check 15. | It returns to the preview's own `/account/`. | Pass |
+| 17 | Turn off the network and choose Delete account. | "Couldn't reach LoopMeet…" shows, with no raw error. | Pass |
+| 18 | In the browser console on another site, for example `example.com`, run `fetch("<api>/users/account-deletion")`. | The browser blocks it with a CORS error (FR-021, SC-006). | Pass |
+| 19 | Turn off JavaScript and open `/account/`. | It says JavaScript is needed and gives `info@palehorse.net` for deletion requests. | Pass |
+| 20 | Time checks 7–9 from opening the live site. | Under 2 minutes (SC-001). | Pass |
+| 21 | Once the custom domain works (rows 25–27), set Play Console's account-deletion URL to `https://<domain>/account/` and the privacy policy URL to `https://<domain>/privacy/`. | Play accepts both (SC-005). | Pass |
 
 ### Apple on the web, once set up
 
