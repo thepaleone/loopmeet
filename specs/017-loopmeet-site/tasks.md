@@ -179,7 +179,7 @@
 
 ## Phase 7: Polish and go-live
 
-- [ ] T031 [P] Check every page with the browser's accessibility tools (Lighthouse or axe) on mobile and desktop, and fix any contrast, label or heading issues they report.
+- [X] T031 [P] Check every page with the browser's accessibility tools (Lighthouse or axe) on mobile and desktop, and fix any contrast, label or heading issues they report. *(Lighthouse accessibility score 100 on the preview, with nothing to fix.)*
 - [X] T032 [P] Check page weights. Home, Privacy and Support should be under 50 KB each, uncompressed, without the images (SC-004). *(Home 2.9 KB, Privacy 12.3 KB, Support 4.4 KB, plus 6.6 KB of CSS. The Account page adds 218 KB of supabase-js, 56 KB gzipped.)*
 - [X] T033 Update `CLAUDE.md` Known gotchas:
   - The site's origin list lives in three places: `Cors:AllowedOrigins`, the `SITE_ORIGINS` secret, and Supabase's Redirect URLs. Change them together.
