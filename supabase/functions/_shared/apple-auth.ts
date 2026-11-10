@@ -21,6 +21,8 @@ const APPLE_AUDIENCE = "https://appleid.apple.com";
 const TOKEN_URL = "https://appleid.apple.com/auth/token";
 const REVOKE_URL = "https://appleid.apple.com/auth/revoke";
 const CLIENT_SECRET_LIFETIME_SECONDS = 300;
+// Apple rejects a client secret that lives longer than 6 months (15,777,000 seconds).
+export const MAX_CLIENT_SECRET_LIFETIME_SECONDS = 15_777_000;
 
 export const readAppleEnv = (): AppleEnv => ({
   teamId: Deno.env.get("APPLE_TEAM_ID") ?? "",
@@ -49,12 +51,17 @@ const pemToPkcs8 = (pem: string): Uint8Array<ArrayBuffer> => {
 };
 
 // sub is the client the token belongs to: the native app, or the web Services ID for tokens
-// stored by 017.
+// stored by 017. The functions use a 5-minute secret; the Supabase Apple provider needs a long one.
 export const createClientSecret = async (
   env: AppleEnv,
   now: Date,
   clientId: string = env.clientId,
+  lifetimeSeconds: number = CLIENT_SECRET_LIFETIME_SECONDS,
 ): Promise<string> => {
+  if (!Number.isInteger(lifetimeSeconds) || lifetimeSeconds <= 0 || lifetimeSeconds > MAX_CLIENT_SECRET_LIFETIME_SECONDS) {
+    throw new RangeError(`lifetimeSeconds must be 1 to ${MAX_CLIENT_SECRET_LIFETIME_SECONDS}`);
+  }
+
   const key = await crypto.subtle.importKey(
     "pkcs8",
     pemToPkcs8(env.privateKey),
@@ -68,7 +75,7 @@ export const createClientSecret = async (
     base64UrlEncodeJson({
       iss: env.teamId,
       iat: issuedAt,
-      exp: issuedAt + CLIENT_SECRET_LIFETIME_SECONDS,
+      exp: issuedAt + lifetimeSeconds,
       aud: APPLE_AUDIENCE,
       sub: clientId,
     })

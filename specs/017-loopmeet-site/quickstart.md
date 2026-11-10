@@ -26,13 +26,19 @@ The site is a Worker, `loopmeet-account`, serving `web/public` as static assets 
 
 ### Apple on the web (PR B, or later)
 
-1. In the Apple Developer portal, under **Identifiers**, add a **Services ID**, for example `io.loopmeet.web`.
+1. In the Apple Developer portal, under **Identifiers**, add a **Services ID**, for example `io.loopmeet.web`. Give it its own identifier. The portal accepts a Services ID named the same as the App ID, `io.loopmeet.app`, but Apple's sign-in page then rejects it with `invalid_request` "Invalid client id or web redirect url".
    - Enable **Sign in with Apple**, with primary App ID `io.loopmeet.app`.
    - **Domains:** the Supabase project host `<project>.supabase.co`.
    - **Return URL:** `https://<project>.supabase.co/auth/v1/callback`.
-2. Generate the Supabase Apple **Secret Key** from your `.p8` file, Team ID, Key ID and the Services ID. The Apple provider page in Supabase's docs links to a generator. It expires after at most 6 months, so **set a calendar reminder to renew it**.
+   - Click **Done**, then **Continue** and **Save**. Done alone doesn't save the domain and Return URL.
+2. Generate the Supabase Apple **Secret Key** from your `.p8` file, Team ID, Key ID and the Services ID:
+   ```bash
+   deno run --allow-read=<path to AuthKey_XXXXXXXXXX.p8> supabase/functions/_tools/apple-client-secret.ts \
+     --team-id <TEAM_ID> --key-id <KEY_ID> --client-id <SERVICES_ID> --key-file <path to AuthKey_XXXXXXXXXX.p8>
+   ```
+   It prints the secret, and its expiry on stderr. Apple allows at most 6 months, so **set a calendar reminder to renew it** a week or so before that date, by rerunning the same command.
 3. In **Supabase → Authentication → Providers → Apple**:
-   - Set **Client IDs** to `io.loopmeet.app,io.loopmeet.web`.
+   - Set **Client IDs** to `io.loopmeet.web,io.loopmeet.app`. The Services ID must come first: the web flow sends the first entry to Apple as `client_id`. Keep `io.loopmeet.app`, which the iOS app's ID tokens are checked against.
    - Paste the Secret Key.
 4. In `config.js`, set `appleWebClientId: "io.loopmeet.web"`. The Apple button appears once this is set.
 
