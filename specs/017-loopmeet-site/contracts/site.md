@@ -63,7 +63,7 @@ The deletion endpoints are exempt from the Api's pending-deletion gate. The site
 
 ```json
 "Cors": {
-  "AllowedOrigins": "https://account.loopmeet.io, https://loopmeet-account.joelgray.workers.dev, https://*-loopmeet-account.joelgray.workers.dev"
+  "AllowedOrigins": "https://loopmeet.io, https://loopmeet-account.joelgray.workers.dev, https://*-loopmeet-account.joelgray.workers.dev"
 }
 ```
 

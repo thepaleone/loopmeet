@@ -82,7 +82,7 @@ Each decision lists what was chosen, why, and what was rejected.
 
 | Origin | Why |
 | --- | --- |
-| `https://account.loopmeet.io` | the live site |
+| `https://loopmeet.io` | the live site |
 | `https://loopmeet-account.joelgray.workers.dev` | the Worker's own address, which also serves the production site |
 | `https://*-loopmeet-account.joelgray.workers.dev` | Worker previews: `<branch>-` and `<version>-loopmeet-account.joelgray.workers.dev` |
 | `http://localhost:4507` | local development only (`appsettings.Development.json`, local `.env`) |

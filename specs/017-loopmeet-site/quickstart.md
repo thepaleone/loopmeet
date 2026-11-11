@@ -19,8 +19,8 @@ The site is a Worker, `loopmeet-account`, serving `web/public` as static assets 
 
 ### Backend (PR B)
 
-1. **Supabase → Authentication → URL Configuration → Redirect URLs**: add `https://account.loopmeet.io/account/`, `https://loopmeet-account.joelgray.workers.dev/account/` and `https://*-loopmeet-account.joelgray.workers.dev/account/`. Leave the Site URL as it is.
-2. **Supabase secrets**: `supabase secrets set SITE_ORIGINS="https://account.loopmeet.io,https://loopmeet-account.joelgray.workers.dev,https://*-loopmeet-account.joelgray.workers.dev"`, then `supabase functions deploy apple-authorization`.
+1. **Supabase → Authentication → URL Configuration → Redirect URLs**: add `https://loopmeet.io/account/`, `https://loopmeet-account.joelgray.workers.dev/account/` and `https://*-loopmeet-account.joelgray.workers.dev/account/`. Leave the Site URL as it is.
+2. **Supabase secrets**: `supabase secrets set SITE_ORIGINS="https://loopmeet.io,https://loopmeet-account.joelgray.workers.dev,https://*-loopmeet-account.joelgray.workers.dev"`, then `supabase functions deploy apple-authorization`.
 3. **The Api**: deploy a build that includes PR B (`staging/**` tag). `Cors:AllowedOrigins` comes from `appsettings.json`, so it needs no new environment variable unless a host changes.
 4. **`web/public/js/config.js`**: fill in the Supabase URL, the publishable key and the Api base URL, which is the same one the app's builds use.
 
@@ -103,6 +103,6 @@ Checks 7–21 run on PR B's preview. These repeat the key ones on the live hosts
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
-| 25 | Open `https://account.loopmeet.io/account/` in a private window. | The sign-in options show, and the response has `Cache-Control: no-store`. | |
-| 26 | Repeat checks 7, 15 and 22 on `https://account.loopmeet.io/account/`. | Sign-in returns to the domain, and the status loads, so CORS allows the domain. | |
+| 25 | Open `https://loopmeet.io/account/` in a private window. | The sign-in options show, and the response has `Cache-Control: no-store`. | |
+| 26 | Repeat checks 7, 15 and 22 on `https://loopmeet.io/account/`. | Sign-in returns to the domain, and the status loads, so CORS allows the domain. | |
 | 27 | Repeat check 7 on `https://loopmeet-account.joelgray.workers.dev/account/`. | It works there too. | |

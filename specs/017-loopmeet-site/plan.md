@@ -24,7 +24,7 @@ The site and its previews use the one existing backend, promoted to production (
 | **Site** | HTML5, one CSS file, ES-module JavaScript with no framework and no build. `@supabase/supabase-js` 2.x UMD, vendored and pinned (research D3). |
 | **Api** | C# 13 / .NET 10 minimal API. The built-in ASP.NET Core CORS middleware, so no new packages. |
 | **Edge function** | TypeScript on Deno 2.x. `apple-authorization` gets CORS handling. |
-| **Hosting** | Cloudflare Worker `loopmeet-account` with static assets from `web/public`, at `account.loopmeet.io`. Production branch `main`, previews per branch at `<branch>-loopmeet-account.joelgray.workers.dev` (research D11). |
+| **Hosting** | Cloudflare Worker `loopmeet-account` with static assets from `web/public`, at `loopmeet.io`. Production branch `main`, previews per branch at `<branch>-loopmeet-account.joelgray.workers.dev` (research D11). |
 | **Testing** | `deno test` and `deno lint` for the site (`web/tests/`). xUnit with `WebApplicationFactory` for the Api's CORS. `deno test` for the edge function's CORS. A quickstart for real sign-in on each provider and a delete-and-restore with a test account. |
 | **Performance** | Static pages under 50 KB each, excluding the vendored library, which loads only on `/account/`. That meets SC-004's under-2-seconds-on-mobile goal. |
 | **Constraints** | `script-src 'self'`, and no third-party requests from the browser other than Supabase and the Api. Home, Privacy and Support load no JavaScript. |
