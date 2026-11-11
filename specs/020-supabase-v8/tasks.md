@@ -36,5 +36,5 @@ The breaking changes are in the [8.0.0 migration guide](https://github.com/supab
   - Api builds with 0 warnings.
   - Android app builds with 0 errors.
   - Api 142, App 220, Core 29 and Infrastructure 1 tests pass.
-- [ ] T007 Staging: deploy the Api from a `staging/**` tag, then run `quickstart.md` rows 1–5.
-- [ ] T008 Android: run `quickstart.md` rows 6–10, including updating over a build of the old version.
+- [x] T007 Staging: deploy the Api from a `staging/**` tag, then run `quickstart.md` rows 1–5.
+- [x] T008 Android: run `quickstart.md` rows 6–10, including updating over a build of the old version.
