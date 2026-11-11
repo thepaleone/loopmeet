@@ -129,7 +129,7 @@
 		<!-- 10.2.0 is the official re-release of 10.1.6, whose author signing
 		     certificate was revoked on 2026-06-02 (reactiveui/refit#2114). -->
 		<PackageReference Include="Refit.HttpClientFactory" Version="10.2.0" />
-		<PackageReference Include="Supabase" Version="1.1.1" />
+		<PackageReference Include="Supabase" Version="8.9.0" />
 	</ItemGroup>
 
 </Project>

@@ -57,7 +57,6 @@ builder.Services.AddSingleton<ICacheService>(provider =>
     new CacheService(provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
         provider.GetService<IDistributedCache>()));
 
-var postgrestDebugHandlerAdded = 0;
 builder.Services.AddScoped(provider =>
 {
     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
@@ -80,17 +79,6 @@ builder.Services.AddScoped(provider =>
             ["Authorization"] = $"Bearer {bearerToken}"
         }
     });
-
-    // Register debug handler once — goes to singleton Debugger.Instance, fires for all future clients too
-    if (Interlocked.CompareExchange(ref postgrestDebugHandlerAdded, 1, 0) == 0)
-    {
-        supabaseClient.Postgrest.AddDebugHandler((_, msg, ex) =>
-        {
-            Log.Debug("[Postgrest] {Message}", msg);
-            if (ex is not null)
-                Log.Warning("[Postgrest Error] {Error}", ex.Message);
-        });
-    }
 
     return supabaseClient;
 });

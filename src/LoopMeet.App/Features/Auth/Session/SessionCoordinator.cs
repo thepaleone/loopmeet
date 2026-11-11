@@ -81,7 +81,7 @@ public sealed class SessionCoordinator : ISessionTokenSource
 
             // A server 401 is authoritative (D9) — bypass the debounce for it.
             if (trigger != RenewalTrigger.ApiUnauthorized
-                && !_renewalPolicy.ShouldAttempt(DateTimeOffset.UtcNow, _lastSuccessfulCheckUtc, ExpiryUtc(session)))
+                && !_renewalPolicy.ShouldAttempt(DateTimeOffset.UtcNow, _lastSuccessfulCheckUtc, SessionExpiry.ExpiresAtUtc(session)))
             {
                 return Task.FromResult(RenewalOutcome.StillValid);
             }
@@ -134,7 +134,7 @@ public sealed class SessionCoordinator : ISessionTokenSource
         }
 
         var session = _client.Auth.CurrentSession;
-        if (session is not null && !session.Expired())
+        if (session is not null && !SessionExpiry.IsExpired(session, DateTimeOffset.UtcNow))
         {
             _logger.LogInformation("SessionRestored: startup resolved to home.");
             _ = EnsureFreshSessionAsync(RenewalTrigger.StartupRevalidation);
@@ -285,11 +285,5 @@ public sealed class SessionCoordinator : ISessionTokenSource
 
         _noticeState.Pending = effectiveReason == SignOutReason.UserInitiated ? null : effectiveReason;
         _logger.LogInformation("SignedOut {Reason}.", effectiveReason);
-    }
-
-    private static DateTimeOffset? ExpiryUtc(GotrueSession session)
-    {
-        var expiresAt = session.ExpiresAt();
-        return expiresAt == default ? null : new DateTimeOffset(expiresAt, TimeSpan.Zero);
     }
 }

@@ -38,6 +38,30 @@ public sealed class SessionSurfaceTests
         Assert.Contains("loopmeet.auth.access_token", source, StringComparison.Ordinal);
     }
 
+    // --- 020: Supabase 8 (System.Text.Json names, no Session.Expired/ExpiresAt) ---
+
+    [Fact]
+    public void MauiSessionPersistence_UsesTheStorageFormatAndRewritesLegacySessions()
+    {
+        var source = ReadSource("src/LoopMeet.App/Features/Auth/MauiSessionPersistence.cs");
+
+        Assert.Contains("SessionStorageFormat.Serialize", source, StringComparison.Ordinal);
+        Assert.Contains("SessionStorageFormat.Read", source, StringComparison.Ordinal);
+        Assert.Contains("IsLegacyFormat", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("JsonSerializer.", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void SessionCoordinator_ComputesExpiryItself()
+    {
+        var source = ReadSource("src/LoopMeet.App/Features/Auth/Session/SessionCoordinator.cs");
+
+        Assert.Contains("SessionExpiry.IsExpired", source, StringComparison.Ordinal);
+        Assert.Contains("SessionExpiry.ExpiresAtUtc", source, StringComparison.Ordinal);
+        Assert.DoesNotContain(".Expired()", source, StringComparison.Ordinal);
+        Assert.DoesNotContain(".ExpiresAt()", source, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void SessionCoordinator_LoadsThePersistedSessionAtStartup()
     {
