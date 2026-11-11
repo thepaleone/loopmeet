@@ -44,6 +44,22 @@ public sealed class SiteOriginsTests
         Assert.True(Cases().Count() >= 20, "site-origins.cases.json must keep at least 20 cases.");
     }
 
+    [Theory]
+    [InlineData("https://loopmeet.io")]
+    [InlineData("https://loopmeet-account.joelgray.workers.dev")]
+    [InlineData("https://main-loopmeet-account.joelgray.workers.dev")]
+    public void ShippedSettingsAllowTheLiveSiteAndItsPreviews(string origin)
+    {
+        // The test host runs as Development, so read the production list from the file itself.
+        var settingsPath = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory, "../../../../../src/LoopMeet.Api/appsettings.json"));
+        using var document = JsonDocument.Parse(File.ReadAllText(settingsPath));
+        var allowed = SiteOrigins.Parse(
+            document.RootElement.GetProperty("Cors").GetProperty("AllowedOrigins").GetString());
+
+        Assert.True(SiteOrigins.IsAllowed(origin, allowed), $"{origin} is missing from Cors:AllowedOrigins.");
+    }
+
     [Fact]
     public void Parse_SplitsOnCommasTrimsAndDropsEmptyEntries()
     {
