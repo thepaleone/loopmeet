@@ -18,8 +18,8 @@
 
 **Purpose**: make CI run the App tests when the files they read change. The 015 tests already depend on this, and so will 021's.
 
-- [ ] T001 In `.github/scripts/ci-scope.test.sh`, change the "deploy script and staging deploy workflow" case. Add cases expecting `app_tests` for `deploy/build-android-release.sh`, `deploy/build-ios-release.sh` and `.gitignore`, while `deploy/deploy-android.sh` and `.github/workflows/deploy-staging.yml` still select nothing. Run `bash .github/scripts/ci-scope.test.sh` and confirm the new cases fail.
-- [ ] T002 In `.github/scripts/ci-scope.sh`, map `deploy/build-*-release.sh` and `.gitignore` to `select_keys app_tests`, placed before the "selects nothing" branch. Remove `.gitignore` from that branch, and update the header comment that lists what `LoopMeet.App.Tests` reads. Re-run `ci-scope.test.sh` until it passes.
+- [X] T001 In `.github/scripts/ci-scope.test.sh`, change the "deploy script and staging deploy workflow" case. Add cases expecting `app_tests` for `deploy/build-android-release.sh`, `deploy/build-ios-release.sh` and `.gitignore`, while `deploy/deploy-android.sh` and `.github/workflows/deploy-staging.yml` still select nothing. Run `bash .github/scripts/ci-scope.test.sh` and confirm the new cases fail.
+- [X] T002 In `.github/scripts/ci-scope.sh`, map `deploy/build-*-release.sh` and `.gitignore` to `select_keys app_tests`, placed before the "selects nothing" branch. Remove `.gitignore` from that branch, and update the header comment that lists what `LoopMeet.App.Tests` reads. Re-run `ci-scope.test.sh` until it passes.
 
 ---
 
@@ -27,7 +27,7 @@
 
 **Purpose**: the shared test class that US1 and US2 extend.
 
-- [ ] T003 Create `tests/LoopMeet.App.Tests/Platforms/IosAppStoreReleaseTests.cs`, modeled on `AndroidPlayReleaseTests`:
+- [X] T003 Create `tests/LoopMeet.App.Tests/Platforms/IosAppStoreReleaseTests.cs`, modeled on `AndroidPlayReleaseTests`:
   - a class summary naming feature 021;
   - a `ReadSource` helper that finds the repo root;
   - a plist `ValueFor(dict, key)` helper like the one in `AppleSceneLifecycleTests`;
@@ -45,12 +45,12 @@
 
 ### Tests for User Story 1 ⚠️ write first, confirm they fail
 
-- [ ] T004 [US1] In `IosAppStoreReleaseTests.cs`, add `ReleaseScript_SignsWithPinnedIdentityAndProfileFromEnvironment`. It asserts the script contains:
+- [X] T004 [US1] In `IosAppStoreReleaseTests.cs`, add `ReleaseScript_SignsWithPinnedIdentityAndProfileFromEnvironment`. It asserts the script contains:
   - `-f net10.0-ios`, `-r ios-arm64` and `-p:ApplicationVersion="$BUILD_NUMBER"`;
   - `-p:CodesignKey="$LOOPMEET_IOS_SIGNING_IDENTITY"` and `-p:CodesignProvision=`;
   - the output folder `artifacts/ios/$BUILD_NUMBER`;
   - no `RunAOTCompilation=false` and no `PublishTrimmed=false` (research D2).
-- [ ] T005 [US1] In `IosAppStoreReleaseTests.cs`, add `ReleaseScript_ChecksEveryContractConditionBeforeBuilding`. For each of the nine pre-build checks in `contracts/build-ios-release.md`, it asserts the distinguishing text appears before the first line that runs `dotnet` (the script runs `dotnet clean` before `dotnet publish`):
+- [X] T005 [US1] In `IosAppStoreReleaseTests.cs`, add `ReleaseScript_ChecksEveryContractConditionBeforeBuilding`. For each of the nine pre-build checks in `contracts/build-ios-release.md`, it asserts the distinguishing text appears before the first line that runs `dotnet` (the script runs `dotnet clean` before `dotnet publish`):
   - the positive-integer test;
   - both variable names;
   - the 40-hexadecimal-character pattern;
@@ -63,12 +63,12 @@
   - `DeveloperCertificates`.
 
   It also asserts the post-build checks of `CFBundleVersion` and of `aps-environment` through `codesign`.
-- [ ] T006 [P] [US1] In `IosAppStoreReleaseTests.cs`, add `Gitignore_ExcludesAppleSigningAssetsAndReleaseOutput`. It asserts `.gitignore` has the lines `*.mobileprovision`, `*.p12`, `*.cer`, `*.p8` and `artifacts/`.
+- [X] T006 [P] [US1] In `IosAppStoreReleaseTests.cs`, add `Gitignore_ExcludesAppleSigningAssetsAndReleaseOutput`. It asserts `.gitignore` has the lines `*.mobileprovision`, `*.p12`, `*.cer`, `*.p8` and `artifacts/`.
 
 ### Implementation for User Story 1
 
-- [ ] T007 [P] [US1] In `.gitignore`, add an "Apple signing assets and release output (feature 021)" block with `*.mobileprovision`, `*.p12` and `*.cer`. `*.p8` and `artifacts/` are already there. T006 passes.
-- [ ] T008 [US1] Create `deploy/build-ios-release.sh` (zsh, `set -euo pipefail`, executable), following the structure of `deploy/build-android-release.sh`:
+- [X] T007 [P] [US1] In `.gitignore`, add an "Apple signing assets and release output (feature 021)" block with `*.mobileprovision`, `*.p12` and `*.cer`. `*.p8` and `artifacts/` are already there. T006 passes.
+- [X] T008 [US1] Create `deploy/build-ios-release.sh` (zsh, `set -euo pipefail`, executable), following the structure of `deploy/build-android-release.sh`:
   - **Header:** usage, both variables and how to find the SHA-1, and why there's no AOT or trimming workaround (research D2).
   - **`-b` parsing:** with `getopts`.
   - **Pre-build checks 1–9:** in contract order, each with its contract message, exiting 1. To decode the profile, write `security cms -D -i` output to a temporary file and read fields with `plutil -extract … raw`. For the certificate check, decode each `DeveloperCertificates` entry and compare its `openssl x509 -noout -fingerprint -sha1` with the identity, ignoring case and colons.
@@ -78,7 +78,7 @@
   - **Output:** print the `.ipa` path.
 
   T004 and T005 pass.
-- [ ] T009 [US1] Manually check the guards. Run the script with:
+- [X] T009 [US1] Manually check the guards. Run the script with:
   1. no `-b`;
   2. `-b 0`;
   3. `LOOPMEET_IOS_SIGNING_IDENTITY` unset;
@@ -99,26 +99,26 @@
 
 ### Tests for User Story 2 ⚠️ write first, confirm they fail
 
-- [ ] T010 [P] [US2] In `IosAppStoreReleaseTests.cs`, add `PrivacyManifest_DeclaresEveryRequiredReasonApi`. It parses `PrivacyInfo.xcprivacy` and asserts:
+- [X] T010 [P] [US2] In `IosAppStoreReleaseTests.cs`, add `PrivacyManifest_DeclaresEveryRequiredReasonApi`. It parses `PrivacyInfo.xcprivacy` and asserts:
   - exactly the four categories with their reasons: FileTimestamp `C617.1`, SystemBootTime `35F9.1`, DiskSpace `E174.1` and UserDefaults `CA92.1`;
   - `NSPrivacyTracking` is `false`;
   - the file contains no `<!--` inside the `NSPrivacyAccessedAPITypes` array, so no entry is commented out.
-- [ ] T011 [P] [US2] In `IosAppStoreReleaseTests.cs`, add `InfoPlist_DeclaresExemptEncryptionAndAllowsNoPlainHttp`. It asserts:
+- [X] T011 [P] [US2] In `IosAppStoreReleaseTests.cs`, add `InfoPlist_DeclaresExemptEncryptionAndAllowsNoPlainHttp`. It asserts:
   - `ITSAppUsesNonExemptEncryption` is `<false/>`;
   - the root dict has no `NSAppTransportSecurity` key;
   - the raw file doesn't contain `NSAllowsArbitraryLoads` or `NSExceptionAllowsInsecureHTTPLoads`.
-- [ ] T012 [P] [US2] In `IosAppStoreReleaseTests.cs`, add `ReleaseEntitlements_UseProductionPushAndSignInWithApple`. It asserts `Entitlements.Release.plist` has `aps-environment` = `production` and `com.apple.developer.applesignin` = [`Default`]. It also asserts the csproj maps `CodesignEntitlements` to `Platforms/iOS/Entitlements.Release.plist` under `'$(Configuration)' != 'Debug'` for device builds.
+- [X] T012 [P] [US2] In `IosAppStoreReleaseTests.cs`, add `ReleaseEntitlements_UseProductionPushAndSignInWithApple`. It asserts `Entitlements.Release.plist` has `aps-environment` = `production` and `com.apple.developer.applesignin` = [`Default`]. It also asserts the csproj maps `CodesignEntitlements` to `Platforms/iOS/Entitlements.Release.plist` under `'$(Configuration)' != 'Debug'` for device builds.
 
 ### Implementation for User Story 2
 
-- [ ] T013 [P] [US2] In `src/LoopMeet.App/Platforms/iOS/Resources/PrivacyInfo.xcprivacy`:
+- [X] T013 [P] [US2] In `src/LoopMeet.App/Platforms/iOS/Resources/PrivacyInfo.xcprivacy`:
   - replace the commented-out UserDefaults block with a real `NSPrivacyAccessedAPICategoryUserDefaults` / `CA92.1` entry;
   - add `NSPrivacyTracking` `<false/>`;
   - change the template's header comment to explain that the app's `Preferences` is backed by `NSUserDefaults`.
 
   T010 passes.
-- [ ] T014 [P] [US2] In `src/LoopMeet.App/Platforms/iOS/Info.plist`, add `ITSAppUsesNonExemptEncryption` `<false/>` and remove the whole `NSAppTransportSecurity` dict (research D5 and D6). T011 passes.
-- [ ] T015 [US2] Run the full App suite (`dotnet test tests/LoopMeet.App.Tests`) and the iOS simulator build (`dotnet build src/LoopMeet.App -f net10.0-ios -r iossimulator-arm64`). Both pass, with no new warnings. T012 needs no code change: the files already comply, and the test pins them.
+- [X] T014 [P] [US2] In `src/LoopMeet.App/Platforms/iOS/Info.plist`, add `ITSAppUsesNonExemptEncryption` `<false/>` and remove the whole `NSAppTransportSecurity` dict (research D5 and D6). T011 passes.
+- [X] T015 [US2] Run the full App suite (`dotnet test tests/LoopMeet.App.Tests`) and the iOS simulator build (`dotnet build src/LoopMeet.App -f net10.0-ios -r iossimulator-arm64`). Both pass, with no new warnings. T012 needs no code change: the files already comply, and the test pins them.
 
 **Checkpoint**: US1 and US2 together produce an uploadable, review-ready build.
 
@@ -149,20 +149,20 @@
 
 **Independent Test**: every data type in `web/data-safety.md` and in the policy at `web/public/privacy/index.html` has an App Store row or a "Not collected" entry in `web/app-privacy.md`.
 
-- [ ] T021 [P] [US4] Create `web/app-privacy.md`, the App Store counterpart of `web/data-safety.md`. It needs:
+- [X] T021 [P] [US4] Create `web/app-privacy.md`, the App Store counterpart of `web/data-safety.md`. It needs:
   - Apple's definitions: collected, linked, tracking;
   - the data-type table from research D8, with policy sections;
   - the "Not collected" list;
   - Tracking: No, with no App Tracking Transparency prompt;
   - a "Keep in step" section.
-- [ ] T022 [US4] In `web/data-safety.md`, update the "Keep in step" section: a policy change also updates `web/app-privacy.md` and the App Store Connect App Privacy answers.
-- [ ] T023 [US4] Run `deno test --allow-read=web,specs/016-account-deletion web/` and `deno lint web/` to confirm the web suite is unaffected.
+- [X] T022 [US4] In `web/data-safety.md`, update the "Keep in step" section: a policy change also updates `web/app-privacy.md` and the App Store Connect App Privacy answers.
+- [X] T023 [US4] Run `deno test --allow-read=web,specs/016-account-deletion web/` and `deno lint --ignore=web/public/vendor web/` (the CI command) to confirm the web suite is unaffected.
 
 ---
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T024 [P] In `CLAUDE.md`:
+- [X] T024 [P] In `CLAUDE.md`:
   - add a 021 line to Recent Changes;
   - add gotchas:
     - the iOS release signs by SHA-1 fingerprint (`LOOPMEET_IOS_SIGNING_IDENTITY`), because certificate names can repeat;
@@ -171,7 +171,7 @@
   - add `deploy/build-ios-release.sh` under Real commands.
 
   Edit by hand: `update-agent-context.sh` damages this file.
-- [ ] T025 Run every suite (Api, App, Core, Infrastructure, `deno test` for `web/` and `supabase/functions/`, and `ci-scope.test.sh`) plus the Android Debug build, to confirm FR-011. Record the counts in the log below.
+- [X] T025 Run every suite (Api, App, Core, Infrastructure, `deno test` for `web/` and `supabase/functions/`, and `ci-scope.test.sh`) plus the Android Debug build, to confirm FR-011. Record the counts in the log below.
 - [ ] T026 Update `~/.claude` memory (`project_store_release_roadmap`) with the TestFlight status after T017 and T020.
 
 ---
@@ -204,4 +204,12 @@ Then:
 
 | Task | Date | Notes |
 | --- | --- | --- |
-| | | |
+| T001–T002 | 2026-11-12 | 3 new ci-scope cases failed first, then all 25 cases pass. `deploy/build-*-release.sh` and `.gitignore` now select `app_tests`; `deploy/deploy-android.sh` still selects nothing. |
+| T003–T006, T010–T012 | 2026-11-12 | `IosAppStoreReleaseTests`: 17 tests. 16 failed before the changes; the entitlements test passed from the start, as planned. The post-build test also checks `CFBundleShortVersionString` (analysis finding C1). |
+| T007, T013, T014 | 2026-11-12 | `.gitignore`, privacy manifest and `Info.plist` changed; both plists keep their CRLF line endings and pass `plutil -lint`. |
+| T008 | 2026-11-12 | Script written; `zsh -n` clean. The post-build checks run for the first time in T017. |
+| T009 | 2026-11-12 | A fake `dotnet` first on `PATH` showed that nothing reached it. No `-b`, `-b 0`, `-b 01`: check 1. Identity unset: check 2. Certificate name: check 3. Unknown SHA-1: check 4. Missing file and non-profile file: check 5. The only local profile (another app's, expired): check 6. Test profiles CMS-signed with a throwaway key covered check 7 (devices; `development` push), 8 (expired) and 9 (another certificate). A valid test profile passed every check, was installed into both profile folders and reached `dotnet clean`; its two copies were then deleted. |
+| T015 | 2026-11-12 | App tests 244 passed. iOS simulator build succeeded with 4 warnings, none new: the Settings.plist deprecation, CA1422 (out of scope) and two CS0618 `DisplayAlert`. |
+| T021–T023 | 2026-11-12 | `web/app-privacy.md` added. Coarse Location added next to Precise (the policy lets users allow approximate location; Play declares both); research D8 updated to match. Web: 60 passed; `deno lint --ignore=web/public/vendor web/` clean. |
+| T024 | 2026-11-12 | `CLAUDE.md` edited by hand: Recent Changes, three gotchas, one command. |
+| T025 | 2026-11-12 | Api 145, App 244, Core 29, Infrastructure 1, web 60, edge functions 107: all pass. `deno lint supabase/functions/` clean. ci-scope 25 cases pass. Android Debug build succeeded (only XA0033, from parsing this machine's JDK version). |

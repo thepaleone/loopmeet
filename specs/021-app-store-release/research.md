@@ -129,6 +129,7 @@ Mac Catalyst's `Info.plist` is unchanged, because it's out of scope.
 | Identifiers → User ID | 2, Account; 2, Sign in with Apple | Yes | App Functionality |
 | Identifiers → Device ID | 2, Push notifications; 5 | Yes | App Functionality |
 | Location → Precise Location | 2, Place search; 4 | No | App Functionality |
+| Location → Coarse Location | 2, Place search; 4 (iOS lets the user allow approximate location instead) | No | App Functionality |
 | Search History | 2, Place search | No | App Functionality |
 | Usage Data → Product Interaction | 5, Push notifications (delivery and open records) | Yes | App Functionality |
 | Diagnostics → Other Diagnostic Data | 2, Operational logs | Yes | App Functionality |

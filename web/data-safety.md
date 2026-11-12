@@ -59,10 +59,10 @@ The Android manifest declares `ACCESS_FINE_LOCATION` and `ACCESS_COARSE_LOCATION
 
 ## Keep in step
 
-- **Policy changes:** a new data type, processor or retention period in the app needs three updates:
+- **Policy changes:** a new data type, processor or retention period in the app needs these updates:
   - the policy's tables
-  - this file
-  - the Play form
+  - this file and its App Store counterpart, [app-privacy.md](app-privacy.md)
+  - the Play form and App Store Connect's App Privacy answers
 
   `web/tests/privacy-policy.test.js` lists the categories and processors it expects, so update it too.
 - **Retention values:** these come from `data-retention.md`. The policy test reads that file, and fails if the two drift apart.

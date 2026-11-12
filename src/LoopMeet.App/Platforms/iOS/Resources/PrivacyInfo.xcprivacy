@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-This is the minimum required version of the Apple Privacy Manifest for .NET MAUI apps.
-The contents below are needed because of APIs that are used in the .NET framework and .NET MAUI SDK.
-
-You are responsible for adding extra entries as needed for your application.
-
-More information: https://aka.ms/maui-privacy-manifest
+Apple Privacy Manifest for LoopMeet (iOS). Every required-reason API the app or the
+.NET / MAUI runtime calls needs an entry, or App Store Connect rejects the upload
+(ITMS-91053):
+  FileTimestamp, SystemBootTime, DiskSpace: used by the .NET runtime and MAUI.
+  UserDefaults: MAUI Preferences is backed by NSUserDefaults, which holds the session
+  and the profile cache. CA92.1: the app reads and writes only its own defaults.
+IosAppStoreReleaseTests pins this list. More information: https://aka.ms/maui-privacy-manifest
 -->
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>NSPrivacyTracking</key>
+    <false/>
     <key>NSPrivacyAccessedAPITypes</key>
     <array>
         <dict>
@@ -36,8 +39,6 @@ More information: https://aka.ms/maui-privacy-manifest
                 <string>E174.1</string>
             </array>
         </dict>
-        <!--
-            The entry below is only needed when you're using the Preferences API in your app.
         <dict>
             <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPICategoryUserDefaults</string>
@@ -45,7 +46,7 @@ More information: https://aka.ms/maui-privacy-manifest
             <array>
                 <string>CA92.1</string>
             </array>
-        </dict> -->
+        </dict>
     </array>
 </dict>
 </plist>
