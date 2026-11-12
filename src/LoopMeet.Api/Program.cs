@@ -1,5 +1,7 @@
 using LoopMeet.Api.Contracts;
+using LoopMeet.Api.Cors;
 using LoopMeet.Api.Services;
+using LoopMeet.Api.Services.Accounts;
 using LoopMeet.Api.Services.Auth;
 using LoopMeet.Core.Meetups;
 using LoopMeet.Api.Services.Cache;
@@ -55,7 +57,6 @@ builder.Services.AddSingleton<ICacheService>(provider =>
     new CacheService(provider.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
         provider.GetService<IDistributedCache>()));
 
-var postgrestDebugHandlerAdded = 0;
 builder.Services.AddScoped(provider =>
 {
     var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
@@ -79,17 +80,6 @@ builder.Services.AddScoped(provider =>
         }
     });
 
-    // Register debug handler once — goes to singleton Debugger.Instance, fires for all future clients too
-    if (Interlocked.CompareExchange(ref postgrestDebugHandlerAdded, 1, 0) == 0)
-    {
-        supabaseClient.Postgrest.AddDebugHandler((_, msg, ex) =>
-        {
-            Log.Debug("[Postgrest] {Message}", msg);
-            if (ex is not null)
-                Log.Warning("[Postgrest Error] {Error}", ex.Message);
-        });
-    }
-
     return supabaseClient;
 });
 
@@ -109,6 +99,7 @@ builder.Services.AddScoped<InvitationCommandService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MeetupQueryService>();
 builder.Services.AddScoped<MeetupCommandService>();
+builder.Services.AddScoped<AccountDeletionService>();
 
 builder.Services.Configure<PlacesOptions>(options =>
 {
@@ -123,6 +114,7 @@ builder.Services.AddScoped<IMembershipRepository, MembershipRepository>();
 builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IAuthIdentityRepository, AuthIdentityRepository>();
 builder.Services.AddScoped<IMeetupRepository, MeetupRepository>();
+builder.Services.AddScoped<IAccountDeletionRepository, AccountDeletionRepository>();
 
 var jwtIssuer = builder.Configuration["Supabase:JwtIssuer"] ?? string.Empty;
 var jwtAudience = builder.Configuration["Supabase:JwtAudience"] ?? "loopmeet-api";
@@ -168,7 +160,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         // JwtValidationHandler.Configure(options, jwtIssuer, jwtAudience);
     });
 builder.Services.AddAuthorization();
-Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+
+// The website's Account page calls the Api from a browser (017 contracts/site.md). Only its origins
+// get CORS headers; bearer tokens, never cookies, so credentials stay off.
+builder.Services.AddCors();
+builder.Services.AddOptions<Microsoft.AspNetCore.Cors.Infrastructure.CorsOptions>()
+    .Configure<IConfiguration>((options, configuration) =>
+    {
+        var siteOrigins = SiteOrigins.Parse(configuration["Cors:AllowedOrigins"]);
+        options.AddPolicy(SiteOrigins.PolicyName, policy => policy
+            .SetIsOriginAllowed(origin => SiteOrigins.IsAllowed(origin, siteOrigins))
+            .WithMethods("GET", "POST", "DELETE")
+            .WithHeaders("Authorization", "Content-Type"));
+    });
+
+// Token details in validation errors can include an email; data-retention.md promises Api logs never do.
+if (isDevelopment)
+{
+    Microsoft.IdentityModel.Logging.IdentityModelEventSource.ShowPII = true;
+}
 
 // Fail at startup, not on every meetup request, if the host has no IANA zone data
 // (e.g. an Alpine image without tzdata): MeetupLifecycle needs it to classify meetups.
@@ -191,9 +201,12 @@ app.Use(async (context, next) =>
     await next();
 });
 
+// Before authentication, so preflights short-circuit and 401s still carry the headers.
+app.UseCors(SiteOrigins.PolicyName);
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<AccountDeletionGateMiddleware>();
 app.UseHttpsRedirection();
 
 app.MapUserEndpoints();
@@ -201,6 +214,7 @@ app.MapGroupsEndpoints();
 app.MapInvitationEndpoints();
 app.MapMeetupsEndpoints();
 app.MapPlacesEndpoints();
+app.MapAccountDeletionEndpoints();
 app.MapGet("/", () => Results.Ok(new { Status = "LoopMeet API" }));
 
 // #if DEBUG

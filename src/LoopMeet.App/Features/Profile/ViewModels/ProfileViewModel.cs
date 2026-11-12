@@ -55,6 +55,9 @@ public sealed partial class ProfileViewModel : ObservableObject
     [ObservableProperty]
     private string _userInitial = "";
 
+    /// <summary>For testers and support: the installed build, e.g. "Version 0.1.3 (4)".</summary>
+    public string VersionText { get; } = AppVersionText.Format(AppInfo.Current.VersionString, AppInfo.Current.BuildString);
+
     public ProfileViewModel(
         AuthService authService,
         SessionCoordinator sessionCoordinator,
@@ -72,12 +75,7 @@ public sealed partial class ProfileViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private Task DeleteAccountAsync()
-    {
-        ShowStatus = true;
-        StatusMessage = "Account deletion isn't available yet.";
-        return Task.CompletedTask;
-    }
+    private Task DeleteAccountAsync() => Shell.Current.GoToAsync("delete-account");
 
     [RelayCommand]
     private async Task OpenNotificationSettingsAsync()

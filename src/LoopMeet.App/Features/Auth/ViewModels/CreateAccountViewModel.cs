@@ -4,6 +4,7 @@ using LoopMeet.App.Features.Auth.Models;
 using LoopMeet.App.Features.Home.Models;
 using LoopMeet.App.Services;
 using LoopMeet.App.Services.Auth;
+using Microsoft.Extensions.Logging;
 
 namespace LoopMeet.App.Features.Auth.ViewModels;
 
@@ -13,6 +14,11 @@ public sealed partial class CreateAccountViewModel : ObservableObject
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
     private readonly AuthSessionService _authSessionService;
+    private readonly ILogger<CreateAccountViewModel> _logger;
+
+    // Set once sign-up succeeds, so retrying after a failed profile save doesn't sign up again
+    // (which would fail with "already registered").
+    private string? _signedUpEmail;
 
     [ObservableProperty]
     private string _displayName = string.Empty;
@@ -48,12 +54,14 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         AuthService authService,
         UsersApi usersApi,
         UserProfileCache userProfileCache,
-        AuthSessionService authSessionService)
+        AuthSessionService authSessionService,
+        ILogger<CreateAccountViewModel> logger)
     {
         _authService = authService;
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
         _authSessionService = authSessionService;
+        _logger = logger;
     }
 
     [RelayCommand]
@@ -86,13 +94,15 @@ public sealed partial class CreateAccountViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            if (!IsOAuthFlow)
+            if (!IsOAuthFlow && !string.Equals(_signedUpEmail, Email, StringComparison.OrdinalIgnoreCase))
             {
                 var session = await _authService.SignUpWithEmailAsync(Email, Password);
                 if (string.IsNullOrWhiteSpace(session.AccessToken))
                 {
                     return;
                 }
+
+                _signedUpEmail = Email;
             }
 
             var profile = await _usersApi.UpsertProfileAsync(new UserProfileRequest
@@ -121,10 +131,30 @@ public sealed partial class CreateAccountViewModel : ObservableObject
             await _authSessionService.HandleSuccessfulSignInAsync();
             await Shell.Current.GoToAsync(SignedInTabs.HomeShellPath);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Create account failed (signed up: {SignedUp}).", _signedUpEmail is not null);
+            ShowError = true;
+            ErrorMessage = SignUpErrorMessage(ex);
+        }
         finally
         {
             IsBusy = false;
         }
+    }
+
+    private static string SignUpErrorMessage(Exception ex)
+    {
+        var message = $"{ex.Message} {ex.InnerException?.Message}";
+        if (message.Contains("already registered", StringComparison.OrdinalIgnoreCase)
+            || message.Contains("user_already_exists", StringComparison.OrdinalIgnoreCase))
+        {
+            return "An account with this email already exists. Please sign in instead.";
+        }
+
+        return ex is HttpRequestException || ex.InnerException is HttpRequestException
+            ? "We could not reach the server. Please check your connection and try again."
+            : "Something unexpected happened. Please try again.";
     }
 
     public void ApplyPrefill(string? displayName, string? email, string? phone, bool isOAuthFlow, string? socialAvatarUrl = null)

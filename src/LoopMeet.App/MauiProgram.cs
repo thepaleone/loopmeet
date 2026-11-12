@@ -10,6 +10,9 @@ using LoopMeet.App.Features.Invitations.ViewModels;
 using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Features.Meetups.ViewModels;
 using LoopMeet.App.Features.Meetups.Views;
+using LoopMeet.App.Features.Account;
+using LoopMeet.App.Features.Account.ViewModels;
+using LoopMeet.App.Features.Account.Views;
 using LoopMeet.App.Features.Profile.ViewModels;
 using LoopMeet.App.Features.Profile.Views;
 using LoopMeet.App.Features.DevTools.ViewModels;
@@ -84,9 +87,13 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SessionNoticeState>();
 		builder.Services.AddSingleton<SessionCoordinator>();
 		builder.Services.AddSingleton<ISessionTokenSource>(sp => sp.GetRequiredService<SessionCoordinator>());
+		builder.Services.AddSingleton<AppleAuthorizationRegistrar>();
 		builder.Services.AddSingleton<AuthService>();
 		builder.Services.AddSingleton<AuthCoordinator>();
 		builder.Services.AddTransient<ApiAuthHandler>();
+		builder.Services.AddSingleton<AccountDeletionSignal>();
+		builder.Services.AddSingleton<AccountDeletionGate>();
+		builder.Services.AddTransient<AccountStatusHandler>();
 		builder.Services.AddLoopMeetApi<IGroupsApi>(config);
 		builder.Services.AddLoopMeetApi<IInvitationsApi>(config);
 		builder.Services.AddLoopMeetApi<IUsersApi>(config);
@@ -127,6 +134,8 @@ public static class MauiProgram
 		builder.Services.AddTransient<PendingInvitationsViewModel>();
 		builder.Services.AddTransient<ProfileViewModel>();
 		builder.Services.AddTransient<ChangePasswordViewModel>();
+		builder.Services.AddTransient<DeleteAccountViewModel>();
+		builder.Services.AddTransient<PendingDeletionViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<HomePage>();
@@ -143,9 +152,14 @@ public static class MauiProgram
 		builder.Services.AddTransient<ProfilePage>();
 		builder.Services.AddTransient<SettingsPage>();
 		builder.Services.AddTransient<ChangePasswordPage>();
+		builder.Services.AddTransient<DeleteAccountPage>();
+		builder.Services.AddTransient<PendingDeletionPage>();
 		builder.Services.AddTransient<DevInfoViewModel>();
 		builder.Services.AddTransient<DevInfoPage>();
 
-		return builder.Build();
+		var app = builder.Build();
+		// Subscribes to AccountDeletionSignal before any Api call can raise it.
+		app.Services.GetRequiredService<AccountDeletionGate>();
+		return app;
 	}
 }

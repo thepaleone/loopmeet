@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.Maui.Storage;
 using Supabase.Gotrue.Interfaces;
 // The Features.Auth.Session child namespace shadows the Gotrue type name here.
@@ -12,8 +11,7 @@ public sealed class MauiSessionPersistence : IGotrueSessionPersistence<GotrueSes
 
     public void SaveSession(GotrueSession session)
     {
-        var json = JsonSerializer.Serialize(session);
-        Preferences.Default.Set(SessionKey, json);
+        Preferences.Default.Set(SessionKey, SessionStorageFormat.Serialize(session));
     }
 
     public void DestroySession()
@@ -23,19 +21,18 @@ public sealed class MauiSessionPersistence : IGotrueSessionPersistence<GotrueSes
 
     public GotrueSession? LoadSession()
     {
-        var json = Preferences.Default.Get(SessionKey, string.Empty);
-        if (string.IsNullOrWhiteSpace(json))
+        var stored = SessionStorageFormat.Read(Preferences.Default.Get(SessionKey, string.Empty));
+        if (stored is not { } found)
         {
             return null;
         }
 
-        try
+        // A session saved before Supabase 8 is rewritten once in the current format.
+        if (found.IsLegacyFormat)
         {
-            return JsonSerializer.Deserialize<GotrueSession>(json);
+            SaveSession(found.Session);
         }
-        catch
-        {
-            return null;
-        }
+
+        return found.Session;
     }
 }

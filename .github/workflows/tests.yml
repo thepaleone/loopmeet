@@ -17,8 +17,52 @@ permissions:
   contents: read
 
 jobs:
+  # Works out which suites this change needs (.github/scripts/ci-scope.sh). Documentation-only
+  # changes need none; manual runs need all.
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      api_tests: ${{ steps.scope.outputs.api_tests }}
+      app_tests: ${{ steps.scope.outputs.app_tests }}
+      core_tests: ${{ steps.scope.outputs.core_tests }}
+      infra_tests: ${{ steps.scope.outputs.infra_tests }}
+      edge_functions: ${{ steps.scope.outputs.edge_functions }}
+      database: ${{ steps.scope.outputs.database }}
+      web: ${{ steps.scope.outputs.web }}
+      dotnet_projects: ${{ steps.dotnet.outputs.projects }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Test the scope rules
+        run: bash .github/scripts/ci-scope.test.sh
+
+      - name: Select suites
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: bash .github/scripts/ci-select.sh | tee -a "$GITHUB_OUTPUT"
+
+      - name: List .NET test projects
+        id: dotnet
+        run: |
+          projects=""
+          [[ "${{ steps.scope.outputs.api_tests }}" == true ]] && projects+=" tests/LoopMeet.Api.Tests/LoopMeet.Api.Tests.csproj"
+          [[ "${{ steps.scope.outputs.app_tests }}" == true ]] && projects+=" tests/LoopMeet.App.Tests/LoopMeet.App.Tests.csproj"
+          [[ "${{ steps.scope.outputs.core_tests }}" == true ]] && projects+=" tests/LoopMeet.Core.Tests/LoopMeet.Core.Tests.csproj"
+          [[ "${{ steps.scope.outputs.infra_tests }}" == true ]] && projects+=" tests/LoopMeet.Infrastructure.Tests/LoopMeet.Infrastructure.Tests.csproj"
+          echo "projects=${projects# }" | tee -a "$GITHUB_OUTPUT"
+
   test:
     name: Run Test Suite
+    needs: changes
+    if: needs.changes.outputs.dotnet_projects != ''
     runs-on: ubuntu-latest
     env:
       Supabase__Url: http://localhost
@@ -26,6 +70,7 @@ jobs:
       Supabase__ServiceKey: test-service-key
       Supabase__JwtIssuer: http://localhost
       Supabase__JwtAudience: loopmeet-api
+      PROJECTS: ${{ needs.changes.outputs.dotnet_projects }}
 
     steps:
       - name: Checkout
@@ -45,17 +90,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r project; do
+          for project in $PROJECTS; do
             echo "Restoring $project"
             dotnet restore "$project"
-          done < <(find tests -name '*.csproj' | sort)
+          done
 
+      # Audits the selected test projects and everything they reference, including the Api.
       - name: Audit NuGet packages (High/Critical)
         shell: bash
         run: |
           set -euo pipefail
           # The MAUI app needs workloads this job doesn't install; build.yml compiles it.
-          report=$(find src/LoopMeet.Api tests -name '*.csproj' | sort | while IFS= read -r project; do
+          report=$(for project in $PROJECTS; do
             dotnet list "$project" package --vulnerable --include-transitive 2>&1
           done)
           echo "$report"
@@ -68,21 +114,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r project; do
+          for project in $PROJECTS; do
             echo "Running tests for $project"
             dotnet test "$project" --configuration Release --no-restore --logger "trx;LogFileName=$(basename "$project" .csproj).trx"
-          done < <(find tests -name '*.csproj' | sort)
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: Lint edge functions
-        run: deno lint supabase/functions/
-
-      - name: Run edge-function tests
-        run: deno test supabase/functions/
+          done
 
       - name: Upload test results
         if: always()
@@ -92,3 +127,96 @@ jobs:
           path: |
             tests/**/TestResults/**/*.trx
           if-no-files-found: ignore
+
+  edge-function-tests:
+    name: Run Edge Function Tests
+    needs: changes
+    if: needs.changes.outputs.edge_functions == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint edge functions
+        run: deno lint supabase/functions/
+
+      # Read access lets source-inspection tests open the function files they check.
+      - name: Run edge-function tests
+        run: deno test --allow-read=supabase/functions supabase/functions/
+
+  website-tests:
+    name: Run Website Tests
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint the website
+        run: deno lint --ignore=web/public/vendor web/
+
+      # The privacy policy test also reads 016's data-retention.md.
+      - name: Run website tests
+        run: deno test --allow-read=web,specs/016-account-deletion web/
+
+  database-tests:
+    name: Run Database Tests
+    needs: changes
+    if: needs.changes.outputs.database == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 3.0.0
+
+      # supabase/signing_keys.json holds a private key and is gitignored, so CI uses a throwaway one.
+      # The CLI loads config.toml (which points at that file) before generating, so seed it empty.
+      - name: Generate local JWT signing key
+        run: |
+          echo '[]' > supabase/signing_keys.json
+          supabase gen signing-key --algorithm ES256 --append
+
+      # Applies every migration to a fresh database. Only Postgres and Auth are needed.
+      - name: Start local Supabase
+        run: supabase start -x realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Run pgTAP tests
+        run: supabase test db
+
+      - name: Lint database schema
+        run: supabase db lint --schema public,private --level error --fail-on error
+
+  # The one check to require on main: it always reports, passing when every suite this change
+  # needed passed and the rest were skipped. Path-skipped jobs never report, so requiring them
+  # directly would leave a docs-only PR waiting forever.
+  tests-gate:
+    name: Tests Gate
+    needs: [changes, test, edge-function-tests, website-tests, database-tests]
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check suite results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$RESULTS" | jq -e 'all(.[]; .result == "success" or .result == "skipped")' > /dev/null

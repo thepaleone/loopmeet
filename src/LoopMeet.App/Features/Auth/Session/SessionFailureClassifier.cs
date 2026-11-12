@@ -25,7 +25,10 @@ public static class SessionFailureClassifier
                 case FailureHint.Reason.InvalidRefreshToken:
                 case FailureHint.Reason.NoSessionFound:
                     return SessionFailureKind.Definitive;
+                // Gotrue 8 classifies by error_code, so a network reason may carry any status.
                 case FailureHint.Reason.Offline:
+                case FailureHint.Reason.NetworkError:
+                case FailureHint.Reason.CloudflareNetworkError:
                     return SessionFailureKind.Transient;
             }
 

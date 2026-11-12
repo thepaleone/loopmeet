@@ -11,12 +11,13 @@ public sealed class MeetupsEndpointsTests
 {
     private readonly HttpClient _client;
     private readonly InMemoryStore _store;
+    private readonly TestWebApplicationFactory _factory;
 
     public MeetupsEndpointsTests()
     {
         _store = new InMemoryStore();
-        var factory = new TestWebApplicationFactory(_store);
-        _client = factory.CreateClient();
+        _factory = new TestWebApplicationFactory(_store);
+        _client = _factory.CreateClient();
     }
 
     // ── T014: POST /groups/{groupId}/meetups ────────────────────────────
@@ -86,6 +87,26 @@ public sealed class MeetupsEndpointsTests
         });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateInAGroupTheCallerCannotSeeReturnsNotFound()
+    {
+        // RLS hides a group whose owner is pending deletion, and the insert would be rejected (FR-007).
+        var userId = Guid.NewGuid();
+        _client.DefaultRequestHeaders.Add("X-Test-UserId", userId.ToString());
+
+        var response = await _client.PostAsJsonAsync($"/groups/{Guid.NewGuid()}/meetups", new CreateMeetupRequest
+        {
+            Title = "Hidden group meetup",
+            ScheduledAt = DateTimeOffset.UtcNow.AddDays(7)
+        });
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        lock (_store.SyncRoot)
+        {
+            Assert.Empty(_store.Meetups);
+        }
     }
 
     // ── T020: GET /groups/{groupId}/meetups ──────────────────────────────
@@ -361,6 +382,80 @@ public sealed class MeetupsEndpointsTests
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    // ── Home lists stay current: a change to a meetup clears every member's cached Home ──
+    // Regression: only the group's own lists were cleared, so for up to 30 seconds (the cache TTL)
+    // other members and the person making the change still saw the old meetup on Home, even after a pull to refresh.
+
+    [Fact]
+    public async Task DeletingAMeetupUpdatesEveryMembersHomeOnTheNextLoad()
+    {
+        var (owner, member, groupId) = SeedOwnerAndMember();
+        var meetupId = SeedMeetup(groupId, owner.Id, "Soon gone", DateTimeOffset.UtcNow.AddDays(2));
+        Assert.Single(await UpcomingTitlesAsync(member.Client));
+        Assert.Single(await UpcomingTitlesAsync(owner.Client));
+
+        var response = await owner.Client.DeleteAsync($"/groups/{groupId}/meetups/{meetupId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Empty(await UpcomingTitlesAsync(member.Client));
+        Assert.Empty(await UpcomingTitlesAsync(owner.Client));
+    }
+
+    [Fact]
+    public async Task CreatingAMeetupUpdatesEveryMembersHomeOnTheNextLoad()
+    {
+        var (owner, member, groupId) = SeedOwnerAndMember();
+        Assert.Empty(await UpcomingTitlesAsync(member.Client));
+
+        var response = await owner.Client.PostAsJsonAsync($"/groups/{groupId}/meetups", new CreateMeetupRequest
+        {
+            Title = "Brand new",
+            ScheduledAt = DateTimeOffset.UtcNow.AddDays(3)
+        });
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(["Brand new"], await UpcomingTitlesAsync(member.Client));
+    }
+
+    [Fact]
+    public async Task UpdatingAMeetupUpdatesEveryMembersHomeOnTheNextLoad()
+    {
+        var (owner, member, groupId) = SeedOwnerAndMember();
+        var meetupId = SeedMeetup(groupId, owner.Id, "Old title", DateTimeOffset.UtcNow.AddDays(2));
+        Assert.Equal(["Old title"], await UpcomingTitlesAsync(member.Client));
+
+        var response = await owner.Client.SendAsync(new HttpRequestMessage(HttpMethod.Patch, $"/groups/{groupId}/meetups/{meetupId}")
+        {
+            Content = JsonContent.Create(new UpdateMeetupRequest { Title = "New title" })
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(["New title"], await UpcomingTitlesAsync(member.Client));
+    }
+
+    private ((Guid Id, HttpClient Client) Owner, (Guid Id, HttpClient Client) Member, Guid GroupId) SeedOwnerAndMember()
+    {
+        var owner = ClientFor(Guid.NewGuid());
+        var member = ClientFor(Guid.NewGuid());
+        var groupId = SeedGroupWithMembership(owner.Id, "Shared group");
+        SeedMembership(groupId, member.Id, "member");
+        return (owner, member, groupId);
+    }
+
+    private (Guid Id, HttpClient Client) ClientFor(Guid userId)
+    {
+        var client = _factory.CreateClient();
+        client.DefaultRequestHeaders.Add("X-Test-UserId", userId.ToString());
+        client.DefaultRequestHeaders.Add("X-Test-Email", $"{userId:N}@test.com");
+        return (userId, client);
+    }
+
+    private static async Task<List<string>> UpcomingTitlesAsync(HttpClient client)
+    {
+        var payload = await client.GetFromJsonAsync<UpcomingMeetupsResponse>("/meetups/upcoming");
+        return payload!.Meetups.Select(meetup => meetup.Title).ToList();
+    }
 
     private void SeedUser(Guid userId, string displayName)
     {

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Serilog.Core;
 
 namespace LoopMeet.Api.Tests.Infrastructure;
 
@@ -20,6 +21,8 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
     }
 
     public FixedTimeProvider Clock { get; } = new();
+
+    public CapturingLogSink Logs { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -43,17 +46,20 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IMeetupRepository>();
             services.RemoveAll<IInvitationRepository>();
             services.RemoveAll<IAuthIdentityRepository>();
+            services.RemoveAll<IAccountDeletionRepository>();
             services.RemoveAll<IPasswordChangeService>();
             services.RemoveAll<TimeProvider>();
 
             services.AddSingleton(_store);
             services.AddSingleton<TimeProvider>(Clock);
+            services.AddSingleton<ILogEventSink>(Logs);
             services.AddScoped<IUserRepository, InMemoryUserRepository>();
             services.AddScoped<IGroupRepository, InMemoryGroupRepository>();
             services.AddScoped<IMembershipRepository, InMemoryMembershipRepository>();
             services.AddScoped<IMeetupRepository, InMemoryMeetupRepository>();
             services.AddScoped<IInvitationRepository, InMemoryInvitationRepository>();
             services.AddScoped<IAuthIdentityRepository, InMemoryAuthIdentityRepository>();
+            services.AddScoped<IAccountDeletionRepository, InMemoryAccountDeletionRepository>();
             services.AddScoped<IPasswordChangeService, InMemoryPasswordChangeService>();
 
             services.AddAuthentication("Test")

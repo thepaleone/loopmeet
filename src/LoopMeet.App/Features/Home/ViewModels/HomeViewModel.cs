@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Controls;
 using LoopMeet.App.Features.Meetups.Models;
 using LoopMeet.App.Services;
 using Microsoft.Extensions.Logging;
@@ -33,8 +34,47 @@ public sealed partial class HomeViewModel(
     [ObservableProperty]
     private bool _showEmptyState;
 
+    [ObservableProperty]
+    private bool _isRefreshing;
+
+    // The load in progress, shared by OnAppearing and pull to refresh so they never overlap:
+    // two loads would both clear and refill UpcomingMeetups.
+    private Task? _inFlightLoad;
+
+    // Set once the first load ends, however it ends, so the placeholders give way to the result.
+    private bool _hasLoadedOnce;
+
+    /// <summary>Placeholder meetup cards, shown only until the first load ends (019).</summary>
+    public bool ShowMeetupsSkeleton => LoadingPlaceholders.ShouldShow(_hasLoadedOnce, UpcomingMeetups.Count);
+
     [RelayCommand]
-    private async Task LoadAsync()
+    private Task LoadAsync() => LoadOnceAsync();
+
+    /// <summary>Pull to refresh, as on group detail: the spinner stops however the load ends.</summary>
+    [RelayCommand]
+    private async Task RefreshAsync()
+    {
+        try
+        {
+            await LoadOnceAsync();
+        }
+        finally
+        {
+            IsRefreshing = false;
+        }
+    }
+
+    private Task LoadOnceAsync()
+    {
+        if (_inFlightLoad is { IsCompleted: false })
+        {
+            return _inFlightLoad;
+        }
+
+        return _inFlightLoad = LoadCoreAsync();
+    }
+
+    private async Task LoadCoreAsync()
     {
         var cached = userProfileCache.GetCachedProfile();
         Title = cached is not null && !string.IsNullOrWhiteSpace(cached.DisplayName)
@@ -69,6 +109,11 @@ public sealed partial class HomeViewModel(
             logger.LogError(ex, "Failed to load upcoming meetups.");
             HasUpcomingMeetups = false;
             ShowEmptyState = true;
+        }
+        finally
+        {
+            _hasLoadedOnce = true;
+            OnPropertyChanged(nameof(ShowMeetupsSkeleton));
         }
     }
 

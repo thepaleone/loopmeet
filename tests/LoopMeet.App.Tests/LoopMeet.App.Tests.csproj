@@ -12,7 +12,7 @@
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="Supabase.Gotrue" Version="6.0.3" />
+    <PackageReference Include="Supabase.Gotrue" Version="8.9.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
   </ItemGroup>
@@ -25,10 +25,17 @@
   <ItemGroup>
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\ISessionTokenSource.cs" Link="Included\ISessionTokenSource.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SessionFailureClassifier.cs" Link="Included\SessionFailureClassifier.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SessionExpiry.cs" Link="Included\SessionExpiry.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Auth\SessionStorageFormat.cs" Link="Included\SessionStorageFormat.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SessionRenewalPolicy.cs" Link="Included\SessionRenewalPolicy.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Auth\Session\SignOutReason.cs" Link="Included\SignOutReason.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Services\ApiAuthHandler.cs" Link="Included\ApiAuthHandler.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Meetups\MeetupOrganizerText.cs" Link="Included\MeetupOrganizerText.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionConfirmation.cs" Link="Included\AccountDeletionConfirmation.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionSignal.cs" Link="Included\AccountDeletionSignal.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Services\AccountStatusHandler.cs" Link="Included\AccountStatusHandler.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Profile\AppVersionText.cs" Link="Included\AppVersionText.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Controls\LoadingPlaceholders.cs" Link="Included\LoadingPlaceholders.cs" />
   </ItemGroup>
 
   <ItemGroup>

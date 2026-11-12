@@ -16,10 +16,24 @@ public sealed class SessionFailureClassifierTests
         Assert.Equal(SessionFailureKind.Definitive, SessionFailureClassifier.Classify(exception));
     }
 
-    [Fact]
-    public void GotrueOffline_IsTransient()
+    [Theory]
+    [InlineData(FailureHint.Reason.Offline)]
+    [InlineData(FailureHint.Reason.NetworkError)]
+    [InlineData(FailureHint.Reason.CloudflareNetworkError)]
+    public void GotrueNetworkReasons_AreTransient(FailureHint.Reason reason)
     {
-        var exception = new GotrueException("offline", FailureHint.Reason.Offline);
+        var exception = new GotrueException("unreachable", reason);
+
+        Assert.Equal(SessionFailureKind.Transient, SessionFailureClassifier.Classify(exception));
+    }
+
+    [Theory]
+    [InlineData(FailureHint.Reason.NetworkError)]
+    [InlineData(FailureHint.Reason.CloudflareNetworkError)]
+    public void GotrueNetworkReasons_StayTransientEvenWithAClientErrorStatus(FailureHint.Reason reason)
+    {
+        // Gotrue 8 classifies by error_code, so a network reason can arrive with any status.
+        var exception = WithStatusCode(new GotrueException("unreachable", reason), 400);
 
         Assert.Equal(SessionFailureKind.Transient, SessionFailureClassifier.Classify(exception));
     }

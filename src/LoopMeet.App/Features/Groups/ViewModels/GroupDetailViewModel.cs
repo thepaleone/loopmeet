@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LoopMeet.App.Controls;
 using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Features.Meetups.Models;
@@ -24,6 +25,8 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     // page reappears, and the other is marked stale so selecting it reloads it.
     private bool _upcomingLoaded;
     private bool _pastLoaded;
+    // Set once the group's members have loaded, or failed to: each open builds a new view model.
+    private bool _membersLoaded;
     private string? _pastNextCursor;
 
     [ObservableProperty]
@@ -43,7 +46,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     private bool _hasMeetups;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUpcomingSelected), nameof(IsPastSelected), nameof(SelectedListLabel), nameof(ShowUpcomingEmpty), nameof(ShowPastEmpty), nameof(ShowLoadMoreError))]
+    [NotifyPropertyChangedFor(nameof(IsUpcomingSelected), nameof(IsPastSelected), nameof(SelectedListLabel), nameof(ShowUpcomingEmpty), nameof(ShowPastEmpty), nameof(ShowLoadMoreError), nameof(ShowUpcomingSkeleton), nameof(ShowPastSkeleton))]
     private MeetupListMode _listMode = MeetupListMode.Upcoming;
 
     [ObservableProperty]
@@ -54,7 +57,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     private bool _isLoadingMorePast;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowPastEmpty), nameof(ShowLoadMoreError))]
+    [NotifyPropertyChangedFor(nameof(ShowPastEmpty), nameof(ShowLoadMoreError), nameof(ShowPastSkeleton))]
     private bool _hasLoadMoreError;
 
     [ObservableProperty]
@@ -66,6 +69,12 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     public bool ShowUpcomingEmpty => IsUpcomingSelected && _upcomingLoaded && !HasMeetups;
     public bool ShowPastEmpty => IsPastSelected && _pastLoaded && !HasPastMeetups && !HasLoadMoreError;
     public bool ShowLoadMoreError => IsPastSelected && HasLoadMoreError;
+
+    // Placeholders (019): only while a section has nothing to show and its load hasn't ended. A
+    // failed past load ends them too, because the retry row takes over.
+    public bool ShowMembersSkeleton => LoadingPlaceholders.ShouldShow(_membersLoaded, Members.Count);
+    public bool ShowUpcomingSkeleton => IsUpcomingSelected && LoadingPlaceholders.ShouldShow(_upcomingLoaded, Meetups.Count);
+    public bool ShowPastSkeleton => IsPastSelected && !HasLoadMoreError && LoadingPlaceholders.ShouldShow(_pastLoaded, PastMeetups.Count);
 
     public GroupDetailViewModel(GroupsApi groupsApi, MeetupsApi meetupsApi, AuthService authService)
     {
@@ -212,15 +221,23 @@ public sealed partial class GroupDetailViewModel : ObservableObject
             return;
         }
 
-        var group = await _groupsApi.GetGroupAsync(GroupId);
-        GroupName = group.Name;
-        OwnerUserId = group.OwnerUserId;
-        var currentUserId = _authService.GetCurrentUserId();
-        IsOwner = currentUserId.HasValue && currentUserId.Value == OwnerUserId;
-        Members.Clear();
-        foreach (var member in group.Members)
+        try
         {
-            Members.Add(member);
+            var group = await _groupsApi.GetGroupAsync(GroupId);
+            GroupName = group.Name;
+            OwnerUserId = group.OwnerUserId;
+            var currentUserId = _authService.GetCurrentUserId();
+            IsOwner = currentUserId.HasValue && currentUserId.Value == OwnerUserId;
+            Members.Clear();
+            foreach (var member in group.Members)
+            {
+                Members.Add(member);
+            }
+        }
+        finally
+        {
+            _membersLoaded = true;
+            OnPropertyChanged(nameof(ShowMembersSkeleton));
         }
 
         await LoadSelectedListAsync();
@@ -239,6 +256,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
         _pastNextCursor = null;
         _pastLoaded = false;
         _upcomingLoaded = false;
+        NotifyMeetupSkeletons();
     }
 
     /// <summary>Switches lists without reloading the rest of the page (FR-005).</summary>
@@ -326,10 +344,12 @@ public sealed partial class GroupDetailViewModel : ObservableObject
         if (IsPastSelected)
         {
             _upcomingLoaded = false;
+            NotifyMeetupSkeletons();
             return LoadPastFirstPageAsync();
         }
 
         _pastLoaded = false;
+        NotifyMeetupSkeletons();
         return LoadUpcomingAsync();
     }
 
@@ -349,6 +369,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
                 _upcomingLoaded = true;
                 HasMeetups = Meetups.Count > 0;
                 OnPropertyChanged(nameof(ShowUpcomingEmpty));
+                NotifyMeetupSkeletons();
             });
         }
         catch
@@ -356,6 +377,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
             _upcomingLoaded = true;
             HasMeetups = false;
             OnPropertyChanged(nameof(ShowUpcomingEmpty));
+            NotifyMeetupSkeletons();
         }
     }
 
@@ -377,6 +399,7 @@ public sealed partial class GroupDetailViewModel : ObservableObject
                 _pastLoaded = true;
                 HasPastMeetups = PastMeetups.Count > 0;
                 OnPropertyChanged(nameof(ShowPastEmpty));
+                NotifyMeetupSkeletons();
             });
         }
         catch
@@ -384,5 +407,11 @@ public sealed partial class GroupDetailViewModel : ObservableObject
             // Keep whatever is shown; the retry row offers the next attempt.
             HasLoadMoreError = true;
         }
+    }
+
+    private void NotifyMeetupSkeletons()
+    {
+        OnPropertyChanged(nameof(ShowUpcomingSkeleton));
+        OnPropertyChanged(nameof(ShowPastSkeleton));
     }
 }

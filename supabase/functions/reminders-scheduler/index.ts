@@ -118,8 +118,9 @@ const fetchRecipients = async (groupIds: string[]): Promise<Map<string, string[]
   const map = new Map<string, string[]>();
   if (groupIds.length === 0) return map;
 
+  // active_memberships leaves out pending members and every group with a pending owner (FR-008).
   const { data, error } = await supabase
-    .from("memberships")
+    .from("active_memberships")
     .select("group_id,member_user_id")
     .in("group_id", groupIds);
 

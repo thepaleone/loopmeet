@@ -20,17 +20,23 @@ public sealed record MeetupCommandResult(MeetupCommandStatus Status, MeetupRespo
 public sealed class MeetupCommandService
 {
     private readonly IMeetupRepository _meetupRepository;
+    private readonly IGroupRepository _groupRepository;
+    private readonly IMembershipRepository _membershipRepository;
     private readonly ICacheService _cacheService;
     private readonly TimeProvider _timeProvider;
     private readonly ILogger<MeetupCommandService> _logger;
 
     public MeetupCommandService(
         IMeetupRepository meetupRepository,
+        IGroupRepository groupRepository,
+        IMembershipRepository membershipRepository,
         ICacheService cacheService,
         TimeProvider timeProvider,
         ILogger<MeetupCommandService> logger)
     {
         _meetupRepository = meetupRepository;
+        _groupRepository = groupRepository;
+        _membershipRepository = membershipRepository;
         _cacheService = cacheService;
         _timeProvider = timeProvider;
         _logger = logger;
@@ -61,6 +67,14 @@ public sealed class MeetupCommandService
             return new MeetupCommandResult(MeetupCommandStatus.InvalidLocation, null);
         }
 
+        // RLS hides groups the caller can't see, including one whose owner is pending deletion.
+        // Its insert check would reject the meetup, so report not found instead of failing.
+        if (await _groupRepository.GetByIdAsync(groupId, cancellationToken) is null)
+        {
+            _logger.LogWarning("Create meetup group not found {GroupId} for {UserId}", groupId, userId);
+            return new MeetupCommandResult(MeetupCommandStatus.NotFound, null);
+        }
+
         _logger.LogInformation("Creating meetup for group {GroupId} by {UserId}", groupId, userId);
         var now = _timeProvider.GetUtcNow();
         var meetup = new Meetup
@@ -82,8 +96,7 @@ public sealed class MeetupCommandService
 
         var created = await _meetupRepository.AddAsync(meetup, cancellationToken);
 
-        await _cacheService.RemoveAsync($"meetups:{groupId}");
-        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
+        await InvalidateMeetupListsAsync(groupId, cancellationToken);
         _logger.LogInformation("Created meetup {MeetupId} for group {GroupId} by {UserId}", created.Id, groupId, userId);
 
         return new MeetupCommandResult(MeetupCommandStatus.Success, MapResponse(created));
@@ -151,8 +164,7 @@ public sealed class MeetupCommandService
 
         await _meetupRepository.UpdateAsync(existing, cancellationToken);
 
-        await _cacheService.RemoveAsync($"meetups:{groupId}");
-        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
+        await InvalidateMeetupListsAsync(groupId, cancellationToken);
         _logger.LogInformation("Updated meetup {MeetupId} in group {GroupId}", meetupId, groupId);
 
         return new MeetupCommandResult(MeetupCommandStatus.Success, MapResponse(existing));
@@ -172,11 +184,25 @@ public sealed class MeetupCommandService
 
         await _meetupRepository.DeleteAsync(meetupId, cancellationToken);
 
-        await _cacheService.RemoveAsync($"meetups:{groupId}");
-        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
+        await InvalidateMeetupListsAsync(groupId, cancellationToken);
         _logger.LogInformation("Deleted meetup {MeetupId} from group {GroupId}", meetupId, groupId);
 
         return new MeetupCommandResult(MeetupCommandStatus.Success, null);
+    }
+
+    // The group's own lists, plus every member's Home list (home-meetups:{userId}), which
+    // MeetupQueryService caches per user. Without the Home entries, members, including whoever made
+    // the change, kept seeing the old meetup on Home for up to the 30-second TTL.
+    private async Task InvalidateMeetupListsAsync(Guid groupId, CancellationToken cancellationToken)
+    {
+        await _cacheService.RemoveAsync($"meetups:{groupId}");
+        await _cacheService.RemoveAsync($"meetups:past:{groupId}");
+
+        var members = await _membershipRepository.ListMembersAsync(groupId, cancellationToken);
+        foreach (var member in members)
+        {
+            await _cacheService.RemoveAsync(MeetupQueryService.HomeCacheKey(member.UserId));
+        }
     }
 
     private static MeetupResponse MapResponse(Meetup meetup)

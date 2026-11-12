@@ -1,19 +1,23 @@
-import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { isAccountActive } from "../_shared/account-status.ts";
 
 export interface RecipientResolverInput {
   table: string;
   record: Record<string, unknown>;
 }
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL") ?? "",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-);
-
-export const resolveRecipients = async ({ table, record }: RecipientResolverInput): Promise<string[]> => {
+export const resolveRecipients = async (
+  client: SupabaseClient,
+  { table, record }: RecipientResolverInput,
+): Promise<string[]> => {
   if (table === "invitations") {
     const invitedUserId = record.invited_user_id;
-    return typeof invitedUserId === "string" ? [invitedUserId] : [];
+    if (typeof invitedUserId !== "string") {
+      return [];
+    }
+
+    // A user pending deletion gets no pushes (FR-008).
+    return await isAccountActive(client, invitedUserId) ? [invitedUserId] : [];
   }
 
   if (table === "meetups") {
@@ -22,8 +26,9 @@ export const resolveRecipients = async ({ table, record }: RecipientResolverInpu
       return [];
     }
 
-    const { data, error } = await supabase
-      .from("memberships")
+    // active_memberships leaves out pending members and every group with a pending owner.
+    const { data, error } = await client
+      .from("active_memberships")
       .select("member_user_id")
       .eq("group_id", groupId);
 
@@ -31,7 +36,7 @@ export const resolveRecipients = async ({ table, record }: RecipientResolverInpu
       throw new Error(`resolve_recipients_failed:${error.message}`);
     }
 
-    return (data ?? [])
+    return ((data ?? []) as { member_user_id: unknown }[])
       .map((row) => row.member_user_id)
       .filter((value): value is string => typeof value === "string");
   }

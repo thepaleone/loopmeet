@@ -1,0 +1,146 @@
+[
+  {
+    "name": "exact match",
+    "origin": "https://account.loopmeet.io",
+    "patterns": ["https://account.loopmeet.io"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "matching ignores case",
+    "origin": "https://Account.LoopMeet.io",
+    "patterns": ["https://account.loopmeet.io"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "a pattern may carry surrounding spaces",
+    "origin": "https://account.loopmeet.io",
+    "patterns": ["  https://account.loopmeet.io  "],
+    "expectedAllowed": true
+  },
+  {
+    "name": "another host is rejected",
+    "origin": "https://evil.test",
+    "patterns": ["https://account.loopmeet.io"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "http is rejected for an https entry",
+    "origin": "http://account.loopmeet.io",
+    "patterns": ["https://account.loopmeet.io"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "another port is rejected",
+    "origin": "https://account.loopmeet.io:8443",
+    "patterns": ["https://account.loopmeet.io"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "a branch preview matches the wildcard",
+    "origin": "https://main-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "a version preview matches the wildcard",
+    "origin": "https://8f3a1c2b-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "a dashed branch name matches the wildcard",
+    "origin": "https://017-loopmeet-site-account-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "the wildcard needs at least one character",
+    "origin": "https://-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "the bare host does not match the wildcard",
+    "origin": "https://loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "the wildcard never crosses a dot",
+    "origin": "https://a.b-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "the wildcard rejects characters outside letters, digits and dashes",
+    "origin": "https://a_b-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "a suffix attack is rejected",
+    "origin": "https://main-loopmeet-account.joelgray.workers.dev.evil.test",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "another account's workers.dev subdomain is rejected",
+    "origin": "https://main-loopmeet-account.someone.workers.dev",
+    "patterns": ["https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "a whole-label wildcard matches one label",
+    "origin": "https://abc.loopmeet.pages.dev",
+    "patterns": ["https://*.loopmeet.pages.dev"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "a whole-label wildcard does not match two labels",
+    "origin": "https://a.b.loopmeet.pages.dev",
+    "patterns": ["https://*.loopmeet.pages.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "a wildcard outside the first label never matches",
+    "origin": "https://account.loopmeet.io",
+    "patterns": ["https://account.*.io"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "a pattern with two wildcards never matches",
+    "origin": "https://a-b-loopmeet-account.joelgray.workers.dev",
+    "patterns": ["https://*-*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "a wildcard in the scheme never matches",
+    "origin": "https://account.loopmeet.io",
+    "patterns": ["*://account.loopmeet.io"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "any entry in the list may match",
+    "origin": "http://localhost:4507",
+    "patterns": ["https://account.loopmeet.io", "http://localhost:4507"],
+    "expectedAllowed": true
+  },
+  {
+    "name": "an empty list allows nothing",
+    "origin": "https://account.loopmeet.io",
+    "patterns": [],
+    "expectedAllowed": false
+  },
+  {
+    "name": "an empty origin is rejected",
+    "origin": "",
+    "patterns": ["https://account.loopmeet.io"],
+    "expectedAllowed": false
+  },
+  {
+    "name": "the opaque origin null is rejected",
+    "origin": "null",
+    "patterns": ["https://account.loopmeet.io", "https://*-loopmeet-account.joelgray.workers.dev"],
+    "expectedAllowed": false
+  }
+]
