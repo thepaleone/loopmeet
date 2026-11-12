@@ -21,18 +21,20 @@ Run on an **iOS 27 simulator or iPhone**, an **iPad or iPad simulator**, and **M
 
 | # | Steps | Expected | iPhone | iPad | Mac |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Signed out, fully closed. Launch the app | Sign-in screen, no crash | | | |
-| 2 | Signed in, fully closed. Launch the app | Home with meetups, no crash | | | |
-| 3 | Signed in. Background the app for a minute, return | Same screen; data reloads; no sign-in prompt | | | |
-| 4 | Signed in. Background long enough for the session to need refreshing (or force an expired token), return | Session refreshes and lists load without a sign-in prompt | | | |
-| 5 | Signed out. Sign in with Google | Browser sheet appears; returns to the app signed in | | | |
-| 6 | Signed out. Sign in with Apple | Apple sheet appears over the app; returns signed in | | | |
-| 7 | App in the background. Tap a meetup push notification | Opens that meetup's group | | | n/a |
-| 8 | App fully closed (swipe away). Tap a meetup push notification | App launches and opens that meetup's group | | | n/a |
-| 9 | Make the Api unreachable (airplane mode, or point at a dead URL), launch, choose **Quit** on "Service Unavailable" | App closes; no hang | | | |
-| 10 | iPad: try to open a second window from the app switcher / multitasking menu | No second LoopMeet window is created | n/a | | n/a |
-| 11 | Mac: Window menu → New Window (if present) | No second window | n/a | n/a | |
-| 12 | Update over the previous release (install the old build, sign in, then install this build) | Opens signed in without re-authenticating | | | |
+| 1 | Signed out, fully closed. Launch the app | Sign-in screen, no crash | ✅ | ✅ | ✅ |
+| 2 | Signed in, fully closed. Launch the app | Home with meetups, no crash | ✅ | ✅ | ✅ |
+| 3 | Signed in. Background the app for a minute, return | Same screen; data reloads; no sign-in prompt | ✅ | ✅ | ✅ |
+| 4 | Signed in. Background long enough for the session to need refreshing (or force an expired token), return | Session refreshes and lists load without a sign-in prompt | ✅ | ✅ | ✅ |
+| 5 | Signed out. Sign in with Google | Browser sheet appears; returns to the app signed in | ✅ | ✅ | ✅ |
+| 6 | Signed out. Sign in with Apple | Apple sheet appears over the app; returns signed in | needs device | needs device | ✅ |
+| 7 | App in the background. Tap a meetup push notification | Opens that meetup's group | needs device | needs device | n/a |
+| 8 | App fully closed (swipe away). Tap a meetup push notification | App launches and opens that meetup's group | needs device | needs device | n/a |
+| 9 | Make the Api unreachable (airplane mode, or point at a dead URL), launch, choose **Quit** on "Service Unavailable" | App closes; no hang | ✅ | ✅ | ✅ |
+| 10 | iPad: try to open a second window from the app switcher / multitasking menu | No second LoopMeet window is created | n/a | ✅ | n/a |
+| 11 | Mac: Window menu → New Window (if present) | No second window | n/a | n/a | ✅ |
+| 12 | Update over the previous release (install the old build, sign in, then install this build) | Opens signed in without re-authenticating | ✅ | ✅ | ✅ |
+
+**Results (2026-11-12):** run on an iPhone simulator, an iPad simulator and Mac Catalyst. Cells marked "needs device" (Sign in with Apple on iOS, and the push rows) can't run on a simulator and are still open for a physical iPhone and iPad.
 
 Push rows 7–8 need a real device with notifications allowed. The simulator can receive simulated pushes via `xcrun simctl push`, but OneSignal-delivered pushes need a device.
 
