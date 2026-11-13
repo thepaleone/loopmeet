@@ -2,13 +2,6 @@ using OneSignalSDK.DotNet;
 
 namespace LoopMeet.App.Services.Notifications;
 
-public enum NotificationPermissionState
-{
-    Unknown,
-    Granted,
-    Denied,
-}
-
 public sealed class NotificationPermissionService
 {
     private const string PermissionStateKey = "notification_permission_state";

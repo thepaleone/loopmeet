@@ -66,7 +66,7 @@ public sealed class RefreshSurfaceTests
         Assert.Contains("AppVersionText.Format(AppInfo.Current.VersionString, AppInfo.Current.BuildString)", viewModel, StringComparison.Ordinal);
         var label = page.IndexOf("Text=\"{Binding VersionText}\"", StringComparison.Ordinal);
         Assert.True(label >= 0, "Profile has no label bound to VersionText");
-        Assert.True(label > page.LastIndexOf("<Button", StringComparison.Ordinal), "the version line must come after the last button");
+        Assert.True(label > page.LastIndexOf("DeleteAccountCommand", StringComparison.Ordinal), "the version line must be the last line of the page");
     }
 
     private static string Slice(string source, string start, string end)

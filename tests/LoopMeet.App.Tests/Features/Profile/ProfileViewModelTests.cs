@@ -26,7 +26,7 @@ public sealed class ProfileViewModelTests
     }
 
     [Fact]
-    public void ProfilePage_HasCircularAvatarBesideDisplayName()
+    public void ProfilePage_HasCircularAvatar()
     {
         var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml"));
         var xaml = File.ReadAllText(path);
@@ -108,7 +108,7 @@ public sealed class ProfileViewModelTests
     }
 
     [Fact]
-    public void ProfilePage_ContainsLogoutButtonWithIcon()
+    public void ProfilePage_ContainsLogoutRowWithIcon()
     {
         var xamlPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml"));
         var xaml = File.ReadAllText(xamlPath);
