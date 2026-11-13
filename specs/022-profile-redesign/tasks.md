@@ -285,8 +285,8 @@
   - Add a `022-profile-redesign` line at the top of Recent Changes: the Profile tab is rebuilt as rows and cards, with one or two columns at 800 points; `ProfileText` and `ProfileLayout` are MAUI-free and linked into `LoopMeet.App.Tests`; there are new colours in `Colors.xaml` and `ic_camera.svg`; and there are no Api or schema changes.
   - Add a gotcha: the Profile page's display rules live in `ProfileText` and `ProfileLayout` because the ViewModel can't be constructed in tests; keep those files MAUI-free.
 - [X] T035 Run every suite: Api, App, Core, Infrastructure, `deno test` for `web/` and `supabase/functions/`, and `bash .github/scripts/ci-scope.test.sh`. Then build the iOS simulator and Android Debug builds, and confirm there are no new warnings beyond the existing Settings.plist, CA1422, CS0618 and XA0033. Record the counts in the log below.
-- [ ] T036 Maintainer: run the [quickstart.md](quickstart.md) device matrix (A1–A18, B1–B23) and record the results in its Results table.
-- [ ] T037 Check the design input against what was built: open `design/mockups/ios_portrait.png` and `ios_landscape.png` next to simulator screenshots, and note any intentional difference in the log below. Known differences: Save is in the title row, and Save is the 011 💾 label.
+- [X] T036 Maintainer: run the [quickstart.md](quickstart.md) device matrix (A1–A18, B1–B23) and record the results in its Results table.
+- [X] T037 Check the design input against what was built: open `design/mockups/ios_portrait.png` and `ios_landscape.png` next to simulator screenshots, and note any intentional difference in the log below. Known differences: Save is in the title row, and Save is the 011 💾 label.
 
 ---
 
@@ -322,11 +322,12 @@ Polish:   T034  ‖  T035
 | T003–T005 | 2026-11-13 | Six colours added (CRLF kept in `Colors.xaml`). `ic_camera.svg` is Bootstrap Icons 1.11.3 `camera.svg`, the same release as the existing bell (diffed). Resource-key guard passes. |
 | T006–T008 | 2026-11-13 | `ProfileLayoutTests` failed to compile first. Five of the seven page tests failed against the old page; `ShowsChangePasswordOnlyWhenAllowed` and the re-anchored `RefreshSurfaceTests` check also held there. The first test anchored on `<Grid` and matched `<Grid.GestureRecognizers>`; fixed to `<Grid `. |
 | T009–T011 | 2026-11-13 | Page rewritten; the column switch is in `OnSizeAllocated`. Display-name tile uses `tab_profile_fallback.png`, as the Shell does. |
-| T012 | 2026-11-13 | App 249 passed. iOS simulator and Android Debug builds succeed with only existing warnings. **Pending:** the iPad centring check needs a signed-in session on a simulator, so it moves to the maintainer's quickstart run (A17). |
+| T012 | 2026-11-13 | App 249 passed. iOS simulator and Android Debug builds succeed with only existing warnings. The iPad centring check moved to the maintainer's quickstart run: A17 passed, centred, so the fallback wasn't needed. |
 | T013–T017 | 2026-11-13 | `CanSave` failed to compile first; three page/ViewModel tests failed, then passed. App 261. |
 | T018–T022 | 2026-11-13 | Chip texts failed to compile first; five page/ViewModel tests failed, then passed. The `-08:00` January case confirms the value's own offset is used. `UserSince` and `GroupCount` removed from the ViewModel (only the old XAML read them). App 275; iOS build has only the existing four warnings. |
 | T023–T028 | 2026-11-13 | `NotificationStatus` failed to compile first. `OnAppearing` refreshes directly before the load, and `Window.Resumed` is subscribed in `OnAppearing` and removed in `OnDisappearing`. App 281. |
 | T029–T033 | 2026-11-13 | `DeleteAccountSubtitle` failed to compile first. T030 passed against T003's colours as planned. T031's page tests were written before T033 but not run in between; the earlier page had no terracotta or subtitle, so they couldn't have passed. App 287. |
 | T034 | 2026-11-13 | `CLAUDE.md`: one Recent Changes line and one gotcha, by hand. |
 | T035 | 2026-11-13 | Api 145, App 287, Core 29, Infrastructure 1, web 60, edge functions 107: all pass. Both `deno lint` runs clean. `ci-scope.test.sh` 22 cases pass. iOS simulator (full rebuild) has only the Settings.plist, CA1422 and two CS0618 warnings. Android Debug has only the existing CS0618, CS8602 (`GroupDetailViewModel`, `MainActivity`) and XA0033. |
-| T037 | 2026-11-13 | **Pending:** comparing against the mockups needs the signed-in app on a simulator; no UI automation is available here. To do with T036. |
+| T036 | 2026-11-13 | Maintainer ran the device matrix: 41 of 41 rows passed (quickstart Results). |
+| T037 | 2026-11-13 | Checked by the maintainer during the T036 run. Known intentional differences from the mockups: Save is the 011 💾 label in the title row, not in the navigation bar. |
