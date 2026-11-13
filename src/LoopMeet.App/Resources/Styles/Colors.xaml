@@ -31,6 +31,14 @@
     <Color x:Key="Gray900">#2D2927</Color>
     <Color x:Key="Gray950">#1A1817</Color>
 
+    <!-- Profile (022). The terracotta pair is the style guide's soft destructive tone; both pass 4.5:1 on their card (ProfileColorContrastTests). -->
+    <Color x:Key="DestructiveTerracotta">#B4513A</Color>
+    <Color x:Key="DestructiveTerracottaDark">#E8957F</Color>
+    <Color x:Key="AmberTint">#FFF1E0</Color>
+    <Color x:Key="AmberTintText">#8A4B00</Color>
+    <Color x:Key="GuavaTint">#FFE6EE</Color>
+    <Color x:Key="TerracottaTint">#FBE9E4</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>

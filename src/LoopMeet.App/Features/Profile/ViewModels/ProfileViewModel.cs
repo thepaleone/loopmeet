@@ -18,13 +18,24 @@ public sealed partial class ProfileViewModel : ObservableObject
     private readonly UsersApi _usersApi;
     private readonly UserProfileCache _userProfileCache;
     private readonly NotificationSettingsLauncher _notificationSettingsLauncher;
+    private readonly NotificationPermissionService _notificationPermissionService;
     private readonly ILogger<ProfileViewModel> _logger;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveProfile))]
+    [NotifyCanExecuteChangedFor(nameof(SaveProfileCommand))]
     private bool _isBusy;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveProfile))]
+    [NotifyCanExecuteChangedFor(nameof(SaveProfileCommand))]
     private string _displayName = string.Empty;
+
+    /// <summary>The name as last loaded or saved: the header card shows it, and Save compares against it.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanSaveProfile))]
+    [NotifyCanExecuteChangedFor(nameof(SaveProfileCommand))]
+    private string _savedDisplayName = string.Empty;
 
     [ObservableProperty]
     private string _email = string.Empty;
@@ -36,10 +47,13 @@ public sealed partial class ProfileViewModel : ObservableObject
     private bool _hasAvatar;
 
     [ObservableProperty]
-    private DateTimeOffset _userSince;
+    private string _memberSinceText = string.Empty;
 
     [ObservableProperty]
-    private int _groupCount;
+    private string _groupCountText = string.Empty;
+
+    [ObservableProperty]
+    private string _notificationStatusText = string.Empty;
 
     [ObservableProperty]
     private bool _canChangePassword = true;
@@ -55,6 +69,9 @@ public sealed partial class ProfileViewModel : ObservableObject
     [ObservableProperty]
     private string _userInitial = "";
 
+    /// <summary>Save is offered only for a changed, non-blank name, and never while loading or saving.</summary>
+    public bool CanSaveProfile => !IsBusy && ProfileText.CanSave(SavedDisplayName, DisplayName);
+
     /// <summary>For testers and support: the installed build, e.g. "Version 0.1.3 (4)".</summary>
     public string VersionText { get; } = AppVersionText.Format(AppInfo.Current.VersionString, AppInfo.Current.BuildString);
 
@@ -64,6 +81,7 @@ public sealed partial class ProfileViewModel : ObservableObject
         UsersApi usersApi,
         UserProfileCache userProfileCache,
         NotificationSettingsLauncher notificationSettingsLauncher,
+        NotificationPermissionService notificationPermissionService,
         ILogger<ProfileViewModel> logger)
     {
         _authService = authService;
@@ -71,8 +89,13 @@ public sealed partial class ProfileViewModel : ObservableObject
         _usersApi = usersApi;
         _userProfileCache = userProfileCache;
         _notificationSettingsLauncher = notificationSettingsLauncher;
+        _notificationPermissionService = notificationPermissionService;
         _logger = logger;
     }
+
+    /// <summary>Re-reads the OS notification permission; the page calls it on appear and on resume.</summary>
+    public void RefreshNotificationStatus() =>
+        NotificationStatusText = ProfileText.NotificationStatus(_notificationPermissionService.CurrentState);
 
     [RelayCommand]
     private Task DeleteAccountAsync() => Shell.Current.GoToAsync("delete-account");
@@ -158,7 +181,7 @@ public sealed partial class ProfileViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanSaveProfile))]
     private async Task SaveProfileAsync()
     {
         if (IsBusy)
@@ -298,14 +321,15 @@ public sealed partial class ProfileViewModel : ObservableObject
     private void Apply(UserProfileResponse profile)
     {
         DisplayName = profile.DisplayName;
+        SavedDisplayName = profile.DisplayName;
         Email = profile.Email;
         AvatarUrl = profile.AvatarUrl;
         HasAvatar = !string.IsNullOrWhiteSpace(AvatarUrl);
         UserInitial = DisplayName.Length > 0
             ? DisplayName[0].ToString().ToUpperInvariant()
             : "?";
-        UserSince = profile.UserSince;
-        GroupCount = profile.GroupCount;
+        MemberSinceText = ProfileText.MemberSince(profile.UserSince);
+        GroupCountText = ProfileText.GroupCount(profile.GroupCount);
         CanChangePassword = profile.CanChangePassword;
     }
 }

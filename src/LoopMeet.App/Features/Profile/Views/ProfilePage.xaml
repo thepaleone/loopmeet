@@ -3,86 +3,297 @@
     x:Class="LoopMeet.App.Features.Profile.Views.ProfilePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Profile">
+    xmlns:profile="clr-namespace:LoopMeet.App.Features.Profile"
+    Title="Profile"
+    BackgroundColor="{StaticResource AppBackgroundColor}">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="24" Spacing="12">
-            <Label Text="Profile" FontSize="20" FontAttributes="Bold" />
+    <ContentPage.Resources>
+        <Style x:Key="SectionLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="CharacterSpacing" Value="0.8" />
+            <Setter Property="TextTransform" Value="Uppercase" />
+            <Setter Property="TextColor" Value="{StaticResource TextMuted}" />
+            <Setter Property="Margin" Value="6,4,6,0" />
+        </Style>
+        <!-- One full-width row: [icon tile] [text, fills and wraps] [chevron]. No fixed height,
+             so larger system text makes the row taller instead of clipping it. -->
+        <Style x:Key="SettingsRow" TargetType="Grid">
+            <Setter Property="ColumnDefinitions" Value="40,*,Auto" />
+            <Setter Property="ColumnSpacing" Value="14" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="MinimumHeightRequest" Value="56" />
+        </Style>
+        <Style x:Key="IconTile" TargetType="Border">
+            <Setter Property="WidthRequest" Value="34" />
+            <Setter Property="HeightRequest" Value="34" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="TileIcon" TargetType="Image">
+            <Setter Property="WidthRequest" Value="18" />
+            <Setter Property="HeightRequest" Value="18" />
+        </Style>
+        <Style x:Key="RowTitle" TargetType="Label">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="{StaticResource TextMain}" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+        </Style>
+        <Style x:Key="RowSubtitle" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="TextColor" Value="{StaticResource TextMuted}" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+        </Style>
+        <Style x:Key="Chevron" TargetType="Label">
+            <Setter Property="Text" Value="›" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="TextColor" Value="{StaticResource Gray400}" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="Chip" TargetType="Border">
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 999" />
+            <Setter Property="BackgroundColor" Value="{StaticResource AmberTint}" />
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Margin" Value="4" />
+        </Style>
+        <Style x:Key="ChipText" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="TextColor" Value="{StaticResource AmberTintText}" />
+            <Setter Property="LineBreakMode" Value="WordWrap" />
+        </Style>
+        <Style x:Key="RowDivider" TargetType="BoxView">
+            <Setter Property="HeightRequest" Value="1" />
+            <Setter Property="Color" Value="{StaticResource Gray100}" />
+        </Style>
+    </ContentPage.Resources>
 
-            <HorizontalStackLayout Spacing="16" VerticalOptions="Start">
-                <Border
-                    WidthRequest="56"
-                    HeightRequest="56"
-                    StrokeThickness="0"
-                    BackgroundColor="{StaticResource Gray400}">
-                    <Border.StrokeShape>
-                        <Ellipse />
-                    </Border.StrokeShape>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding PickAvatarCommand}" />
-                    </Border.GestureRecognizers>
-                    <Grid WidthRequest="56" HeightRequest="56">
-                        <Label
-                            Text="{Binding UserInitial}"
-                            FontSize="28" FontAttributes="Bold"
-                            TextColor="White"
-                            HorizontalOptions="Center" VerticalOptions="Center" />
-                        <Image
-                            Source="{Binding AvatarUrl}"
-                            Aspect="AspectFill"
-                            IsVisible="{Binding HasAvatar}" />
-                    </Grid>
-                </Border>
-                <VerticalStackLayout Spacing="4" VerticalOptions="Center">
-                    <Label Text="Display name" FontAttributes="Bold" />
-                    <Entry Text="{Binding DisplayName}" Placeholder="Display name" />
-                </VerticalStackLayout>
-            </HorizontalStackLayout>
-
-            <Label Text="Email" FontAttributes="Bold" />
-            <Label Text="{Binding Email}" />
-
-            <Label Text="{Binding UserSince, StringFormat='User since: {0:yyyy-MM-dd}'}" />
-            <Label Text="{Binding GroupCount, StringFormat='Groups: {0}'}" />
-
-            <HorizontalStackLayout Spacing="8">
-                <Button
-                    Text="Save"
-                    ImageSource="ic_save.png"
-                    ContentLayout="Left,8"
-                    Command="{Binding SaveProfileCommand}" />
-                <Button
-                    Text="Change Password"
-                    ImageSource="ic_change_pwd.png"
-                    IsVisible="{Binding CanChangePassword}"
-                    Command="{Binding OpenPasswordChangeCommand}" />
-                <Button
-                    Text="Log out"
-                    ImageSource="ic_logout.png"
-                    ContentLayout="Left,8"
-                    Command="{Binding LogoutCommand}" />
-            </HorizontalStackLayout>
-
-            <HorizontalStackLayout Spacing="8">
-                <Button
-                    Text="Delete account"
-                    ImageSource="ic_delete_account.png"
-                    ContentLayout="Left,8"
-                    Command="{Binding DeleteAccountCommand}" />
-                <Button
-                    Text="Notification settings"
-                    ImageSource="ic_notification_bell_fallback.png"
-                    ContentLayout="Left,8"
-                    Command="{Binding OpenNotificationSettingsCommand}" />
-            </HorizontalStackLayout>
-            <Label Text="{Binding StatusMessage}" IsVisible="{Binding ShowStatus}" />
-
+    <!-- Same header pattern as Create/Edit Meetup (011): the title row sits outside the
+         ScrollView, so neither scrolling nor the keyboard can hide Save. -->
+    <Grid RowDefinitions="Auto,*">
+        <Grid
+            x:Name="HeaderRow"
+            Grid.Row="0"
+            ColumnDefinitions="*,Auto"
+            ColumnSpacing="12"
+            Padding="20,16,20,0"
+            MaximumWidthRequest="600"
+            HorizontalOptions="Fill">
             <Label
-                Text="{Binding VersionText}"
-                FontSize="12"
-                HorizontalOptions="Center"
-                Margin="0,24,0,0"
-                TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
-        </VerticalStackLayout>
-    </ScrollView>
+                Text="Profile"
+                FontSize="24"
+                FontAttributes="Bold"
+                VerticalOptions="Center" />
+            <!-- Active only for a changed, non-blank name (ProfileText.CanSave); dimmed otherwise. -->
+            <Label
+                Grid.Column="1"
+                Text="💾"
+                FontSize="24"
+                VerticalOptions="Center"
+                SemanticProperties.Description="Save profile">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SaveProfileCommand}" />
+                </Label.GestureRecognizers>
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding CanSaveProfile}" Value="False">
+                        <Setter Property="Opacity" Value="0.4" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <!-- ProfilePage.xaml.cs moves HeaderCard and DetailsColumn between one and two
+                 columns by page width (ProfileLayout). -->
+            <Grid
+                x:Name="ContentGrid"
+                RowDefinitions="Auto,Auto"
+                ColumnDefinitions="*"
+                RowSpacing="16"
+                ColumnSpacing="20"
+                Padding="20,16,20,32"
+                MaximumWidthRequest="600"
+                HorizontalOptions="Fill">
+
+                <Border
+                    x:Name="HeaderCard"
+                    Grid.Row="0"
+                    Style="{StaticResource BubbleCardBorderStyle}"
+                    Padding="20,22,20,18"
+                    VerticalOptions="Start">
+                    <VerticalStackLayout Spacing="2">
+                        <!-- Tapping the avatar picks a new photo; the badge says so. -->
+                        <Grid WidthRequest="96" HeightRequest="96" HorizontalOptions="Center">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding PickAvatarCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Border StrokeThickness="0" StrokeShape="Ellipse">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="{StaticResource Primary}" Offset="0" />
+                                        <GradientStop Color="{StaticResource Secondary}" Offset="1" />
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Grid>
+                                    <Label
+                                        Text="{Binding UserInitial}"
+                                        FontSize="42"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource White}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                    <Image
+                                        Source="{Binding AvatarUrl}"
+                                        Aspect="AspectFill"
+                                        IsVisible="{Binding HasAvatar}" />
+                                </Grid>
+                            </Border>
+                            <Border
+                                WidthRequest="34"
+                                HeightRequest="34"
+                                StrokeThickness="0"
+                                StrokeShape="Ellipse"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="End"
+                                VerticalOptions="End"
+                                Margin="0,0,-2,-2">
+                                <Border.Shadow>
+                                    <Shadow Brush="{StaticResource BlackBrush}" Opacity="0.15" Radius="6" Offset="0,2" />
+                                </Border.Shadow>
+                                <Image Source="ic_camera.png" WidthRequest="18" HeightRequest="18" />
+                            </Border>
+                            <ActivityIndicator
+                                IsRunning="{Binding IsUploading}"
+                                IsVisible="{Binding IsUploading}"
+                                Color="{StaticResource White}" />
+                        </Grid>
+
+                        <Label
+                            Text="{Binding SavedDisplayName}"
+                            FontSize="21"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource TextMain}"
+                            HorizontalTextAlignment="Center"
+                            MaxLines="1"
+                            LineBreakMode="TailTruncation"
+                            Margin="0,12,0,0" />
+                        <Label
+                            Text="{Binding Email}"
+                            FontSize="14"
+                            TextColor="{StaticResource TextMuted}"
+                            HorizontalTextAlignment="Center"
+                            MaxLines="1"
+                            LineBreakMode="TailTruncation" />
+
+                        <!-- Wraps the chips onto a new line instead of clipping them. -->
+                        <FlexLayout Wrap="Wrap" JustifyContent="Center" Margin="0,10,0,0">
+                            <Border Style="{StaticResource Chip}">
+                                <Label Text="{Binding MemberSinceText}" Style="{StaticResource ChipText}" />
+                            </Border>
+                            <Border Style="{StaticResource Chip}">
+                                <Label Text="{Binding GroupCountText}" Style="{StaticResource ChipText}" />
+                            </Border>
+                        </FlexLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout
+                    x:Name="DetailsColumn"
+                    Grid.Row="1"
+                    Spacing="8">
+                    <Label Text="Account" Style="{StaticResource SectionLabel}" />
+                    <Border Style="{StaticResource BubbleCardBorderStyle}" Padding="0">
+                        <VerticalStackLayout>
+                            <Grid Style="{StaticResource SettingsRow}" ColumnDefinitions="40,*">
+                                <Border Style="{StaticResource IconTile}" BackgroundColor="{StaticResource AmberTint}">
+                                    <Image Source="tab_profile_fallback.png" Style="{StaticResource TileIcon}" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                    <Label Text="Display name" Style="{StaticResource RowSubtitle}" FontAttributes="Bold" />
+                                    <Entry Text="{Binding DisplayName}" Placeholder="Display name" ReturnType="Done" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <BoxView Style="{StaticResource RowDivider}" />
+
+                            <Grid Style="{StaticResource SettingsRow}" IsVisible="{Binding CanChangePassword}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenPasswordChangeCommand}" />
+                                </Grid.GestureRecognizers>
+                                <Border Style="{StaticResource IconTile}" BackgroundColor="{StaticResource AmberTint}">
+                                    <Image Source="ic_change_pwd.png" Style="{StaticResource TileIcon}" />
+                                </Border>
+                                <Label Grid.Column="1" Text="Change password" Style="{StaticResource RowTitle}" VerticalOptions="Center" />
+                                <Label Grid.Column="2" Style="{StaticResource Chevron}" />
+                            </Grid>
+                            <BoxView Style="{StaticResource RowDivider}" IsVisible="{Binding CanChangePassword}" />
+
+                            <Grid Style="{StaticResource SettingsRow}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenNotificationSettingsCommand}" />
+                                </Grid.GestureRecognizers>
+                                <Border Style="{StaticResource IconTile}" BackgroundColor="{StaticResource GuavaTint}">
+                                    <Image Source="ic_notification_bell_fallback.png" Style="{StaticResource TileIcon}" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                    <Label Text="Notifications" Style="{StaticResource RowTitle}" />
+                                    <Label Text="{Binding NotificationStatusText}" Style="{StaticResource RowSubtitle}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Style="{StaticResource Chevron}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource BubbleCardBorderStyle}" Padding="0" Margin="0,8,0,0">
+                        <VerticalStackLayout>
+                            <Grid Style="{StaticResource SettingsRow}" ColumnDefinitions="40,*">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding LogoutCommand}" />
+                                </Grid.GestureRecognizers>
+                                <Border Style="{StaticResource IconTile}" BackgroundColor="{StaticResource Gray100}">
+                                    <Image Source="ic_logout.png" Style="{StaticResource TileIcon}" />
+                                </Border>
+                                <Label Grid.Column="1" Text="Log out" Style="{StaticResource RowTitle}" VerticalOptions="Center" />
+                            </Grid>
+                            <BoxView Style="{StaticResource RowDivider}" />
+
+                            <Grid Style="{StaticResource SettingsRow}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding DeleteAccountCommand}" />
+                                </Grid.GestureRecognizers>
+                                <Border Style="{StaticResource IconTile}" BackgroundColor="{StaticResource TerracottaTint}">
+                                    <Image Source="ic_delete_account.png" Style="{StaticResource TileIcon}" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                    <!-- The style guide's soft terracotta, never alert red or the primary amber. -->
+                                    <Label
+                                        Text="Delete account"
+                                        Style="{StaticResource RowTitle}"
+                                        TextColor="{AppThemeBinding Light={StaticResource DestructiveTerracotta}, Dark={StaticResource DestructiveTerracottaDark}}" />
+                                    <Label Text="{x:Static profile:ProfileText.DeleteAccountSubtitle}" Style="{StaticResource RowSubtitle}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Style="{StaticResource Chevron}" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label
+                        Text="{Binding StatusMessage}"
+                        IsVisible="{Binding ShowStatus}"
+                        HorizontalTextAlignment="Center"
+                        LineBreakMode="WordWrap"
+                        Margin="0,8,0,0" />
+
+                    <Label
+                        Text="{Binding VersionText}"
+                        FontSize="12"
+                        HorizontalOptions="Center"
+                        Margin="0,16,0,0"
+                        TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
+    </Grid>
 </ContentPage>
