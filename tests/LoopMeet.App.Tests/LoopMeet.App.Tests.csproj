@@ -35,6 +35,9 @@
     <Compile Include="..\..\src\LoopMeet.App\Features\Account\AccountDeletionSignal.cs" Link="Included\AccountDeletionSignal.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Services\AccountStatusHandler.cs" Link="Included\AccountStatusHandler.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Features\Profile\AppVersionText.cs" Link="Included\AppVersionText.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Profile\ProfileText.cs" Link="Included\ProfileText.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Profile\ProfileLayout.cs" Link="Included\ProfileLayout.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Services\Notifications\NotificationPermissionState.cs" Link="Included\NotificationPermissionState.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Controls\LoadingPlaceholders.cs" Link="Included\LoadingPlaceholders.cs" />
   </ItemGroup>
 
