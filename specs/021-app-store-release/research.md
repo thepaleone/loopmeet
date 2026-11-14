@@ -15,7 +15,7 @@ Publishing an iOS device build produces a signed `.ipa`. The script runs `dotnet
 
 **Alternatives considered:**
 - *`ArchiveOnBuild=true` with an Xcode Organizer upload:* adds a GUI step and an `.xcarchive` we don't otherwise need.
-- *Signing by certificate name:* ambiguous with two certificates of the same name.
+- *Signing by certificate name:* ambiguous when the name matches more than one keychain entry, as it does here (the same certificate in the login and System keychains).
 - *Deleting the duplicate certificate:* this machine-specific fix doesn't protect the next machine. The quickstart still suggests removing an expired duplicate.
 
 ## D2. AOT and trimming
@@ -162,6 +162,7 @@ Mac Catalyst's `Info.plist` is unchanged, because it's out of scope.
   - the privacy manifest's four reasons, and that no entry is commented out;
   - `ITSAppUsesNonExemptEncryption` is false;
   - the plist has no ATS exception allowing plain HTTP;
+  - `UIDeviceFamily` is iPhone only (D11);
   - the Release entitlements, which are production push and Sign in with Apple, and the project's mapping of Release builds to them;
   - the script's environment variables, identity pinning, build number, output folder and every pre-build guard;
   - the ignore rules.
@@ -174,3 +175,14 @@ Mac Catalyst's `Info.plist` is unchanged, because it's out of scope.
 
 **Alternatives considered:**
 - *Running the zsh script under test:* the CI runners don't have zsh, and its guards need the macOS `security` tool.
+
+## D11. iPhone only
+
+**Decision:** `Info.plist`'s `UIDeviceFamily` lists only `1` (iPhone), from build 9. `IosAppStoreReleaseTests.InfoPlist_TargetsIPhoneOnly` pins it.
+
+**Rationale:**
+- With `2` (iPad) declared, App Store Connect requires 13-inch iPad screenshots, and the app's layouts aren't designed for iPad yet. The maintainer chose to ship iPhone-only and design for iPad later.
+- iPads can still install the app and run it in iPhone compatibility mode.
+- The App Store doesn't let an update drop a device family once a build has shipped with it. Adding iPad later is allowed, so this is the reversible direction.
+
+**Alternative considered:** *keep iPad and upload iPad screenshots:* it would commit the app to iPad support with layouts that don't work well there.

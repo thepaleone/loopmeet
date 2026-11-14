@@ -25,7 +25,7 @@ public sealed class IosAppStoreReleaseTests
         Assert.Contains("-f net10.0-ios", script, StringComparison.Ordinal);
         Assert.Contains("-r ios-arm64", script, StringComparison.Ordinal);
         Assert.Contains("-p:ApplicationVersion=\"$BUILD_NUMBER\"", script, StringComparison.Ordinal);
-        // The SHA-1, never the certificate name: two certificates share the name.
+        // The SHA-1, never the certificate name: the name matches more than one keychain entry.
         Assert.Contains("-p:CodesignKey=\"$LOOPMEET_IOS_SIGNING_IDENTITY\"", script, StringComparison.Ordinal);
         Assert.Contains("-p:CodesignProvision=", script, StringComparison.Ordinal);
         Assert.Contains("artifacts/ios/$BUILD_NUMBER", script, StringComparison.Ordinal);
@@ -112,6 +112,16 @@ public sealed class IosAppStoreReleaseTests
         Assert.DoesNotContain(root.Elements("key"), key => key.Value == "NSAppTransportSecurity");
         Assert.DoesNotContain("NSAllowsArbitraryLoads", source, StringComparison.Ordinal);
         Assert.DoesNotContain("NSExceptionAllowsInsecureHTTPLoads", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void InfoPlist_TargetsIPhoneOnly()
+    {
+        var root = ReadPlistRoot(InfoPlist);
+
+        // iPhone only until the layouts are designed for iPad (021 research D11). The App
+        // Store doesn't let an update drop iPad once a build has shipped with it.
+        Assert.Equal(["1"], ValueFor(root, "UIDeviceFamily").Elements("integer").Select(family => family.Value));
     }
 
     [Fact]

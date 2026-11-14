@@ -126,7 +126,7 @@
 
 ## Phase 5: User Story 3 - Testers install from TestFlight and the app works as on Android (Priority: P1)
 
-**Goal**: a TestFlight install works on a physical iPhone and iPad, closing 013 rows 6–8 and 016 row 13.
+**Goal**: a TestFlight install works on a physical iPhone, closing 013 rows 6–8 and 016 row 13.
 
 **Independent Test**: [quickstart.md](quickstart.md) device checks 1–11.
 
@@ -134,10 +134,10 @@
   - **Developer portal:** check the App ID capabilities, pick the certificate SHA-1, and create the App Store profile.
   - **OneSignal:** check the production push credentials.
   - **App Store Connect:** create the app record, enter App Information, Test Information and the demo account, and create the "Team" and "Invited" groups.
-- [ ] T017 [US3] Maintainer: run `deploy/build-ios-release.sh -b 1`, upload with Transporter, and add the build to "Team". Record it in the quickstart's Uploads table.
-- [ ] T018 [US3] Maintainer: run the quickstart device checks 1–11 on a TestFlight install (iPhone, and iPad where marked), and record the results in `specs/021-app-store-release/quickstart.md`.
+- [ ] T017 [US3] Maintainer: run `deploy/build-ios-release.sh -b <n>`, upload with Transporter, and add the build to "Team". Record it in the quickstart's Uploads table.
+- [ ] T018 [US3] Maintainer: run the quickstart device checks 1–11 on a TestFlight install on an iPhone, and record the results in `specs/021-app-store-release/quickstart.md`.
 - [ ] T019 [US3] Mark the closed rows in the earlier quickstarts, citing 021 and the build number:
-  - `specs/013-uiscene-lifecycle/quickstart.md`: row 6 on iPhone and iPad, and rows 7–8;
+  - `specs/013-uiscene-lifecycle/quickstart.md`: row 6 on iPhone (iPad stays open until iPad support, research D11), and rows 7–8;
   - `specs/016-account-deletion/quickstart.md`: row 13.
 - [ ] T020 [US3] Maintainer: add the build to "Invited", submit it for Beta App Review, and record the outcome in the Uploads table (SC-002).
 

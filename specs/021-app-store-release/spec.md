@@ -50,9 +50,9 @@ The app declares what it does accurately, so processing and Beta App Review don'
 
 ### User Story 3 - Testers install from TestFlight and the app works as on Android (Priority: P1)
 
-An invited tester installs LoopMeet from TestFlight on an iPhone or iPad. They sign in with Google or Apple, receive push notifications, and can delete their account.
+An invited tester installs LoopMeet from TestFlight on an iPhone. They sign in with Google or Apple, receive push notifications, and can delete their account.
 
-**Independent Test**: Run the quickstart device checks on a TestFlight-installed build on a physical iPhone and iPad.
+**Independent Test**: Run the quickstart device checks on a TestFlight-installed build on a physical iPhone.
 
 **Acceptance Scenarios**:
 
@@ -98,6 +98,7 @@ A maintainer answers App Store Connect's App Privacy questions from one table, k
   - Uploading the build, with Transporter or the command line.
   - Device checks on a TestFlight install, including the 013 device rows and 016 row 13.
 - **FR-010**: The repo MUST hold a table of App Store App Privacy answers that maps each answer to a privacy-policy section, kept in step with the policy the same way `web/data-safety.md` is.
+- **FR-012**: The app MUST declare iPhone as its only device family, so App Store Connect asks for no iPad screenshots. iPad support waits until the layouts are designed for it.
 - **FR-011**: Android builds and every existing automated test MUST be unaffected.
 
 ## Success Criteria *(mandatory)*
@@ -118,6 +119,7 @@ A maintainer answers App Store Connect's App Privacy questions from one table, k
 - Uploading stays a manual step, with Transporter or `xcrun altool`. Scripting the upload with an App Store Connect API key is optional.
 - Out of scope:
   - Mac Catalyst distribution.
+  - iPad as a supported device family (FR-012).
   - The public App Store release: screenshots, the store listing and App Review.
   - A production backend.
   - CI-built releases.

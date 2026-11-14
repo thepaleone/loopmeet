@@ -39,7 +39,7 @@ Get LoopMeet into TestFlight internal testing, then external testing, the iOS co
 - `bash .github/scripts/ci-scope.test.sh`.
 - Quickstart device checks on a TestFlight install.
 
-**Target Platform**: iOS 15.0+ on iPhone and iPad (`ios-arm64`). Mac Catalyst is out of scope.
+**Target Platform**: iOS 15.0+ on iPhone (`ios-arm64`). iPad is out of scope: `UIDeviceFamily` is iPhone only, and iPads run the app in compatibility mode (research D11). Mac Catalyst is out of scope.
 
 **Project Type**: Mobile app (MAUI) plus release tooling.
 

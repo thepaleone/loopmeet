@@ -10,11 +10,11 @@ TestFlight has two tracks:
 ### Developer portal (developer.apple.com → Certificates, Identifiers & Profiles)
 
 1. **App ID:** open Identifiers → `io.loopmeet.app`. Check that **Push Notifications** and **Sign in with Apple** are enabled.
-2. **Certificate:** your keychain holds two certificates named "Apple Distribution: Joel Gray". List them with their fingerprints and expiry dates:
+2. **Certificate:** "Apple Distribution: Joel Gray" is listed twice because the same certificate is in both the login and System keychains (one SHA-1, `4803FF3E…`). List the identities with their fingerprints:
    ```sh
    security find-identity -v -p codesigning
    ```
-   Pick the newest valid one. Optionally, delete the other in Keychain Access, then revoke it in the portal.
+   Use that SHA-1. If two different fingerprints ever appear, pick the newest valid one.
 3. **Profile:** under Profiles, create a new profile:
    1. Choose Distribution → **App Store Connect**.
    2. Select App ID `io.loopmeet.app` and the certificate from step 2.
@@ -57,12 +57,12 @@ TestFlight builds register with Apple's production push environment, so OneSigna
 ```sh
 export LOOPMEET_IOS_SIGNING_IDENTITY=<40-character SHA-1 from security find-identity>
 export LOOPMEET_IOS_PROVISIONING_PROFILE=~/path/to/LoopMeet_App_Store.mobileprovision
-./deploy/build-ios-release.sh -b 1
+./deploy/build-ios-release.sh -b <n>
 ```
 
 - **Before building:** the script checks the profile against the identity, and stops with a message if anything doesn't match.
-- **Output:** the `.ipa` lands in `artifacts/ios/1/`.
-- **Build numbers:** use the next unused number for every upload. iOS numbers are counted separately from Android's.
+- **Output:** the `.ipa` lands in `artifacts/ios/<n>/`.
+- **Build numbers:** use the next unused number for every upload. iOS and Android are kept in step: build 8 matched Play's build 8, and build 9 is the first iPhone-only build (research D11).
 
 ## Upload
 
@@ -84,14 +84,14 @@ Processing takes 5–30 minutes, and App Store Connect emails you when the build
 | --- | --- | --- | --- | --- |
 | | | | | |
 
-## Device checks (TestFlight install on a physical iPhone, plus an iPad where marked)
+## Device checks (TestFlight install on a physical iPhone)
 
 | # | Check | Expected | Result |
 | --- | --- | --- | --- |
 | 1 | Fresh install from TestFlight, then launch | Sign-in screen, no crash | |
 | 2 | Sign in with email and password, then force-quit and relaunch | Home with groups and meetups, still signed in | |
-| 3 | Sign in with Google (iPhone and iPad) | The browser sheet returns to the app signed in | |
-| 4 | Sign in with Apple (iPhone and iPad; closes 013 row 6) | The Apple sheet appears over the app, and the app returns signed in | |
+| 3 | Sign in with Google | The browser sheet returns to the app signed in | |
+| 4 | Sign in with Apple (closes 013 row 6 on iPhone) | The Apple sheet appears over the app, and the app returns signed in | |
 | 5 | Profile → change photo → library, then camera | The picker and the camera open after their permission prompts, and the avatar uploads | |
 | 6 | Create meetup → search for a place with location allowed | Nearby results first | |
 | 7 | Allow notifications. Another member creates a meetup in your group | A push arrives, which proves the production push environment and OneSignal credentials | |
