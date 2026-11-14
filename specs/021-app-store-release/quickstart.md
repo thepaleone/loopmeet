@@ -96,7 +96,7 @@ Processing takes 5–30 minutes, and App Store Connect emails you when the build
 | 6 | Create meetup → search for a place with location allowed | Nearby results first | |
 | 7 | Allow notifications. Another member creates a meetup in your group | A push arrives, which proves the production push environment and OneSignal credentials | |
 | 8 | Tap that push with the app in the background, then again with it closed (closes 013 rows 7–8) | The app opens. Opening the meetup itself is #18, so record what happens without failing the row | |
-| 9 | Settings → General → About, or the Profile version label | `0.1.8` (`<build>`), the project's `ApplicationDisplayVersion` | |
+| 9 | Settings → General → About, or the Profile version label | `0.1.9` (`9`), the project's `ApplicationDisplayVersion` | |
 | 10 | Sign in with Apple, request deletion, then force the purge (016 row 13) | An `apple_authorizations` row exists after sign-in. After the purge, LoopMeet is gone from Settings → Apple ID → Sign in with Apple | |
 | 11 | Profile → Delete Account → Restore, as the reviewer would | The account comes back, and the demo data is intact | |
 
