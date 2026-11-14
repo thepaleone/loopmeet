@@ -39,4 +39,4 @@ Each check exits with status 1 and prints a message naming the problem. When any
 ## Side effects
 
 - Copies the profile as `<UUID>.mobileprovision` into `~/Library/MobileDevice/Provisioning Profiles/` and `~/Library/Developer/Xcode/UserData/Provisioning Profiles/`, creating them if needed. This is safe to repeat, because the file name is the profile's UUID.
-- Runs `dotnet clean` for `net10.0-ios` Release before publishing.
+- Runs `dotnet restore -r ios-arm64`, then `dotnet clean` for `net10.0-ios` Release, before publishing. `clean` never restores, so without the restore an IDE-written `project.assets.json` that lacks the `ios-arm64` target fails it with NETSDK1047.

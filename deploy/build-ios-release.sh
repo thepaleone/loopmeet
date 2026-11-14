@@ -138,6 +138,9 @@ DISPLAY_VERSION="$(sed -n 's:.*<ApplicationDisplayVersion>\(.*\)</ApplicationDis
 
 echo "Building App Store ipa version=$DISPLAY_VERSION build=$BUILD_NUMBER profile=$PROFILE_UUID output=$OUTPUT_DIR"
 
+# dotnet clean never restores, and an IDE restore leaves project.assets.json without the
+# net10.0-ios/ios-arm64 target (NETSDK1047), so restore for the device runtime first.
+dotnet restore src/LoopMeet.App -r ios-arm64
 dotnet clean src/LoopMeet.App -c Release -f net10.0-ios -r ios-arm64
 
 dotnet publish src/LoopMeet.App -c Release -f net10.0-ios -r ios-arm64 \

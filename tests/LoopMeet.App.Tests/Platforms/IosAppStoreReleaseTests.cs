@@ -34,6 +34,17 @@ public sealed class IosAppStoreReleaseTests
         Assert.DoesNotContain("PublishTrimmed=false", script, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void ReleaseScript_RestoresForTheDeviceRuntimeBeforeCleaning()
+    {
+        var (_, fromFirstDotnetCall) = SplitAtFirstDotnetCall(ReadSource(ReleaseScript));
+
+        // dotnet clean never restores. An IDE restore leaves project.assets.json without the
+        // net10.0-ios/ios-arm64 target, and clean then fails with NETSDK1047.
+        Assert.StartsWith("dotnet restore src/LoopMeet.App -r ios-arm64", fromFirstDotnetCall.TrimStart(), StringComparison.Ordinal);
+        Assert.Contains("dotnet clean", fromFirstDotnetCall, StringComparison.Ordinal);
+    }
+
     [Theory]
     [InlineData("^[1-9][0-9]*$")]                            // 1: positive build number
     [InlineData("LOOPMEET_IOS_SIGNING_IDENTITY")]            // 2: variable set

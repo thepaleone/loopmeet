@@ -9,7 +9,7 @@
 - `-p:ApplicationVersion=<n>`
 - `-o artifacts/ios/<n>`
 
-Publishing an iOS device build produces a signed `.ipa`. The script runs `dotnet clean` first, as the Android script does.
+Publishing an iOS device build produces a signed `.ipa`. The script runs `dotnet restore -r ios-arm64` and then `dotnet clean` first. The Android script cleans too, but iOS also needs the restore: `clean` never restores, and an IDE restore leaves out the `ios-arm64` target (NETSDK1047).
 
 **Rationale:** this is the documented .NET for iOS App Store path, and it needs no Xcode project or archive step. `CodesignKey` goes to `codesign -s`, which accepts a SHA-1 fingerprint, so the duplicate "Apple Distribution: Joel Gray" name can't pick the wrong certificate (spec FR-001).
 
