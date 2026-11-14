@@ -7,7 +7,8 @@
 # folder-per-project rule:
 #   LoopMeet.Api.Tests   reads src/LoopMeet.Api and supabase/functions (source-inspection tests)
 #   LoopMeet.Core.Tests  reads supabase/functions/_shared/meetup-lifecycle.cases.json
-#   LoopMeet.App.Tests   compiles and reads files from src/LoopMeet.App
+#   LoopMeet.App.Tests   compiles and reads files from src/LoopMeet.App, plus the release scripts
+#                        (deploy/build-*-release.sh) and .gitignore
 #   web (deno test)      reads web/ and specs/016-account-deletion/data-retention.md (privacy policy check)
 # Documentation (*.md, specs/, .specify/) selects nothing. Any path not listed below selects
 # everything, so a new kind of file can't silently skip CI.
@@ -41,7 +42,10 @@ else
         select_keys web ;;
       *.md | specs/* | .specify/*)
         ;;
-      .github/workflows/deploy-staging.yml | deploy/* | .gitignore | .gitattributes | .vscode/* | .idea/* | docker-compose.yml)
+      deploy/build-*-release.sh | .gitignore)
+        # Read by AndroidPlayReleaseTests and IosAppStoreReleaseTests.
+        select_keys app_tests ;;
+      .github/workflows/deploy-staging.yml | deploy/* | .gitattributes | .vscode/* | .idea/* | docker-compose.yml)
         ;;
       .github/*)
         # Workflows and this script.

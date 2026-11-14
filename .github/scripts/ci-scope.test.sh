@@ -26,7 +26,10 @@ check() {
 
 check "docs only" "README.md\nspecs/016-account-deletion/tasks.md\n.specify/memory/constitution.md\nCLAUDE.md\nsupabase/functions/README.md" ""
 check "no changes" "" ""
-check "deploy script and staging deploy workflow" "deploy/deploy-android.sh\n.github/workflows/deploy-staging.yml" ""
+check "dev deploy script and staging deploy workflow" "deploy/deploy-android.sh\n.github/workflows/deploy-staging.yml" ""
+check "android release script feeds the app tests" "deploy/build-android-release.sh" "app_tests"
+check "ios release script feeds the app tests" "deploy/build-ios-release.sh" "app_tests"
+check "gitignore feeds the app tests" ".gitignore" "app_tests"
 check "app source" "src/LoopMeet.App/Features/Home/Views/HomePage.xaml" "app_tests build_app"
 check "app tests" "tests/LoopMeet.App.Tests/Services/AccountStatusHandlerTests.cs" "app_tests"
 check "api source" "src/LoopMeet.Api/Program.cs" "api_tests build_backend"

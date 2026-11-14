@@ -92,3 +92,8 @@ artifacts/
 
 # Apple private keys (Sign in with Apple / APNs). Never commit.
 *.p8
+
+# Apple signing assets and release output (feature 021). artifacts/ and *.p8 are above.
+*.mobileprovision
+*.p12
+*.cer

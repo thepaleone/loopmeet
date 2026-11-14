@@ -16,7 +16,6 @@
 		<key>UIDeviceFamily</key>
 		<array>
 			<integer>1</integer>
-			<integer>2</integer>
 		</array>
 		<key>UIRequiredDeviceCapabilities</key>
 		<array>
@@ -47,27 +46,8 @@
 		<array>
 			<string>remote-notification</string>
 		</array>
-		<key>NSAppTransportSecurity</key>
-		<dict>
-			<key>NSExceptionDomains</key>
-			<dict>
-				<key>dev.loopmeet.io</key>
-				<dict>
-					<key>NSIncludesSubdomains</key>
-					<true/>
-					<key>NSExceptionAllowsInsecureHTTPLoads</key>
-					<true/>
-				</dict>
-				<key>localhost</key>
-				<dict>
-					<key>NSIncludesSubdomains</key>
-					<true/>
-					<key>NSExceptionAllowsInsecureHTTPLoads</key>
-					<true/>
-				</dict>
-			</dict>
-		</dict>
-
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>
