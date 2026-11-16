@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="LoopMeet.App.Features.Safety.Views.ReportConcernPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:safety="clr-namespace:LoopMeet.App.Features.Safety"
+    Title="Report a concern">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="12" MaximumWidthRequest="600">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            <Label Text="{Binding ErrorMessage}" IsVisible="{Binding ShowError}" TextColor="Red" />
+
+            <!-- Reports cover groups the reporter belongs to (spec Edge Cases: no groups). -->
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding HasNoGroups}">
+                <Label Text="You can report people and groups you belong to. You're not in any groups yet." />
+                <Label Text="For anything else, email our safety team:" />
+                <Label Text="{x:Static safety:ReportFallbackMail.SafetyAddress}" FontAttributes="Bold" />
+                <Button
+                    Text="Copy address"
+                    Command="{Binding CopyAddressCommand}"
+                    SemanticProperties.Description="Copy the safety team's email address" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="12" IsVisible="{Binding IsFormVisible}">
+                <Label Text="Tell us what happened. The person you report isn't told." />
+
+                <Picker
+                    Title="Group"
+                    ItemsSource="{Binding Groups}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedGroup}"
+                    SemanticProperties.Description="The group this is about" />
+
+                <Picker
+                    Title="Who is it about?"
+                    ItemsSource="{Binding People}"
+                    SelectedItem="{Binding SelectedPerson}"
+                    SemanticProperties.Description="The person this is about, or the group itself" />
+
+                <Picker
+                    Title="Reason"
+                    ItemsSource="{Binding Reasons}"
+                    SelectedItem="{Binding SelectedReason}"
+                    SemanticProperties.Description="The reason for the report" />
+
+                <Editor
+                    Text="{Binding Details}"
+                    Placeholder="What happened, and where? Don't attach or send images of a child."
+                    MaxLength="1000"
+                    AutoSize="TextChanges"
+                    MinimumHeightRequest="120"
+                    SemanticProperties.Description="Details of what happened, up to 1,000 characters" />
+                <Label Text="{Binding RemainingText}" FontSize="12" HorizontalTextAlignment="End" />
+
+                <Button
+                    Text="Send by email instead"
+                    Command="{Binding SendByEmailCommand}"
+                    IsVisible="{Binding ShowEmailFallback}" />
+
+                <Button Text="Submit report" Command="{Binding SubmitReportCommand}" />
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

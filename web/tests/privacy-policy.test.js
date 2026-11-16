@@ -37,7 +37,7 @@ Deno.test("covers every kind of data the app uses (FR-014)", () => {
 });
 
 Deno.test("names every company that processes data, and what each does (FR-015)", () => {
-  for (const company of ["Supabase", "DigitalOcean", "Google", "Apple", "OneSignal", "Firebase Cloud Messaging", "Cloudflare"]) {
+  for (const company of ["Supabase", "DigitalOcean", "Google", "Apple", "OneSignal", "Firebase Cloud Messaging", "Cloudflare", "SendGrid"]) {
     assertMatch(html, new RegExp(`<td>${company}</td>`), `no processor row for ${company}`);
   }
   assertSays(/Places/, "Google Places");
@@ -61,6 +61,22 @@ Deno.test("states the deletion and retention rules as data-retention.md does (FR
   }
   assertSays(/Apple[^.]*(own records|its own record|Apple's privacy policy)/i, "Apple's own records");
   assertSays(/hidden from (everyone|other people)/i, "what's hidden during the 30 days");
+});
+
+Deno.test("explains reports and how long they're kept, as data-retention.md does (023)", () => {
+  assertSays(/Report a concern/, "reporting in the app");
+  assertSays(/SendGrid[^.]*(email|inbox)/i, "SendGrid emails reports to the safety inbox");
+  assertSays(/(aren't|isn't|is not|are not) told/i, "the reported person isn't told");
+
+  const shared = [
+    [/kept for \*\*1 year\*\*/, /reports?[^.]*1 year/i, "reports kept for 1 year"],
+    [/longer when the law requires/, /longer when the law requires/, "longer under a legal requirement"],
+    [/even if either account is deleted/, /even if (either|your|their) account/i, "reports outlive account deletion"],
+  ];
+  for (const [inRetention, inPolicy, what] of shared) {
+    assertMatch(retention, inRetention, `data-retention.md no longer says: ${what}`);
+    assertSays(inPolicy, what);
+  }
 });
 
 Deno.test("says data isn't sold or used for ads, and there are no analytics or ad SDKs (FR-017)", () => {

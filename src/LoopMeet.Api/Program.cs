@@ -11,6 +11,7 @@ using LoopMeet.Api.Services.Groups;
 using LoopMeet.Api.Services.Invitations;
 using LoopMeet.Api.Services.Meetups;
 using LoopMeet.Api.Services.Places;
+using LoopMeet.Api.Services.Safety;
 using LoopMeet.Core.Interfaces;
 using LoopMeet.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -100,6 +101,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<MeetupQueryService>();
 builder.Services.AddScoped<MeetupCommandService>();
 builder.Services.AddScoped<AccountDeletionService>();
+builder.Services.AddScoped<ReportCommandService>();
 
 builder.Services.Configure<PlacesOptions>(options =>
 {
@@ -115,6 +117,7 @@ builder.Services.AddScoped<IInvitationRepository, InvitationRepository>();
 builder.Services.AddScoped<IAuthIdentityRepository, AuthIdentityRepository>();
 builder.Services.AddScoped<IMeetupRepository, MeetupRepository>();
 builder.Services.AddScoped<IAccountDeletionRepository, AccountDeletionRepository>();
+builder.Services.AddScoped<IAbuseReportRepository, AbuseReportRepository>();
 
 var jwtIssuer = builder.Configuration["Supabase:JwtIssuer"] ?? string.Empty;
 var jwtAudience = builder.Configuration["Supabase:JwtAudience"] ?? "loopmeet-api";
@@ -215,6 +218,7 @@ app.MapInvitationEndpoints();
 app.MapMeetupsEndpoints();
 app.MapPlacesEndpoints();
 app.MapAccountDeletionEndpoints();
+app.MapReportsEndpoints();
 app.MapGet("/", () => Results.Ok(new { Status = "LoopMeet API" }));
 
 // #if DEBUG

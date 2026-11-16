@@ -47,6 +47,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<IInvitationRepository>();
             services.RemoveAll<IAuthIdentityRepository>();
             services.RemoveAll<IAccountDeletionRepository>();
+            services.RemoveAll<IAbuseReportRepository>();
             services.RemoveAll<IPasswordChangeService>();
             services.RemoveAll<TimeProvider>();
 
@@ -60,6 +61,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IInvitationRepository, InMemoryInvitationRepository>();
             services.AddScoped<IAuthIdentityRepository, InMemoryAuthIdentityRepository>();
             services.AddScoped<IAccountDeletionRepository, InMemoryAccountDeletionRepository>();
+            services.AddScoped<IAbuseReportRepository, InMemoryAbuseReportRepository>();
             services.AddScoped<IPasswordChangeService, InMemoryPasswordChangeService>();
 
             services.AddAuthentication("Test")

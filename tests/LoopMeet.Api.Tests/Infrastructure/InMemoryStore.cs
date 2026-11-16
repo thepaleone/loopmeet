@@ -11,5 +11,6 @@ public sealed class InMemoryStore
     public List<Invitation> Invitations { get; } = new();
     public List<AuthIdentity> AuthIdentities { get; } = new();
     public Dictionary<Guid, AccountDeletion> AccountDeletions { get; } = new();
+    public List<AbuseReport> AbuseReports { get; } = new();
     public object SyncRoot { get; } = new();
 }

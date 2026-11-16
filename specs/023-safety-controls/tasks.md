@@ -23,7 +23,7 @@
 
 **Purpose**: put the spec documents on `023-safety-controls`, so every story branch starts from them.
 
-- [ ] T001 Commit `specs/023-safety-controls/` (spec, plan, research, data model, contracts, quickstart, checklist, design, tasks) on `023-safety-controls` and push it, once the maintainer confirms. Leave the untracked `plan/child-safety/` alone.
+- [X] T001 Commit `specs/023-safety-controls/` (spec, plan, research, data model, contracts, quickstart, checklist, design, tasks) on `023-safety-controls` and push it, once the maintainer confirms. Leave the untracked `plan/child-safety/` alone.
 
 **Checkpoint**: `023-safety-controls` on the remote holds the documents and no code. There's no foundational phase: anything shared lives in the first story that needs it.
 
@@ -35,11 +35,11 @@
 
 **Independent Test**: quickstart rows 1–10 on staging. Reports from Profile and from a member arrive at the safety inbox. With the network off, the report goes through the mail app.
 
-- [ ] T002 [US1] Create branch `023-safety-controls-report` from `023-safety-controls`.
+- [X] T002 [US1] Create branch `023-safety-controls-report` from `023-safety-controls`.
 
 ### Tests for User Story 1 (write first, confirm they fail)
 
-- [ ] T003 [P] [US1] Write `supabase/tests/database/abuse_reports.test.sql` (pgTAP). Cover:
+- [X] T003 [P] [US1] Write `supabase/tests/database/abuse_reports.test.sql` (pgTAP). Cover:
   - **RLS:** `abuse_reports` has RLS on, and `authenticated` can't select, insert, update or delete.
   - **`submit_abuse_report` success:** a member reports another member and the group itself, and the snapshot names and trimmed details are stored.
   - **`submit_abuse_report` refusals:** `not_group_member`; `invalid_reported_user` for self and for a non-member; `invalid_report` for an unknown reason, blank details and 1,001 characters; `report_limit_reached` on the 11th report within 24 hours (but not for a report 25 hours old); `account_inactive` for a user pending deletion.
@@ -48,15 +48,15 @@
   - **`stuck_report_emails`:** returns a 25-hour-old unsent report once.
   - **`delete_expired_abuse_reports`:** deletes a 13-month-old report and keeps one with a future `legal_hold_until`.
   - **Trigger and execute rights:** the insert trigger exists, and the service-only functions refuse `authenticated`.
-- [ ] T004 [P] [US1] Write `tests/LoopMeet.Core.Tests/Validators/AbuseReportValidatorTests.cs`. Cover: each defined `ReportReason` passes, and an undefined value fails; details trimmed to 0 and to 1,001 characters fail, 1 and 1,000 pass; `ReportedUserId = Guid.Empty` fails, while null and a real id pass.
-- [ ] T005 [P] [US1] Write `supabase/functions/report-email/report-mailer.test.ts` (Deno, with `jsr:@std/assert@1` imported directly), with the tests listed in `contracts/report-email.md`:
+- [X] T004 [P] [US1] Write `tests/LoopMeet.Core.Tests/Validators/AbuseReportValidatorTests.cs`. Cover: each defined `ReportReason` passes, and an undefined value fails; details trimmed to 0 and to 1,001 characters fail, 1 and 1,000 pass; `ReportedUserId = Guid.Empty` fails, while null and a real id pass.
+- [X] T005 [P] [US1] Write `supabase/functions/report-email/report-mailer.test.ts` (Deno, with `jsr:@std/assert@1` imported directly), with the tests listed in `contracts/report-email.md`:
   - every body field, and a subject without the group name or the details;
   - "The group itself", and `reply_to` dropped when the reporter's email is missing;
   - `202` marks the row sent, while non-2xx and a network error mark the failure and the later rows still go;
   - a `report_id` body against `{}`, and `400` for any other body;
   - no email, name or details in any log call.
-- [ ] T006 [P] [US1] Add `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryAbuseReportRepository.cs`. It reproduces the SQL rules from `data-model.md`: membership, self, the limit of 10 in 24 hours using `FixedTimeProvider`, and validation. Register it in `TestWebApplicationFactory.cs` in place of the real repository.
-- [ ] T007 [US1] Write `tests/LoopMeet.Api.Tests/Endpoints/ReportsEndpointsTests.cs` for `POST /reports`, checking each status and code in `contracts/api.md`:
+- [X] T006 [P] [US1] Add `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryAbuseReportRepository.cs`. It reproduces the SQL rules from `data-model.md`: membership, self, the limit of 10 in 24 hours using `FixedTimeProvider`, and validation. Register it in `TestWebApplicationFactory.cs` in place of the real repository.
+- [X] T007 [US1] Write `tests/LoopMeet.Api.Tests/Endpoints/ReportsEndpointsTests.cs` for `POST /reports`, checking each status and code in `contracts/api.md`:
   - `201` with `Location` and a body;
   - `400 invalid_report`;
   - `403 not_group_member`;
@@ -65,63 +65,63 @@
   - `401` without a token.
 
   With `CapturingLogSink`, assert that `ReportSubmitted` and `ReportRefused` carry ids and the reason code only, never the details or an email.
-- [ ] T008 [P] [US1] Add a test to `tests/LoopMeet.Api.Tests/Contract/LoggingPrivacyTests.cs`. It reads every `.cs` file under `src/LoopMeet.Api/Services/Safety/`, plus `src/LoopMeet.Api/Endpoints/ReportsEndpoints.cs` and `supabase/functions/report-email/*.ts` (not tests). No logging template or log payload may contain `Email`, `Details`, `details` or `reply_to`.
-- [ ] T009 [P] [US1] Write the App unit tests in `tests/LoopMeet.App.Tests/Features/Safety/`, and link the four sources (`ReportReasons.cs`, `ReportDraft.cs`, `ReportFallbackMail.cs`, `SafetyErrorText.cs`) in `tests/LoopMeet.App.Tests/LoopMeet.App.Tests.csproj`:
+- [X] T008 [P] [US1] Add a test to `tests/LoopMeet.Api.Tests/Contract/LoggingPrivacyTests.cs`. It reads every `.cs` file under `src/LoopMeet.Api/Services/Safety/`, plus `src/LoopMeet.Api/Endpoints/ReportsEndpoints.cs` and `supabase/functions/report-email/*.ts` (not tests). No logging template or log payload may contain `Email`, `Details`, `details` or `reply_to`.
+- [X] T009 [P] [US1] Write the App unit tests in `tests/LoopMeet.App.Tests/Features/Safety/`, and link the four sources (`ReportReasons.cs`, `ReportDraft.cs`, `ReportFallbackMail.cs`, `SafetyErrorText.cs`) in `tests/LoopMeet.App.Tests/LoopMeet.App.Tests.csproj`:
   - **`ReportReasonsTests.cs`:** five reasons, with the labels from the spec and the Api codes from the contract.
   - **`ReportDraftTests.cs`:** `CanSubmit` needs a group, a reason and non-blank details of at most 1,000 characters. `Remaining` counts down. The details are trimmed.
   - **`ReportFallbackMailTests.cs`:** the address is `abuse@loopmeet.io`. The subject names the reason. The body has the group name, the person's display name or "The group itself", the reason, the details and the app version. No GUIDs.
   - **`SafetyErrorTextTests.cs`:** each US1 code maps to its contract message. An unknown code or a network failure gives the fallback prompt.
-- [ ] T010 [P] [US1] Write `tests/LoopMeet.App.Tests/Features/Safety/ReportConcernSurfaceTests.cs` (source inspection). It checks:
+- [X] T010 [P] [US1] Write `tests/LoopMeet.App.Tests/Features/Safety/ReportConcernSurfaceTests.cs` (source inspection). It checks:
   - **Profile:** `ProfilePage.xaml` has a "Report a concern" settings row bound to `ReportConcernCommand`, using the 022 row styles.
   - **Report page:** `ReportConcernPage.xaml` has a no-groups empty state with the copyable `abuse@loopmeet.io` address, and binds the group and person pickers, the reason picker, an `Editor` with `MaxLength="1000"`, the remaining-characters label and `SubmitReportCommand`.
   - **ViewModel:** `ReportConcernViewModel.cs` is a `sealed partial` class, uses `Email.Default.IsComposeSupported`, `Email.Default.ComposeAsync`, `Clipboard.Default.SetTextAsync`, `ReportFallbackMail` and `SafetyErrorText`, and never logs the details.
   - **Group Detail:** the member tile in `GroupDetailPage.xaml` has a `TapGestureRecognizer` bound to `MemberActionsCommand`, and a `SemanticProperties.Description`.
   - **Routing:** `AppShell.xaml.cs` registers `report-concern`.
-- [ ] T011 [P] [US1] Extend `web/tests/privacy-policy.test.js`:
+- [X] T011 [P] [US1] Extend `web/tests/privacy-policy.test.js`:
   - the processors list names SendGrid and what it does;
   - the policy has a "Reports" section with its anchor;
   - the retention text states reports are kept 1 year, or longer when the law requires, matching `specs/016-account-deletion/data-retention.md`.
-- [ ] T012 [US1] Run the new tests and confirm they fail for the right reason (missing objects, routes and files, not compile errors elsewhere):
+- [X] T012 [US1] Run the new tests and confirm they fail for the right reason (missing objects, routes and files, not compile errors elsewhere):
   - `dotnet test`;
   - `deno test supabase/functions/report-email web/tests`;
   - `supabase test db`, with `DOCKER_HOST` set for podman.
 
 ### Implementation for User Story 1
 
-- [ ] T013 [US1] Write migration `supabase/migrations/<ts>_abuse_reports.sql` as `data-model.md` describes:
+- [X] T013 [US1] Write migration `supabase/migrations/<ts>_abuse_reports.sql` as `data-model.md` describes:
   - the table, checks, indexes and RLS, with no user policies;
   - the functions `submit_abuse_report` (with an advisory lock and the 10-in-24-hours count), `claim_report_emails`, `mark_report_email`, `stuck_report_emails` and `delete_expired_abuse_reports`, with execute granted to `authenticated` and `service_role` as listed;
   - the `after insert` trigger calling `net.http_post` to `/functions/v1/report-email` with `{report_id}`;
   - the `report-email-sweep` cron job (`*/5 * * * *`), skipped with a notice when the Vault secrets are missing, as in `20261103120200_account_deletion_purge.sql`, and the unguarded `abuse-reports-retention` job (`17 3 * * *`).
 
   Apply it locally with `supabase migration up`, never `db reset`. T003 passes.
-- [ ] T014 [US1] Create `supabase/functions/report-email/`:
+- [X] T014 [US1] Create `supabase/functions/report-email/`:
   - `deno.json`;
   - `report-mailer.ts`: pure claim, render, send, mark and stuck logic, through injected ports;
   - `index.ts`: the service-role client, SendGrid `fetch` and env secrets `SENDGRID_API_KEY`, `REPORT_EMAIL_FROM` and `REPORT_EMAIL_TO`, per `contracts/report-email.md`.
 
   Add `[functions.report-email] verify_jwt = false` to `supabase/config.toml`. T005 passes, and `deno lint` is clean.
-- [ ] T015 [P] [US1] Add to Core:
+- [X] T015 [P] [US1] Add to Core:
   - `src/LoopMeet.Core/Models/AbuseReport.cs` and `ReportReason.cs`, with the snake_case code map;
   - `ReportSubmission.cs`, the result;
   - `src/LoopMeet.Core/Interfaces/IAbuseReportRepository.cs`;
   - `src/LoopMeet.Core/Validators/AbuseReportValidator.cs`.
 
   T004 passes.
-- [ ] T016 [US1] Add `src/LoopMeet.Infrastructure/Repositories/AbuseReportRepository.cs`:
+- [X] T016 [US1] Add `src/LoopMeet.Infrastructure/Repositories/AbuseReportRepository.cs`:
   - it calls `submit_abuse_report` with `Client.Rpc`, reading the returned row with explicit snake_case names, as `AccountDeletionRepository` does;
   - it maps the `PostgrestException` codes to `ReportSubmission`.
 
   Register it in `src/LoopMeet.Api/Program.cs`.
-- [ ] T017 [US1] Add to the Api:
+- [X] T017 [US1] Add to the Api:
   - `src/LoopMeet.Api/Contracts/SafetyContracts.cs` (`ReportRequest`, `ReportResponse`);
   - `src/LoopMeet.Api/Services/Safety/ReportCommandService.cs`, which validates, calls the repository and logs `ReportSubmitted` or `ReportRefused` by id;
   - `src/LoopMeet.Api/Endpoints/ReportsEndpoints.cs`, mapping each result to the contract's status, code and message.
 
   Call `app.MapReportsEndpoints()` in `Program.cs`. T007 and T008 pass.
-- [ ] T018 [P] [US1] Add the MAUI-free rules in `src/LoopMeet.App/Features/Safety/`: `ReportReasons.cs`, `ReportDraft.cs`, `ReportFallbackMail.cs` and `SafetyErrorText.cs`, with no `Microsoft.Maui.*` usings. T009 passes.
-- [ ] T019 [US1] Add `src/LoopMeet.App/Services/SafetyApi.cs`, with `ISafetyApi.SubmitReportAsync` and the `SafetyApi` wrapper. Register the Refit client and wrapper in `src/LoopMeet.App/MauiProgram.cs` beside the `GroupsApi` registrations.
-- [ ] T020 [US1] Build the report form:
+- [X] T018 [P] [US1] Add the MAUI-free rules in `src/LoopMeet.App/Features/Safety/`: `ReportReasons.cs`, `ReportDraft.cs`, `ReportFallbackMail.cs` and `SafetyErrorText.cs`, with no `Microsoft.Maui.*` usings. T009 passes.
+- [X] T019 [US1] Add `src/LoopMeet.App/Services/SafetyApi.cs`, with `ISafetyApi.SubmitReportAsync` and the `SafetyApi` wrapper. Register the Refit client and wrapper in `src/LoopMeet.App/MauiProgram.cs` beside the `GroupsApi` registrations.
+- [X] T020 [US1] Build the report form:
   - **Page:** `src/LoopMeet.App/Features/Safety/ViewModels/ReportConcernViewModel.cs` and `src/LoopMeet.App/Features/Safety/Views/ReportConcernPage.xaml(.cs)`, with the group picker from `GroupsApi.GetGroupsAsync` and the members from `GetGroupAsync`, excluding self, plus "The group itself (name or meetups)".
   - **Preselection:** query parameters `groupId` and `userId` preselect the group and person.
   - **No groups:** the empty state from the spec's Edge Cases, explaining that reports cover groups you belong to, with the address and a Copy button.
@@ -130,31 +130,33 @@
     - **4xx:** the `SafetyErrorText` message, keeping the text.
     - **Network or 5xx:** the fallback, `Email.Default.ComposeAsync` with `ReportFallbackMail` when `IsComposeSupported`, otherwise an alert with the address and a Copy button using `Clipboard`.
   - **Wiring:** register the route `report-concern` in `AppShell.xaml.cs`, and the ViewModel and page in `MauiProgram.cs`.
-- [ ] T021 [US1] Add the "Report a concern" row to the Account card in `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml`, using the 022 `SettingsRow` styles, and add `ReportConcernCommand` to `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs`. The command navigates to `report-concern`.
-- [ ] T022 [US1] Make member tiles tappable:
+- [X] T021 [US1] Add the "Report a concern" row to the Account card in `src/LoopMeet.App/Features/Profile/Views/ProfilePage.xaml`, using the 022 `SettingsRow` styles, and add `ReportConcernCommand` to `src/LoopMeet.App/Features/Profile/ViewModels/ProfileViewModel.cs`. The command navigates to `report-concern`.
+- [X] T022 [US1] Make member tiles tappable:
   - **Page:** in `src/LoopMeet.App/Features/Groups/Views/GroupDetailPage.xaml`, add a `TapGestureRecognizer` bound to `MemberActionsCommand`, with `SemanticProperties.Description` "Actions for {name}".
   - **ViewModel:** in `GroupDetailViewModel.cs`, `MemberActionsCommandAsync` shows an action sheet that offers Report for members other than the viewer, and navigates to `report-concern` with `groupId` and `userId`. The viewer's own tile does nothing.
 
   T010 passes.
-- [ ] T023 [US1] Update the privacy documents together, for reports and SendGrid only (research D15): blocks are added in T052. T011 passes, and the web suite is green.
+- [X] T023 [US1] Update the privacy documents together, for reports and SendGrid only (research D15): blocks are added in T052. T011 passes, and the web suite is green.
   - **`specs/016-account-deletion/data-retention.md`:** a "Reports" section:
     - reports are kept 1 year, longer under a legal hold, and kept through account deletion, with snapshot names;
     - SendGrid is added to the providers table.
   - **`web/public/privacy/index.html`:** section 2 "Reports", the SendGrid processor row, and the retention text.
   - **`web/data-safety.md`:** the "Other user-generated content" purposes add "Fraud prevention, security, and compliance".
   - **`web/app-privacy.md`:** the "Other User Content" policy-section mapping adds the new section.
-- [ ] T024 [US1] Update `CLAUDE.md` by hand (not `update-agent-context.sh`):
+- [X] T024 [US1] Update `CLAUDE.md` by hand (not `update-agent-context.sh`):
   - a Recent Changes line for 023 US1;
   - a gotcha: reports have no foreign keys, deliberately, so they outlive deletion. Email delivery is the trigger plus sweep in the migration, with a lease, not a dashboard webhook. The SendGrid key and addresses are Supabase secrets.
 
 ### Verification for User Story 1
 
-- [ ] T025 [US1] Run every suite and record the counts here:
+- [X] T025 [US1] Run every suite and record the counts here:
   - `dotnet test` for the Api, App, Core and Infrastructure;
   - `deno test` for `supabase/functions` and `web/tests`, plus `deno lint`;
   - `supabase test db`;
   - `bash .github/scripts/ci-scope.test.sh`;
   - the iOS simulator and Android Debug builds, with no new warnings.
+
+  **Result (2026-11-16):** Api 161, App 351, Core 48, Infrastructure 1, edge functions 116, web 61, pgTAP 133 (4 files), all passing. `deno lint` is clean, and `ci-scope.test.sh` is ok. Both builds succeed with only the known warnings: `Settings.plist` on iOS, and on Android the `MainActivity` CS8602 and the Java SDK path.
 - [ ] T026 [US1] Maintainer, on staging: complete the one-time setup in `quickstart.md`:
   - set the secrets;
   - `supabase functions deploy report-email`;
@@ -162,7 +164,7 @@
   - deploy the Api from a `staging/**` tag.
 
   Then run quickstart rows 1–10 on iPhone and Android, and record the results.
-- [ ] T027 [US1] Open a pull request for this story (`023-safety-controls-report` into `main`), once the maintainer confirms. The body names the privacy documents changed and the secrets that production needs.
+- [X] T027 [US1] Open a pull request for this story (`023-safety-controls-report` into `main`), once the maintainer confirms. The body names the privacy documents changed and the secrets that production needs.
 
 **Checkpoint**: US1 is merged. Reports work end to end, and the store-required reporting is in place.
 

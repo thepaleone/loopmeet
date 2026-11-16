@@ -4,6 +4,7 @@ using LoopMeet.App.Features.Groups.Views;
 using LoopMeet.App.Features.Invitations.Views;
 using LoopMeet.App.Features.Meetups.Views;
 using LoopMeet.App.Features.Profile.Views;
+using LoopMeet.App.Features.Safety.Views;
 
 namespace LoopMeet.App;
 
@@ -30,6 +31,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("create-meetup", typeof(CreateMeetupPage));
 		Routing.RegisterRoute("edit-meetup", typeof(EditMeetupPage));
 		Routing.RegisterRoute("meetup-detail", typeof(MeetupDetailPage));
+		Routing.RegisterRoute("report-concern", typeof(ReportConcernPage));
 
 		this.DevToolsTab.IsVisible = ShowDevTools;
 	}

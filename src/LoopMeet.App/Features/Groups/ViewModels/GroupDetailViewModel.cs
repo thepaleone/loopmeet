@@ -127,6 +127,30 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     }
 
     /// <summary>
+    /// A member tile's actions (023). Every member can report anyone else in the group; a tap on
+    /// your own tile does nothing.
+    /// </summary>
+    [RelayCommand]
+    private async Task MemberActionsAsync(GroupMember? member)
+    {
+        if (member is null || GroupId == Guid.Empty || member.UserId == _authService.GetCurrentUserId())
+        {
+            return;
+        }
+
+        const string report = "Report";
+        var choice = await Shell.Current.DisplayActionSheetAsync(member.DisplayName, "Cancel", null, report);
+        if (choice == report)
+        {
+            await Shell.Current.GoToAsync("report-concern", new Dictionary<string, object>
+            {
+                ["groupId"] = GroupId,
+                ["userId"] = member.UserId
+            });
+        }
+    }
+
+    /// <summary>
     /// Opens the read-only details screen. Deliberately not owner-gated: every
     /// group member gets a response from tapping a meetup (FR-008), and editing
     /// is offered on the details screen only to the group's owner.
