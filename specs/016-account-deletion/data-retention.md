@@ -46,7 +46,7 @@ Notification event records (`notification_events`) are kept. They hold only a no
 
 ## What remains, and for how long
 
-LoopMeet keeps no copy of a deleted user's data. Some copies held by providers can't be removed selectively, and expire on the provider's own schedule:
+LoopMeet keeps no copy of a deleted user's data, except reports (see [Reports](#reports)). Some copies held by providers can't be removed selectively, and expire on the provider's own schedule:
 
 | Where | What it may contain | Kept for |
 | --- | --- | --- |
@@ -55,13 +55,31 @@ LoopMeet keeps no copy of a deleted user's data. Some copies held by providers c
 | DigitalOcean App Platform logs (Api) | Request logs and the Api's structured logs, keyed by user id, never email | Not stored. |
 | OneSignal | The deleted OneSignal user, until OneSignal finishes processing the deletion | OneSignal deletes users asynchronously after accepting the request. |
 | Apple | Apple's own record that the user used Sign in with Apple with LoopMeet | Governed by Apple's privacy policy. LoopMeet revokes its access. |
+| SendGrid | Report emails it delivered to the safety inbox: the report and the reporter's account email (023) | SendGrid's own message-activity retention. The safety inbox keeps the email as long as the team needs it. |
 
 **Api logs and token errors:** the Api sets `IdentityModelEventSource.ShowPII` only in Development, so in staging and production, token validation errors don't log token details, which can include an email. `LoggingPrivacyTests` keeps it that way.
 
-There is no legal requirement to keep any LoopMeet user data after deletion. If one arises, add it here explicitly.
+There is no legal requirement to keep any LoopMeet user data after deletion, apart from reports held under a legal hold (below). If another arises, add it here explicitly.
+
+## Reports
+
+Feature 023. A user can report a person or a group they belong to (Profile → Report a concern, or a member's tile). A report holds:
+
+- the reporter's, the group's and the reported person's ids;
+- the reason and the details the reporter wrote;
+- the group's name and both display names, as they were when the report was sent;
+- when it was received, and whether its email was delivered.
+
+The reporter's email address isn't stored with the report. It's read when the report is emailed to the safety inbox, through SendGrid, so the safety team can reply. The reported person isn't told about the report.
+
+A report is kept for **1 year** from when it was received, then deleted by a daily job (`delete_expired_abuse_reports`). It's kept longer when the law requires: an operator sets `legal_hold_until`, and the report is kept until then. Reports are kept even if either account is deleted, so a report can still be acted on, or handed to the authorities, after the account behind it is gone.
 
 ## Logging
 
 Every request, restore, refused restore and permanent-deletion step is logged by user id only, never by email:
 - Api: `AccountDeletionRequested`, `AccountDeletionAlreadyPending`, `AccountDeletionRestored`, `AccountDeletionRestoreRefused`
 - `account-purge`: `account_purge_started`, `account_purge_step_completed`, `account_purge_step_failed`, `account_purge_completed`, `account_purge_stuck`, `apple_token_unavailable`
+
+Reports (023) are logged by id and reason code only, never by email or report text (`LoggingPrivacyTests`):
+- Api: `ReportSubmitted`, `ReportRefused`
+- `report-email`: `report_email_sent`, `report_email_failed`, `report_email_stuck`

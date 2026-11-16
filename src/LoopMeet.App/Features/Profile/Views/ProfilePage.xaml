@@ -243,6 +243,21 @@
                                 </VerticalStackLayout>
                                 <Label Grid.Column="2" Style="{StaticResource Chevron}" />
                             </Grid>
+                            <BoxView Style="{StaticResource RowDivider}" />
+
+                            <Grid Style="{StaticResource SettingsRow}">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ReportConcernCommand}" />
+                                </Grid.GestureRecognizers>
+                                <Border Style="{StaticResource IconTile}" BackgroundColor="{StaticResource AmberTint}">
+                                    <Image Source="ic_flag.png" Style="{StaticResource TileIcon}" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                    <Label Text="Report a concern" Style="{StaticResource RowTitle}" />
+                                    <Label Text="Tell our safety team about a person or group" Style="{StaticResource RowSubtitle}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Style="{StaticResource Chevron}" />
+                            </Grid>
                         </VerticalStackLayout>
                     </Border>
 

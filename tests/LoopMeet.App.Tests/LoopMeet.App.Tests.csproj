@@ -39,6 +39,10 @@
     <Compile Include="..\..\src\LoopMeet.App\Features\Profile\ProfileLayout.cs" Link="Included\ProfileLayout.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Services\Notifications\NotificationPermissionState.cs" Link="Included\NotificationPermissionState.cs" />
     <Compile Include="..\..\src\LoopMeet.App\Controls\LoadingPlaceholders.cs" Link="Included\LoadingPlaceholders.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Safety\ReportReasons.cs" Link="Included\ReportReasons.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Safety\ReportDraft.cs" Link="Included\ReportDraft.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Safety\ReportFallbackMail.cs" Link="Included\ReportFallbackMail.cs" />
+    <Compile Include="..\..\src\LoopMeet.App\Features\Safety\SafetyErrorText.cs" Link="Included\SafetyErrorText.cs" />
   </ItemGroup>
 
   <ItemGroup>

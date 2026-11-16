@@ -384,6 +384,11 @@ verify_jwt = false
 [functions.apple-authorization]
 verify_jwt = false
 
+# Called by the abuse_reports insert trigger and a cron sweep with the publishable key. It only
+# sends existing, undelivered reports to the fixed safety inbox (023 research D4).
+[functions.report-email]
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

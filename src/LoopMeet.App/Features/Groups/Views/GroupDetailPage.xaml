@@ -115,10 +115,17 @@
                                     Style="{StaticResource BubbleCardCompactBorderStyle}"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray900}}"
                                     Padding="10,8"
-                                    Margin="0,0,8,8">
+                                    Margin="0,0,8,8"
+                                    SemanticProperties.Description="{Binding ActionsDescription}">
                                     <Border.StrokeShape>
                                         <RoundRectangle CornerRadius="14,18,16,20" />
                                     </Border.StrokeShape>
+                                    <!-- Opens the member's actions, such as Report (023). -->
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.MemberActionsCommand, Source={x:Reference GroupDetailPageRoot}}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
                                     <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
                                         <!-- Avatar circle -->
                                         <Border

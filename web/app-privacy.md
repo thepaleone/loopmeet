@@ -20,7 +20,7 @@ Every purpose is **App Functionality**: no analytics, advertising, personalizati
 | Contact Info → Email Address | 2, Account; 2, What you create (invitee's email) | Yes | No | App Functionality |
 | Contact Info → Phone Number | 2, Account (optional) | Yes | No | App Functionality |
 | User Content → Photos or Videos | 2, Profile photo | Yes | No | App Functionality |
-| User Content → Other User Content | 2, What you create (groups, invitations, meetups) | Yes | No | App Functionality |
+| User Content → Other User Content | 2, What you create (groups, invitations, meetups); 2, Reports | Yes | No | App Functionality |
 | Identifiers → User ID | 2, Account (Google or Apple link); 2, Sign in with Apple | Yes | No | App Functionality |
 | Identifiers → Device ID | 2, Push notifications; 5 | Yes | No | App Functionality |
 | Location → Precise Location | 2, Place search; 4, Location | No | No | App Functionality |

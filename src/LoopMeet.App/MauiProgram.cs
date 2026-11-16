@@ -15,6 +15,8 @@ using LoopMeet.App.Features.Account.ViewModels;
 using LoopMeet.App.Features.Account.Views;
 using LoopMeet.App.Features.Profile.ViewModels;
 using LoopMeet.App.Features.Profile.Views;
+using LoopMeet.App.Features.Safety.ViewModels;
+using LoopMeet.App.Features.Safety.Views;
 using LoopMeet.App.Features.DevTools.ViewModels;
 using LoopMeet.App.Features.DevTools.Views;
 using LoopMeet.App.Services;
@@ -99,11 +101,13 @@ public static class MauiProgram
 		builder.Services.AddLoopMeetApi<IUsersApi>(config);
 		builder.Services.AddLoopMeetApi<IMeetupsApi>(config);
 		builder.Services.AddLoopMeetApi<IPlacesApi>(config);
+		builder.Services.AddLoopMeetApi<ISafetyApi>(config);
 		builder.Services.AddSingleton<GroupsApi>();
 		builder.Services.AddSingleton<InvitationsApi>();
 		builder.Services.AddSingleton<UsersApi>();
 		builder.Services.AddSingleton<MeetupsApi>();
 		builder.Services.AddSingleton<PlacesApi>();
+		builder.Services.AddSingleton<SafetyApi>();
 		builder.Services.AddSingleton<PendingNotificationIntentStore>();
 		builder.Services.AddSingleton<NotificationRouteMap>();
 		builder.Services.AddSingleton<NotificationNavigator>();
@@ -136,6 +140,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<ChangePasswordViewModel>();
 		builder.Services.AddTransient<DeleteAccountViewModel>();
 		builder.Services.AddTransient<PendingDeletionViewModel>();
+		builder.Services.AddTransient<ReportConcernViewModel>();
 		builder.Services.AddTransient<LoginPage>();
 		builder.Services.AddTransient<CreateAccountPage>();
 		builder.Services.AddTransient<HomePage>();
@@ -154,6 +159,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<ChangePasswordPage>();
 		builder.Services.AddTransient<DeleteAccountPage>();
 		builder.Services.AddTransient<PendingDeletionPage>();
+		builder.Services.AddTransient<ReportConcernPage>();
 		builder.Services.AddTransient<DevInfoViewModel>();
 		builder.Services.AddTransient<DevInfoPage>();
 

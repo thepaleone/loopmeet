@@ -39,6 +39,9 @@ public sealed class GroupMember
         ? DisplayName[0].ToString().ToUpperInvariant()
         : "?";
     public bool HasAvatar => !string.IsNullOrWhiteSpace(AvatarUrl);
+
+    /// <summary>What a screen reader announces for the tappable member tile (023 FR-025).</summary>
+    public string ActionsDescription => $"Actions for {DisplayName}";
 }
 
 public sealed class GroupDetail : GroupSummary

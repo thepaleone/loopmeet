@@ -101,6 +101,9 @@ public sealed partial class ProfileViewModel : ObservableObject
     private Task DeleteAccountAsync() => Shell.Current.GoToAsync("delete-account");
 
     [RelayCommand]
+    private Task ReportConcernAsync() => Shell.Current.GoToAsync("report-concern");
+
+    [RelayCommand]
     private async Task OpenNotificationSettingsAsync()
     {
         try

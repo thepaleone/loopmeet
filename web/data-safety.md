@@ -20,7 +20,7 @@ The Play Console Data safety form and [the privacy policy](public/privacy/index.
 | Location → Approximate location | 2, Place search; 4, Location | Yes | No | **Yes** | Optional | App functionality |
 | Location → Precise location | 2, Place search; 4, Location | Yes | No | **Yes** | Optional | App functionality |
 | App activity → In-app search history | 2, Place search | Yes | No | **Yes** | Optional | App functionality |
-| App activity → Other user-generated content | 2, What you create (groups, invitations, meetups) | Yes | No | No | Optional | App functionality |
+| App activity → Other user-generated content | 2, What you create (groups, invitations, meetups); 2, Reports | Yes | No | No | Optional | App functionality, Fraud prevention, security, and compliance |
 | App activity → Other actions | 5, Push notifications (delivery and open records) | Yes | No | No | Optional | App functionality |
 | App info and performance → Diagnostics | 2, Operational logs | Yes | No | No | Required | App functionality (operations and fixing problems) |
 | Device or other IDs | 2, Push notifications; 5 | Yes | No | No | Required | App functionality |
