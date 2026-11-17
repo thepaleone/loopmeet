@@ -95,6 +95,7 @@ builder.Services.Configure<PasswordPolicyOptions>(builder.Configuration.GetSecti
 builder.Services.AddSingleton<PasswordPolicyValidator>();
 builder.Services.AddScoped<GroupQueryService>();
 builder.Services.AddScoped<GroupCommandService>();
+builder.Services.AddScoped<GroupMembershipCommandService>();
 builder.Services.AddScoped<InvitationQueryService>();
 builder.Services.AddScoped<InvitationCommandService>();
 builder.Services.AddSingleton(TimeProvider.System);

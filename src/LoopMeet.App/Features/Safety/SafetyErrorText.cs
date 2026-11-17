@@ -13,11 +13,18 @@ public static class SafetyErrorText
         ["invalid_report"] = "Choose a reason and describe what happened (up to 1,000 characters).",
         ["not_group_member"] = "You can only report groups you belong to.",
         ["invalid_reported_user"] = "Choose someone in this group other than yourself.",
-        ["report_limit_reached"] = "You've sent 10 reports today. You can send more later, or email abuse@loopmeet.io."
+        ["report_limit_reached"] = "You've sent 10 reports today. You can send more later, or email abuse@loopmeet.io.",
+        ["owner_cannot_leave"] = "Group owners can't leave their own group."
     };
 
     public static string Message(string? code) =>
         code is not null && Messages.TryGetValue(code, out var message) ? message : "Something went wrong. Please try again.";
+
+    /// <summary>
+    /// Leaving a group the caller is no longer in means they already left, or were removed, from
+    /// another device: the App returns to Groups with no error (spec Edge Cases, racing actions).
+    /// </summary>
+    public static bool MeansAlreadyLeft(string? code) => code == "not_group_member";
 
     /// <summary>
     /// A network failure (no status) or a server error offers the email route. A refusal (4xx)

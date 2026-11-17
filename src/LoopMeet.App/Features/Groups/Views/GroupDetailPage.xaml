@@ -158,6 +158,8 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </FlexLayout>
+                    <!-- Members only: owners can't leave their own group (023 US2). -->
+                    <Button Text="Leave group" Command="{Binding LeaveGroupCommand}" IsVisible="{Binding CanLeave}" />
 
                     <!-- Meetups: Upcoming / Past switch (always visible). The thumb slides
                          between halves from code-behind; no triggers change colors. -->

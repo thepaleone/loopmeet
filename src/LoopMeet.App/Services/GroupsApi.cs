@@ -16,6 +16,9 @@ public interface IGroupsApi
 
     [Patch("/groups/{groupId}")]
     Task<GroupSummary> UpdateGroupAsync(Guid groupId, [Body] UpdateGroupRequest request);
+
+    [Post("/groups/{groupId}/leave")]
+    Task LeaveGroupAsync(Guid groupId);
 }
 
 public sealed class GroupsApi
@@ -35,4 +38,6 @@ public sealed class GroupsApi
 
     public Task<GroupSummary> UpdateGroupAsync(Guid groupId, UpdateGroupRequest request) =>
         _api.UpdateGroupAsync(groupId, request);
+
+    public Task LeaveGroupAsync(Guid groupId) => _api.LeaveGroupAsync(groupId);
 }

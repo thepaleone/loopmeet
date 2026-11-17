@@ -6,8 +6,10 @@ using LoopMeet.App.Controls;
 using LoopMeet.App.Features.Auth;
 using LoopMeet.App.Features.Groups.Models;
 using LoopMeet.App.Features.Meetups.Models;
+using LoopMeet.App.Features.Safety;
 using LoopMeet.App.Services;
 using Microsoft.Maui.ApplicationModel;
+using Refit;
 
 namespace LoopMeet.App.Features.Groups.ViewModels;
 
@@ -36,9 +38,11 @@ public sealed partial class GroupDetailViewModel : ObservableObject
     private Guid _groupId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanLeave))]
     private Guid _ownerUserId;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanLeave))]
     private bool _isOwner;
 
     [ObservableProperty]
@@ -62,6 +66,10 @@ public sealed partial class GroupDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private bool _isRefreshing;
+
+    // Owners can't leave their own group (023 FR-010). Hidden until the group loads, so the
+    // button doesn't flash for an owner.
+    public bool CanLeave => !IsOwner && OwnerUserId != Guid.Empty;
 
     public bool IsUpcomingSelected => ListMode == MeetupListMode.Upcoming;
     public bool IsPastSelected => ListMode == MeetupListMode.Past;
@@ -148,6 +156,46 @@ public sealed partial class GroupDetailViewModel : ObservableObject
                 ["userId"] = member.UserId
             });
         }
+    }
+
+    /// <summary>
+    /// Leave group (023 US2): confirm, leave, then return to Groups, where the group is gone.
+    /// </summary>
+    [RelayCommand]
+    private async Task LeaveGroupAsync()
+    {
+        if (GroupId == Guid.Empty || !CanLeave)
+        {
+            return;
+        }
+
+        var confirmed = await Shell.Current.DisplayAlertAsync(
+            $"Leave \"{GroupName}\"?",
+            "You'll stop seeing its meetups and getting its notifications. To rejoin, you'll need a new invitation from the owner.",
+            "Leave group",
+            "Cancel");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            await _groupsApi.LeaveGroupAsync(GroupId);
+        }
+        catch (ApiException ex) when (!SafetyErrorText.MeansAlreadyLeft(SafetyErrorText.CodeFrom(ex.Content)))
+        {
+            await Shell.Current.DisplayAlertAsync("Couldn't leave the group", SafetyErrorText.Message(SafetyErrorText.CodeFrom(ex.Content)), "OK");
+            return;
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            await Shell.Current.DisplayAlertAsync("Couldn't leave the group", "Check your connection and try again.", "OK");
+            return;
+        }
+
+        // Also reached when the Api says they're no longer a member: they already left.
+        await Shell.Current.GoToAsync("//groups");
     }
 
     /// <summary>

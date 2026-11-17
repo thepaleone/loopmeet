@@ -14,4 +14,11 @@ public interface IMembershipRepository
     Task<IReadOnlyList<Membership>> ListMembersByGroupsAsync(IReadOnlyList<Guid> groupIds, CancellationToken cancellationToken = default);
     Task AddAsync(Membership membership, CancellationToken cancellationToken = default);
     Task AddFromInvitationAsync(Membership membership, string invitedEmail, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes <paramref name="userId"/>'s membership of the group (023 US2). The Supabase client
+    /// acts as that user, so leave_group() reads them from the token; the id names whose
+    /// membership the call removes.
+    /// </summary>
+    Task<MembershipExitResult> LeaveAsync(Guid userId, Guid groupId, CancellationToken cancellationToken = default);
 }
