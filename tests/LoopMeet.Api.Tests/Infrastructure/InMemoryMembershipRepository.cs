@@ -67,4 +67,26 @@ public sealed class InMemoryMembershipRepository : IMembershipRepository
 
         return Task.CompletedTask;
     }
+
+    /// <summary>Mirrors leave_group(): only a member can leave, and never the owner.</summary>
+    public Task<MembershipExitResult> LeaveAsync(Guid userId, Guid groupId, CancellationToken cancellationToken = default)
+    {
+        lock (_store.SyncRoot)
+        {
+            var membership = _store.Memberships.FirstOrDefault(m => m.GroupId == groupId && m.UserId == userId);
+            if (membership is null)
+            {
+                return Task.FromResult(MembershipExitResult.NotGroupMember);
+            }
+
+            var group = _store.Groups.FirstOrDefault(g => g.Id == groupId);
+            if (membership.Role == "owner" || group?.OwnerUserId == userId)
+            {
+                return Task.FromResult(MembershipExitResult.OwnerCannotLeave);
+            }
+
+            _store.Memberships.Remove(membership);
+            return Task.FromResult(MembershipExitResult.Done);
+        }
+    }
 }

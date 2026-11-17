@@ -2,6 +2,7 @@ using LoopMeet.Core.Interfaces;
 using LoopMeet.Core.Models;
 using LoopMeet.Infrastructure.Supabase.Models;
 using Supabase;
+using Supabase.Postgrest.Exceptions;
 using Operator = Supabase.Postgrest.Constants.Operator;
 
 namespace LoopMeet.Infrastructure.Repositories;
@@ -66,6 +67,23 @@ public sealed class MembershipRepository : IMembershipRepository
             ["p_email"] = invitedEmail
         };
         await _client.Rpc("create_membership_from_invitation", parameters);
+    }
+
+    public async Task<MembershipExitResult> LeaveAsync(Guid userId, Guid groupId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _client.Rpc("leave_group", new Dictionary<string, object> { ["p_group_id"] = groupId });
+            return MembershipExitResult.Done;
+        }
+        catch (PostgrestException exception) when (exception.Message.Contains("not_group_member", StringComparison.Ordinal))
+        {
+            return MembershipExitResult.NotGroupMember;
+        }
+        catch (PostgrestException exception) when (exception.Message.Contains("owner_cannot_leave", StringComparison.Ordinal))
+        {
+            return MembershipExitResult.OwnerCannotLeave;
+        }
     }
 
     private async Task<Membership?> GetByUserAndGroupInternalAsync(Guid userId, Guid groupId)

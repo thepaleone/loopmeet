@@ -9,9 +9,19 @@ public sealed class SafetyErrorTextTests
     [InlineData("not_group_member", "You can only report groups you belong to.")]
     [InlineData("invalid_reported_user", "Choose someone in this group other than yourself.")]
     [InlineData("report_limit_reached", "You've sent 10 reports today. You can send more later, or email abuse@loopmeet.io.")]
+    [InlineData("owner_cannot_leave", "Group owners can't leave their own group.")]
     public void EachCodeHasTheContractMessage(string code, string message)
     {
         Assert.Equal(message, SafetyErrorText.Message(code));
+    }
+
+    [Theory]
+    [InlineData("not_group_member", true)]
+    [InlineData("owner_cannot_leave", false)]
+    [InlineData(null, false)]
+    public void NotAMemberMeansTheLeaveAlreadyHappened(string? code, bool alreadyLeft)
+    {
+        Assert.Equal(alreadyLeft, SafetyErrorText.MeansAlreadyLeft(code));
     }
 
     [Theory]

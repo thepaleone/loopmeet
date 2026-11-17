@@ -157,7 +157,7 @@
   - the iOS simulator and Android Debug builds, with no new warnings.
 
   **Result (2026-11-16):** Api 161, App 351, Core 48, Infrastructure 1, edge functions 116, web 61, pgTAP 133 (4 files), all passing. `deno lint` is clean, and `ci-scope.test.sh` is ok. Both builds succeed with only the known warnings: `Settings.plist` on iOS, and on Android the `MainActivity` CS8602 and the Java SDK path.
-- [ ] T026 [US1] Maintainer, on staging: complete the one-time setup in `quickstart.md`:
+- [X] T026 [US1] Maintainer, on staging: complete the one-time setup in `quickstart.md`:
   - set the secrets;
   - `supabase functions deploy report-email`;
   - `supabase db push`;
@@ -176,48 +176,49 @@
 
 **Independent Test**: quickstart rows 11–16.
 
-- [ ] T028 [US2] After US1 merges, update `023-safety-controls` from `main`, then create branch `023-safety-controls-leave` from it.
+- [X] T028 [US2] After US1 merges, update `023-safety-controls` from `main`, then create branch `023-safety-controls-leave` from it.
 
 ### Tests for User Story 2 (write first, confirm they fail)
 
-- [ ] T029 [P] [US2] Write `supabase/tests/database/leave_group.test.sql` (pgTAP). Cover:
+- [X] T029 [P] [US2] Write `supabase/tests/database/leave_group.test.sql` (pgTAP). Cover:
   - `leave_group` deletes only the caller's membership;
   - the leaver drops out of `active_memberships`;
   - meetups the leaver created stay visible to the remaining members;
   - `owner_cannot_leave`, `not_group_member` and `account_inactive`;
   - a second call raises `not_group_member`.
-- [ ] T030 [P] [US2] Add `LeaveAsync` to `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryMembershipRepository.cs`, with the same rules as T029. Write `tests/LoopMeet.Api.Tests/Endpoints/GroupMembershipEndpointsTests.cs` for `POST /groups/{id}/leave`. Cover:
+- [X] T030 [P] [US2] Add `LeaveAsync` to `tests/LoopMeet.Api.Tests/Infrastructure/InMemoryMembershipRepository.cs`, with the same rules as T029. Write `tests/LoopMeet.Api.Tests/Endpoints/GroupMembershipEndpointsTests.cs` for `POST /groups/{id}/leave`. Cover:
   - `204`, `404 not_group_member`, `409 owner_cannot_leave` and `401`;
   - after leaving, `GET /groups` for the leaver no longer lists the group, and `GET /groups/{id}` for the owner no longer lists the leaver: the cache was invalidated;
   - the `GroupLeft` log has ids only.
-- [ ] T031 [P] [US2] Write `tests/LoopMeet.App.Tests/Features/Groups/GroupLeaveSurfaceTests.cs` (source inspection). It checks:
+- [X] T031 [P] [US2] Write `tests/LoopMeet.App.Tests/Features/Groups/GroupLeaveSurfaceTests.cs` (source inspection). It checks:
   - **Page:** `GroupDetailPage.xaml` has a "Leave group" button bound to `LeaveGroupCommand`, visible only for non-owners (`IsVisible` bound to `CanLeave`).
   - **ViewModel:** `GroupDetailViewModel.cs` confirms with `DisplayAlert` naming the group, calls `LeaveGroupAsync`, and navigates to the Groups tab. A `not_group_member` response also navigates to Groups with no error (spec Edge Cases, racing actions).
   - **Api interface:** `GroupsApi.cs` declares `[Post("/groups/{groupId}/leave")]`.
 
   Extend `SafetyErrorTextTests.cs` with `owner_cannot_leave` and `not_group_member`.
-- [ ] T032 [US2] Run the new tests and confirm they fail.
+- [X] T032 [US2] Run the new tests and confirm they fail.
 
 ### Implementation for User Story 2
 
-- [ ] T033 [US2] Write migration `supabase/migrations/<ts>_leave_group.sql` with `leave_group(p_group_id)` (`security definer`, the account-active check, the errors in `data-model.md`), granted to `authenticated`. Apply it with `supabase migration up`. T029 passes.
-- [ ] T034 [P] [US2] Add `src/LoopMeet.Core/Models/MembershipExitResult.cs`, and `LeaveAsync(Guid groupId)` on `src/LoopMeet.Core/Interfaces/IMembershipRepository.cs`.
-- [ ] T035 [US2] Implement `LeaveAsync` in `src/LoopMeet.Infrastructure/Repositories/MembershipRepository.cs`: an Rpc call, mapping the error codes.
-- [ ] T036 [US2] Add the leave endpoint to the Api. T030 passes.
+- [X] T033 [US2] Write migration `supabase/migrations/<ts>_leave_group.sql` with `leave_group(p_group_id)` (`security definer`, the account-active check, the errors in `data-model.md`), granted to `authenticated`. Apply it with `supabase migration up`. T029 passes.
+- [X] T034 [P] [US2] Add `src/LoopMeet.Core/Models/MembershipExitResult.cs`, and `LeaveAsync(Guid groupId)` on `src/LoopMeet.Core/Interfaces/IMembershipRepository.cs`.
+- [X] T035 [US2] Implement `LeaveAsync` in `src/LoopMeet.Infrastructure/Repositories/MembershipRepository.cs`: an Rpc call, mapping the error codes.
+- [X] T036 [US2] Add the leave endpoint to the Api. T030 passes.
   - **Service:** `src/LoopMeet.Api/Services/Groups/GroupMembershipCommandService.cs`, `LeaveAsync`. It lists the members first, so it can invalidate `group-detail:{id}`, `groups:{userId}` for the leaver and every remaining member, the leaver's `HomeCacheKey` and `meetups:{id}`. It logs `GroupLeft`.
   - **Endpoint:** `POST /groups/{groupId}/leave` in `src/LoopMeet.Api/Endpoints/GroupsEndpoints.cs`, with the contract's codes and messages.
   - **Registration:** the service in `Program.cs`.
-- [ ] T037 [US2] Add Leave group to the App. T031 passes.
+- [X] T037 [US2] Add Leave group to the App. T031 passes.
   - **Api interface:** `LeaveGroupAsync` on `IGroupsApi` and `GroupsApi` in `src/LoopMeet.App/Services/GroupsApi.cs`.
   - **ViewModel:** `CanLeave` and `LeaveGroupCommand` in `GroupDetailViewModel.cs`, with a confirmation that says a new invitation is needed to rejoin, then navigation to `//groups`. A `not_group_member` response is treated as already left.
   - **Page:** the "Leave group" button below the members in `GroupDetailPage.xaml`.
-- [ ] T038 [US2] Update the 023 Recent Changes line in `CLAUDE.md`. Add a gotcha: leaving deletes the membership row, so `active_memberships` needs no change. Don't add a soft-delete.
+- [X] T038 [US2] Update the 023 Recent Changes line in `CLAUDE.md`. Add a gotcha: leaving deletes the membership row, so `active_memberships` needs no change. Don't add a soft-delete.
 
 ### Verification for User Story 2
 
-- [ ] T039 [US2] Run every suite, as in T025, and record the counts here.
-- [ ] T040 [US2] Maintainer, on staging: `supabase db push`, deploy the Api, then run quickstart rows 11–16 on iPhone and Android, and record the results.
-- [ ] T041 [US2] Open a pull request for this story (`023-safety-controls-leave` into `main`), once the maintainer confirms.
+- [X] T039 [US2] Run every suite, as in T025, and record the counts here.
+  - Result (2026-11-16): Api 168, App 360, Core 48, Infrastructure 1, edge functions 116, web 61, pgTAP 145 (5 files); `deno lint` and `ci-scope.test.sh` clean. iOS simulator and Android builds succeed with only the known warnings.
+- [X] T040 [US2] Maintainer, on staging: `supabase db push`, deploy the Api, then run quickstart rows 11–16 on iPhone and Android, and record the results.
+- [X] T041 [US2] Open a pull request for this story (`023-safety-controls-leave` into `main`), once the maintainer confirms.
 
 **Checkpoint**: US2 is merged. Members can leave groups, and their notifications stop.
 

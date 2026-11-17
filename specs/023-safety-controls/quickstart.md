@@ -24,27 +24,27 @@ Manual checks on **staging**, on a physical iPhone (a TestFlight or development 
 
 | # | Steps | Expected | iPhone | Android |
 | --- | --- | --- | --- | --- |
-| 1 🎥 | Time it (SC-001: under 1 minute). Member A: Profile → Report a concern. Choose "Safety QA", then Member B, then "Harassment or threats". Type details, then Submit | A confirmation that says the report was sent and may get a reply. Within 5 minutes, `abuse@loopmeet.io` gets "LoopMeet report …: Harassment or threats" with the group, Member B, Member A's name and email, and the details. Reply goes to Member A's email | | |
-| 2 🎥 | Time it (SC-001: under 45 seconds, to Submit). Member A: Groups → "Safety QA". Tap Member B's tile, then Report | The form opens with "Safety QA" and Member B already chosen | | |
-| 3 | Member A: report "The group itself (name or meetups)" | The email says "Reported: The group itself" | | |
-| 4 | Member A: the person list | Member A isn't listed | | |
-| 5 | Details: empty, spaces only, then 1,001 characters | Submit stays inactive. The counter shows what's left, and stops input at 1,000 | | |
-| 6 | Turn on airplane mode, then submit a report | The text is kept. "Send by email instead" opens the mail app addressed to `abuse@loopmeet.io`, with the same content | | |
-| 7 | As row 6, on a device with no mail account configured | The address is shown with Copy, and copying works | | |
-| 8 | File 10 reports, then an 11th | The 11th is refused with the "sent 10 reports today" message, and the text is kept | | |
-| 9 | Member B: check notifications and the app | Nothing indicates a report | | |
-| 10 | Staging, during row 1: in the SQL editor, run `select email_sent_at, email_attempts from abuse_reports order by received_at desc limit 1` | `email_sent_at` is set and `email_attempts` is 1 | | |
+| 1 🎥 | Time it (SC-001: under 1 minute). Member A: Profile → Report a concern. Choose "Safety QA", then Member B, then "Harassment or threats". Type details, then Submit | A confirmation that says the report was sent and may get a reply. Within 5 minutes, `abuse@loopmeet.io` gets "LoopMeet report …: Harassment or threats" with the group, Member B, Member A's name and email, and the details. Reply goes to Member A's email | Pass | Pass |
+| 2 🎥 | Time it (SC-001: under 45 seconds, to Submit). Member A: Groups → "Safety QA". Tap Member B's tile, then Report | The form opens with "Safety QA" and Member B already chosen | Pass | Pass |
+| 3 | Member A: report "The group itself (name or meetups)" | The email says "Reported: The group itself" | Pass | Pass |
+| 4 | Member A: the person list | Member A isn't listed | Pass | Pass |
+| 5 | Details: empty, spaces only, then 1,001 characters | Submit stays inactive. The counter shows what's left, and stops input at 1,000 | Pass | Pass |
+| 6 | Turn on airplane mode, then submit a report | The text is kept. "Send by email instead" opens the mail app addressed to `abuse@loopmeet.io`, with the same content | Pass | Pass |
+| 7 | As row 6, on a device with no mail account configured | The address is shown with Copy, and copying works | Pass | Pass |
+| 8 | File 10 reports, then an 11th | The 11th is refused with the "sent 10 reports today" message, and the text is kept | Pass | Pass |
+| 9 | Member B: check notifications and the app | Nothing indicates a report | Pass | Pass |
+| 10 | Staging, during row 1: in the SQL editor, run `select email_sent_at, email_attempts from abuse_reports order by received_at desc limit 1` | `email_sent_at` is set and `email_attempts` is 1 | Pass | Pass |
 
 ## US2: Leave a group
 
 | # | Steps | Expected | iPhone | Android |
 | --- | --- | --- | --- | --- |
-| 11 🎥 | Member A: "Safety QA" → Leave group → Leave group → confirm | You're back on Groups. "Safety QA" and its meetups are gone from Groups and Home | | |
-| 12 | Owner: open "Safety QA" | Member A isn't in the members or the count (after a pull to refresh, within 30 seconds) | | |
-| 13 | Owner: create a meetup in "Safety QA" | Member A gets no push | | |
-| 14 | Owner: Group Detail | There's no Leave group button | | |
-| 15 | Before row 11, Member A creates a meetup for next week | After row 11, the Owner and Member B still see it | | |
-| 16 | Owner invites Member A again, and Member A accepts | Member A is back in the group as a new member | | |
+| 11 🎥 | Member A: "Safety QA" → Leave group → Leave group → confirm | You're back on Groups. "Safety QA" and its meetups are gone from Groups and Home | Pass | Pass |
+| 12 | Owner: open "Safety QA" | Member A isn't in the members or the count (after a pull to refresh, within 30 seconds) | Pass | Pass |
+| 13 | Owner: create a meetup in "Safety QA" | Member A gets no push | Pass | Pass |
+| 14 | Owner: Group Detail | There's no Leave group button | Pass | Pass |
+| 15 | Before row 11, Member A creates a meetup for next week | After row 11, the Owner and Member B still see it | Pass | Pass |
+| 16 | Owner invites Member A again, and Member A accepts | Member A is back in the group as a new member | Pass | Pass |
 
 ## US3: Remove and block
 

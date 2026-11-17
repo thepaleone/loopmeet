@@ -2,6 +2,7 @@ using LoopMeet.Api.Contracts;
 using LoopMeet.Api.Services.Auth;
 using LoopMeet.Api.Services.Groups;
 using LoopMeet.Api.Services.Invitations;
+using LoopMeet.Core.Models;
 
 namespace LoopMeet.Api.Endpoints;
 
@@ -122,6 +123,36 @@ public static class GroupsEndpoints
                         Message = "Please provide a group name."
                     }, statusCode: StatusCodes.Status400BadRequest),
                     _ => Results.BadRequest()
+                };
+            })
+            .RequireAuthorization();
+
+        app.MapPost("/groups/{groupId:guid}/leave", async (
+                Guid groupId,
+                CurrentUserService currentUser,
+                GroupMembershipCommandService membershipService,
+                CancellationToken cancellationToken) =>
+            {
+                var userId = currentUser.UserId;
+                if (userId is null)
+                {
+                    return Results.Unauthorized();
+                }
+
+                var result = await membershipService.LeaveAsync(userId.Value, groupId, cancellationToken);
+                return result switch
+                {
+                    MembershipExitResult.Done => Results.NoContent(),
+                    MembershipExitResult.OwnerCannotLeave => Results.Json(new ErrorResponse
+                    {
+                        Code = "owner_cannot_leave",
+                        Message = "Group owners can't leave their own group."
+                    }, statusCode: StatusCodes.Status409Conflict),
+                    _ => Results.Json(new ErrorResponse
+                    {
+                        Code = "not_group_member",
+                        Message = "You're not a member of this group."
+                    }, statusCode: StatusCodes.Status404NotFound)
                 };
             })
             .RequireAuthorization();
