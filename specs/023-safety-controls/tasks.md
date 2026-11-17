@@ -217,8 +217,8 @@
 
 - [X] T039 [US2] Run every suite, as in T025, and record the counts here.
   - Result (2026-11-16): Api 168, App 360, Core 48, Infrastructure 1, edge functions 116, web 61, pgTAP 145 (5 files); `deno lint` and `ci-scope.test.sh` clean. iOS simulator and Android builds succeed with only the known warnings.
-- [ ] T040 [US2] Maintainer, on staging: `supabase db push`, deploy the Api, then run quickstart rows 11–16 on iPhone and Android, and record the results.
-- [ ] T041 [US2] Open a pull request for this story (`023-safety-controls-leave` into `main`), once the maintainer confirms.
+- [X] T040 [US2] Maintainer, on staging: `supabase db push`, deploy the Api, then run quickstart rows 11–16 on iPhone and Android, and record the results.
+- [X] T041 [US2] Open a pull request for this story (`023-safety-controls-leave` into `main`), once the maintainer confirms.
 
 **Checkpoint**: US2 is merged. Members can leave groups, and their notifications stop.
 
